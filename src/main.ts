@@ -1,44 +1,59 @@
 import './style.css';
-import { Cell, SIZE, SYMBOLS, edges, findErrors, givens, isSolved } from './puzzle';
+import {
+  createBoardWithGivenCells,
+  getCellValue,
+  getNextCellValue,
+  setCellValue,
+  toCellKey,
+  type CellPosition,
+} from './board';
+import { edgeHints, givenCells } from './puzzle';
+import { renderBoard } from './render';
+import { findCellsBreakingRules, isSolved } from './rules';
 
-const board: Cell[][] = Array.from({ length: SIZE }, () => Array<Cell>(SIZE).fill(null));
-const locked = new Set<string>();
-for (const [r, c, v] of givens) { board[r][c] = v; locked.add(`${r},${c}`); }
+const board = createBoardWithGivenCells(givenCells);
+const lockedCellKeys = new Set(givenCells.map(toCellKey));
 
-const boardEl = document.getElementById('board')!;
-const statusEl = document.getElementById('status')!;
+const boardElement = getRequiredElement('board');
+const statusElement = getRequiredElement('status');
 
-function render() {
-  const errors = findErrors(board);
-  boardEl.innerHTML = '';
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
-      const key = `${r},${c}`;
-      const el = document.createElement('button');
-      el.className = 'cell' + (locked.has(key) ? ' locked' : '') + (errors.has(key) ? ' error' : '');
-      el.textContent = board[r][c] === null ? '' : SYMBOLS[board[r][c]!];
-      el.tabIndex = locked.has(key) ? -1 : 0;
-      el.onclick = () => {
-        if (locked.has(key)) return;
-        const v = board[r][c];
-        board[r][c] = v === null ? 0 : v === 0 ? 1 : null;
-        render();
-      };
-      el.style.gridRow = String(r + 1);
-      el.style.gridColumn = String(c + 1);
-      boardEl.appendChild(el);
-    }
+function getRequiredElement(elementId: string): HTMLElement {
+  const element = document.getElementById(elementId);
+
+  if (element === null) {
+    throw new Error(`Missing element with id "${elementId}" in index.html`);
   }
-  // Edge markers, positioned on the boundary between two cells.
-  for (const e of edges) {
-    const m = document.createElement('div');
-    m.className = 'edge';
-    m.textContent = e.type === '=' ? '=' : '×';
-    m.style.left = `calc(${((e.c1 + e.c2 + 1) / 2) / SIZE * 100}%)`;
-    m.style.top = `calc(${((e.r1 + e.r2 + 1) / 2) / SIZE * 100}%)`;
-    boardEl.appendChild(m);
+
+  return element;
+}
+
+function handleCellClick(position: CellPosition): void {
+  const isLocked = lockedCellKeys.has(toCellKey(position));
+
+  if (isLocked) {
+    return;
   }
-  statusEl.textContent = isSolved(board) ? '🎉 Solved!' : '';
+
+  const nextValue = getNextCellValue(getCellValue(board, position));
+  setCellValue(board, position, nextValue);
+  render();
+}
+
+function render(): void {
+  const cellKeysBreakingRules = findCellsBreakingRules(board, edgeHints);
+  renderBoard(
+    boardElement,
+    { board, lockedCellKeys, cellKeysBreakingRules, edgeHints },
+    handleCellClick,
+  );
+  statusElement.textContent = createStatusMessage();
+}
+
+function createStatusMessage(): string {
+  if (isSolved(board, edgeHints)) {
+    return '🎉 Solved!';
+  }
+  return '';
 }
 
 render();
