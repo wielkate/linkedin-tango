@@ -12,6 +12,10 @@ export type Difficulty = (typeof DIFFICULTIES)[number];
 export const DEFAULT_DIFFICULTY: Difficulty = 'easy';
 
 export interface Puzzle {
+  // Shown to the player as the board number.
+  id: number;
+  // One string per row; '0' is 🐱 and '1' is 🐶. Used by the hint button.
+  solution: string[];
   givenCells: GivenCell[];
   edgeHints: EdgeHint[];
 }

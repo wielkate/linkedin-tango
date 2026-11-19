@@ -14,7 +14,7 @@ A minimal browser version of the **Tango** puzzle on a 6×6 grid. This first ver
 
 ## How to play
 
-Pick a difficulty above the board (easy has the most clues, hard the fewest). Click a cell to cycle: empty → 🐱 → 🐶 → empty. Undo takes back the last move and Reset clears the board. Grey cells are given and locked. Cells that
+Pick a difficulty above the board (easy has the most clues, hard the fewest). Click a cell to cycle: empty → 🐱 → 🐶 → empty. A stopwatch runs from the moment a board opens and stops when it is solved ("Solved in 1 min 23 sec"). Pause freezes the stopwatch and blurs the board; opening ⓘ (top-right, explains the rules) pauses it too. The 💡 button fills in one correct cell and locks it, and the progress bar shows the board number and how many levels you have solved (kept in the browser's `localStorage`). Undo takes back the last move and Reset clears the board. Grey cells are given and locked. Cells that
 break a rule turn red after one second without a new move. A "Solved!" message appears when the grid is complete and valid.
 
 ## Tech stack
@@ -99,6 +99,10 @@ linkedin-tango/
 │   ├── main.ts           entry point: game state, click handling, status message
 │   ├── puzzle.ts         loads and types the puzzles from puzzles.json
 │   ├── puzzles.json      the hard-coded puzzles per difficulty: given cells and edge hints
+│   ├── hint.ts           picks a cell for the hint button
+│   ├── panel.css         layout of the timer, side buttons, progress bar and info dialog
+│   ├── progress.ts       solved levels (localStorage) and the progress bar
+│   ├── stopwatch.ts      stopwatch and duration formatting
 │   ├── history.ts        change history used by the undo button
 │   ├── error-highlight.css  1-second CSS delay before rule violations turn red
 │   ├── render.ts         builds the DOM for the board and positions the hints

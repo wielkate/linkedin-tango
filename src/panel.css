@@ -1,0 +1,89 @@
+#info {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  font-size: 20px;
+}
+
+#difficulty {
+  margin-bottom: 28px;
+}
+
+/* The board decides the width: the rows above and below stretch to its edges. */
+#game {
+  width: max-content;
+  margin: 0 auto;
+}
+
+#timer-row,
+#board-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#timer-row {
+  margin-bottom: 16px;
+}
+
+#board-controls {
+  margin-top: 16px;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+#timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+}
+
+/* While the stopwatch is paused the board is hidden, so nobody can plan the puzzle for free. */
+#board.paused {
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+#progress {
+  margin-top: 16px;
+}
+
+.progress-label {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: #666;
+}
+
+progress {
+  width: 240px;
+  accent-color: #333;
+}
+
+#info-dialog {
+  width: min(480px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 32px 36px;
+  border: 2px solid #333;
+  border-radius: 12px;
+  text-align: left;
+}
+
+#info-dialog h2 {
+  margin-top: 0;
+}
+
+#info-dialog ul {
+  padding-left: 20px;
+  margin-bottom: 28px;
+}
+
+#info-dialog li {
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+#info-dialog form {
+  text-align: right;
+}
