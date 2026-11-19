@@ -1,7 +1,7 @@
 # Tango (LinkedIn-style puzzle)
 
-A minimal browser version of the **Tango** puzzle on a 6×6 grid. This first version has
-**hard-coded boards in three difficulty levels** (easy, medium, hard).
+A minimal browser version of the **Tango** puzzle on a 6×6 grid, with **all 11 222 valid
+boards** in three difficulty levels (easy, medium, hard). Every start opens a random board.
 
 ## Rules
 
@@ -14,8 +14,39 @@ A minimal browser version of the **Tango** puzzle on a 6×6 grid. This first ver
 
 ## How to play
 
-Pick a difficulty above the board (easy has the most clues, hard the fewest). Click a cell to cycle: empty → 🐱 → 🐶 → empty. A stopwatch runs from the moment a board opens and stops when it is solved ("Solved in 1 min 23 sec"). Pause freezes the stopwatch and blurs the board; opening ⓘ (top-right, explains the rules) pauses it too. The 💡 button fills in one correct cell and locks it, and the progress bar shows the board number and how many levels you have solved (kept in the browser's `localStorage`). Undo takes back the last move and Reset clears the board. Grey cells are given and locked. Cells that
-break a rule turn red after one second without a new move. A "Solved!" message appears when the grid is complete and valid.
+**Playing**
+
+- Click a cell to cycle: empty → 🐱 → 🐶 → empty.
+- Grey cells are given and locked.
+- A cell that breaks a rule turns red after one second without a new move.
+- When the grid is complete and valid, confetti falls and the stopwatch stops
+  ("Solved in 1 min 23 sec"). **Next board →** opens another random unsolved board.
+
+**Buttons**
+
+- **Easy / Medium / Hard:** pick a level; easy has the most clues, hard the fewest.
+- **↶ Undo:** takes back the last move. **Reset:** clears the board back to the given cells.
+- **💡 Hint:** fills in one correct cell and locks it.
+- **⏸ Pause / ▶ Resume:** freezes the stopwatch and blurs the board.
+- **ⓘ** (top-right): explains the rules and pauses the stopwatch while it is open.
+
+**Choosing a board**
+
+- **☰** (top-left) opens the list of all boards for the current level. The 11 222 boards are
+  grouped in three layers: thousands (1–1 000, ...), hundreds (1–100, ...) and then the
+  board numbers. A range tile fills with green as you solve its boards. Click a number to
+  play that board.
+- **🎲 Random** picks a random unsolved board; **Go to #** jumps to a board number.
+- Solved boards are remembered per level in the browser's `localStorage`.
+
+## Example board
+
+Board 1 on the easy level, as the game starts and when solved. How the data is stored and
+decoded is explained at the top of [`scripts/generate-puzzles.mjs`](scripts/generate-puzzles.mjs).
+
+| Start | Solved |
+| --- | --- |
+| ![Board 1 at the start](example/example_start_board.png) | ![Board 1 solved](example/example_solved_board.png) |
 
 ## Tech stack
 
@@ -92,16 +123,28 @@ The **dev** configuration is shared through the repository in `.run/dev.run.xml`
 linkedin-tango/
 ├── .run/
 │   └── dev.run.xml       WebStorm run configuration that starts `npm run dev`
+├── example/
+│   ├── example_start_board.png   board 1 (easy) at the start
+│   └── example_solved_board.png  board 1 solved
+├── scripts/
+│   ├── generate-puzzles.mjs  generates src/data (all boards and their puzzles)
+│   ├── clue-index.mjs        ClueIndex class: counts the boards that fit a set of clues
+│   └── format-json.mjs       writes JSON arrays with one element per line
 ├── src/
 │   ├── controls.css      styling of the difficulty and undo/reset buttons
 │   ├── difficulty.ts     difficulty picker buttons
+│   ├── board-menu.ts     BoardMenu class: the boards drawer (thousands, hundreds, numbers)
+│   ├── board-ranges.ts   splitting the boards into ranges and counting solved ones
+│   ├── board-menu.css    styling of the boards drawer
+│   ├── confetti.ts       Confetti class: the celebration when a puzzle is solved
 │   ├── board.ts          board model: types, constants and small helpers
 │   ├── main.ts           entry point: game state, click handling, status message
-│   ├── puzzle.ts         loads and types the puzzles from puzzles.json
-│   ├── puzzles.json      the hard-coded puzzles per difficulty: given cells and edge hints
+│   ├── puzzle.ts         decodes puzzles from src/data and picks the next board
+│   ├── data/             generated: boards.json (all boards) and easy/medium/hard.json (one puzzle per board)
 │   ├── hint.ts           picks a cell for the hint button
-│   ├── panel.css         layout of the timer, side buttons, progress bar and info dialog
-│   ├── progress.ts       solved levels (localStorage) and the progress bar
+│   ├── panel.css         layout of the title, timer, side buttons and info dialog
+│   ├── solved-boards.ts  solved boards per level (localStorage)
+│   ├── format-number.ts  writes 11222 as "11 222"
 │   ├── stopwatch.ts      stopwatch and duration formatting
 │   ├── history.ts        change history used by the undo button
 │   ├── error-highlight.css  1-second CSS delay before rule violations turn red
@@ -112,9 +155,9 @@ linkedin-tango/
 ├── .gitignore            files Git ignores: node_modules, dist, .idea/
 ├── .npmrc                npm settings: enforce the Node version
 ├── .nvmrc                Node version for nvm (26)
-├── CLAUDE.md             code style rules (also read by Claude Code)
+├── CLAUDE.md             code style and workflow rules (also read by Claude Code)
 ├── README.md             this file
-├── index.html            the page: loads src/main.ts and holds #board and #status
+├── index.html            the page: loads src/main.ts and holds the board, buttons and menu
 ├── package-lock.json     exact dependency versions, generated by npm (do not edit)
 ├── package.json          project metadata, npm scripts, Node version, dependencies
 ├── tsconfig.json         TypeScript compiler settings (strict mode)
@@ -148,15 +191,12 @@ chmod 644 package-lock.json   # writable again
 ## Code style
 
 The rules are in [CLAUDE.md](CLAUDE.md): braces on every loop and condition, no one-line
-conditions, meaningful names, small single-purpose functions, and named conditions.
+conditions, meaningful names, small single-purpose functions, named conditions, one class per
+file, JSON arrays with one element per line, and a linear git history.
 
 ## Roadmap
 
-1. Generate all 11,222 valid boards and store them as static data
-2. Solver + puzzle generator with unique-solution check
-3. Progress tracking (`localStorage`) and timer
+1. ~~Generate all 11 222 valid boards and store them as static data~~ (done)
+2. ~~Solver + puzzle generator with unique-solution check~~ (done, see `scripts/generate-puzzles.mjs`)
+3. ~~Progress tracking (`localStorage`) and timer~~ (done)
 4. GitHub Pages deployment via GitHub Actions
-
-# Git workflow
-
-- Keep a linear history: pull with `git pull --rebase`, never create merge commits

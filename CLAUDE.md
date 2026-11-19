@@ -82,3 +82,20 @@ if (areBothCellsFilled && haveSameValue) {
 
 When the condition is reused or needs several lines, make it a function
 (`isEdgeHintBroken(board, edgeHint)`).
+
+# Git workflow
+
+- Keep a linear history: pull with `git pull --rebase`, never create merge commits
+
+# Files
+
+## Classes live in their own files
+
+Put each class in a separate file named after it (`stopwatch.ts`, `board-menu.ts`,
+`clue-index.mjs`). Do not hide a class in a file that does something else.
+
+## JSON data files
+
+Format JSON files that hold a long array with **one element per line**, so a diff shows
+which element changed and element N is on line N + 1. `scripts/format-json.mjs` does this
+for the generated files in `src/data/`; use it (or the same layout) for any new data file.

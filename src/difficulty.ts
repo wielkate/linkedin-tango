@@ -1,11 +1,5 @@
 import './controls.css';
-import { DIFFICULTIES, type Difficulty } from './puzzle';
-
-const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-  easy: 'Easy',
-  medium: 'Medium',
-  hard: 'Hard',
-};
+import { DIFFICULTIES, DIFFICULTY_LABELS, type Difficulty } from './puzzle';
 
 // Builds one button per difficulty and marks the selected one.
 export function renderDifficultyPicker(
