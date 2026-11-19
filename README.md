@@ -1,7 +1,7 @@
 # Tango (LinkedIn-style puzzle)
 
 A minimal browser version of the **Tango** puzzle on a 6×6 grid. This first version has
-**hard-coded boards in three difficulty levels** (easy, medium, hard).
+**all 11,222 valid boards in three difficulty levels** (easy, medium, hard).
 
 ## Rules
 
@@ -14,7 +14,7 @@ A minimal browser version of the **Tango** puzzle on a 6×6 grid. This first ver
 
 ## How to play
 
-Pick a difficulty above the board (easy has the most clues, hard the fewest). Click a cell to cycle: empty → 🐱 → 🐶 → empty. A stopwatch runs from the moment a board opens and stops when it is solved ("Solved in 1 min 23 sec"). Pause freezes the stopwatch and blurs the board; opening ⓘ (top-right, explains the rules) pauses it too. The 💡 button fills in one correct cell and locks it, and the progress bar shows the board number and how many levels you have solved (kept in the browser's `localStorage`). Undo takes back the last move and Reset clears the board. Grey cells are given and locked. Cells that
+Pick a difficulty above the board (easy has the most clues, hard the fewest). Click a cell to cycle: empty → 🐱 → 🐶 → empty. A stopwatch runs from the moment a board opens and stops when it is solved ("Solved in 1 min 23 sec"). Pause freezes the stopwatch and blurs the board; opening ⓘ (top-right, explains the rules) pauses it too. The 💡 button fills in one correct cell and locks it, and the progress bar shows the board number and how many boards you have solved on the current level; "Next board" appears after a solve and picks a random unsolved board (kept in the browser's `localStorage`). Undo takes back the last move and Reset clears the board. Grey cells are given and locked. Cells that
 break a rule turn red after one second without a new move. A "Solved!" message appears when the grid is complete and valid.
 
 ## Tech stack
@@ -92,13 +92,15 @@ The **dev** configuration is shared through the repository in `.run/dev.run.xml`
 linkedin-tango/
 ├── .run/
 │   └── dev.run.xml       WebStorm run configuration that starts `npm run dev`
+├── scripts/
+│   └── generate-puzzles.mjs  generates src/data (all boards and their puzzles)
 ├── src/
 │   ├── controls.css      styling of the difficulty and undo/reset buttons
 │   ├── difficulty.ts     difficulty picker buttons
 │   ├── board.ts          board model: types, constants and small helpers
 │   ├── main.ts           entry point: game state, click handling, status message
-│   ├── puzzle.ts         loads and types the puzzles from puzzles.json
-│   ├── puzzles.json      the hard-coded puzzles per difficulty: given cells and edge hints
+│   ├── puzzle.ts         decodes puzzles from src/data and picks the next board
+│   ├── data/             generated: boards.json (all boards) and easy/medium/hard.json (one puzzle per board)
 │   ├── hint.ts           picks a cell for the hint button
 │   ├── panel.css         layout of the timer, side buttons, progress bar and info dialog
 │   ├── progress.ts       solved levels (localStorage) and the progress bar
@@ -152,8 +154,8 @@ conditions, meaningful names, small single-purpose functions, and named conditio
 
 ## Roadmap
 
-1. Generate all 11,222 valid boards and store them as static data
-2. Solver + puzzle generator with unique-solution check
+1. ~~Generate all 11,222 valid boards and store them as static data~~ (done)
+2. ~~Solver + puzzle generator with unique-solution check~~ (done, see `scripts/generate-puzzles.mjs`)
 3. Progress tracking (`localStorage`) and timer
 4. GitHub Pages deployment via GitHub Actions
 
