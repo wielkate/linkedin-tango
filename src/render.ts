@@ -18,6 +18,9 @@ export interface BoardView {
   lockedCellKeys: Set<CellKey>;
   cellKeysBreakingRules: Set<CellKey>;
   edgeHints: EdgeHint[];
+  // The cell the last hint filled in, and the cells its explanation points at.
+  hintTargetCellKey: CellKey | null;
+  hintRelatedCellKeys: Set<CellKey>;
 }
 
 const HINT_TEXT: Record<HintType, string> = {
@@ -58,6 +61,8 @@ function createCellElement(
   cellElement.className = 'cell';
   cellElement.classList.toggle('locked', isLocked);
   cellElement.classList.toggle('error', isBreakingRules);
+  cellElement.classList.toggle('hint-target', cellKey === view.hintTargetCellKey);
+  cellElement.classList.toggle('hint-related', view.hintRelatedCellKeys.has(cellKey));
   cellElement.textContent = getEmoji(getCellValue(view.board, position));
   cellElement.addEventListener('click', () => onCellClick(position));
 

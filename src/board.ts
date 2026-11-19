@@ -48,6 +48,14 @@ export function setCellValue(board: Board, position: CellPosition, value: CellVa
   board[position.row][position.column] = value;
 }
 
+export function copyBoard(board: Board): Board {
+  return board.map((row) => [...row]);
+}
+
+export function getOppositeSymbol(symbol: PlayerSymbol): PlayerSymbol {
+  return symbol === CAT ? DOG : CAT;
+}
+
 export function getNextCellValue(currentValue: CellValue): CellValue {
   const currentIndex = CLICK_CYCLE.indexOf(currentValue);
   const nextIndex = (currentIndex + 1) % CLICK_CYCLE.length;
@@ -80,14 +88,27 @@ export function areNeighbouringCells(first: CellPosition, second: CellPosition):
   return rowDistance + columnDistance === 1;
 }
 
-// Every row and every column, each as a list of its cell positions.
-export function getAllLinePositions(): CellPosition[][] {
-  const lines: CellPosition[][] = [];
+export type LineDirection = 'row' | 'column';
+
+// A row or a column: which one it is (counted from 0) and its cell positions in order.
+export interface Line {
+  direction: LineDirection;
+  index: number;
+  positions: CellPosition[];
+}
+
+export function getAllLines(): Line[] {
+  const lines: Line[] = [];
   for (let index = 0; index < BOARD_SIZE; index++) {
-    lines.push(getRowPositions(index));
-    lines.push(getColumnPositions(index));
+    lines.push({ direction: 'row', index, positions: getRowPositions(index) });
+    lines.push({ direction: 'column', index, positions: getColumnPositions(index) });
   }
   return lines;
+}
+
+// Every row and every column, each as a list of its cell positions.
+export function getAllLinePositions(): CellPosition[][] {
+  return getAllLines().map((line) => line.positions);
 }
 
 function getRowPositions(row: number): CellPosition[] {
