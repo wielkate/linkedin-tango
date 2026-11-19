@@ -1,7 +1,46 @@
+#info {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  font-size: 20px;
+}
+
+#difficulty {
+  margin-bottom: 28px;
+}
+
+#timer-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
 #timer {
   font-variant-numeric: tabular-nums;
   font-size: 18px;
-  margin: 8px 0;
+  min-width: 100px;
+  text-align: right;
+}
+
+#board-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.side-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* While the stopwatch is paused the board is hidden, so nobody can plan the puzzle for free. */
+#board.paused {
+  filter: blur(12px);
+  pointer-events: none;
 }
 
 #progress {
@@ -15,17 +54,33 @@
 }
 
 progress {
-  width: var(--progress-width, 240px);
+  width: 240px;
   accent-color: #333;
 }
 
 #info-dialog {
-  max-width: 360px;
+  width: min(480px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 32px 36px;
   border: 2px solid #333;
-  border-radius: 8px;
+  border-radius: 12px;
   text-align: left;
+}
+
+#info-dialog h2 {
+  margin-top: 0;
 }
 
 #info-dialog ul {
   padding-left: 20px;
+  margin-bottom: 28px;
+}
+
+#info-dialog li {
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+#info-dialog form {
+  text-align: right;
 }

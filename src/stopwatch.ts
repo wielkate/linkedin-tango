@@ -1,30 +1,54 @@
 const MILLISECONDS_PER_SECOND = 1000;
 const SECONDS_PER_MINUTE = 60;
 
-// Counts the time since start(); freezes at stop(). Reading the time costs nothing,
-// the caller decides how often to refresh the display.
+// Counts the time that passed while running. It can be paused and resumed, and is
+// frozen for good by stop(). Reading the time costs nothing, the caller decides how
+// often to refresh the display.
 export class Stopwatch {
-  private startedAtMilliseconds = Date.now();
-  private stoppedAtMilliseconds: number | null = null;
+  private accumulatedMilliseconds = 0;
+  private runningSinceMilliseconds: number | null = Date.now();
+  private hasStopped = false;
 
   restart(): void {
-    this.startedAtMilliseconds = Date.now();
-    this.stoppedAtMilliseconds = null;
+    this.accumulatedMilliseconds = 0;
+    this.runningSinceMilliseconds = Date.now();
+    this.hasStopped = false;
   }
 
-  stop(): void {
-    if (this.stoppedAtMilliseconds === null) {
-      this.stoppedAtMilliseconds = Date.now();
+  pause(): void {
+    if (this.runningSinceMilliseconds === null) {
+      return;
+    }
+
+    this.accumulatedMilliseconds += Date.now() - this.runningSinceMilliseconds;
+    this.runningSinceMilliseconds = null;
+  }
+
+  resume(): void {
+    const canResume = !this.hasStopped && this.runningSinceMilliseconds === null;
+
+    if (canResume) {
+      this.runningSinceMilliseconds = Date.now();
     }
   }
 
-  isRunning(): boolean {
-    return this.stoppedAtMilliseconds === null;
+  stop(): void {
+    this.pause();
+    this.hasStopped = true;
+  }
+
+  isStopped(): boolean {
+    return this.hasStopped;
+  }
+
+  isPaused(): boolean {
+    return !this.hasStopped && this.runningSinceMilliseconds === null;
   }
 
   getElapsedSeconds(): number {
-    const endMilliseconds = this.stoppedAtMilliseconds ?? Date.now();
-    return Math.floor((endMilliseconds - this.startedAtMilliseconds) / MILLISECONDS_PER_SECOND);
+    const currentRunMilliseconds =
+      this.runningSinceMilliseconds === null ? 0 : Date.now() - this.runningSinceMilliseconds;
+    return Math.floor((this.accumulatedMilliseconds + currentRunMilliseconds) / MILLISECONDS_PER_SECOND);
   }
 }
 

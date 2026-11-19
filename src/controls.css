@@ -1,15 +1,8 @@
-#controls {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-}
 
 #difficulty {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 12px;
 }
 
 .difficulty-button,
