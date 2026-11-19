@@ -1,0 +1,31 @@
+#timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  margin: 8px 0;
+}
+
+#progress {
+  margin-top: 16px;
+}
+
+.progress-label {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: #666;
+}
+
+progress {
+  width: var(--progress-width, 240px);
+  accent-color: #333;
+}
+
+#info-dialog {
+  max-width: 360px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  text-align: left;
+}
+
+#info-dialog ul {
+  padding-left: 20px;
+}

@@ -10,12 +10,30 @@
       <h1>Tango</h1>
       <p class="hint">Click a cell to cycle: empty → 🐱 → 🐶 → empty</p>
       <div id="difficulty"></div>
+      <p id="timer">0 sec</p>
       <div id="board"></div>
       <div id="controls">
         <button type="button" id="undo" class="control-button">↶ Undo</button>
         <button type="button" id="reset" class="control-button">Reset</button>
+        <button type="button" id="hint" class="control-button">💡 Hint</button>
+        <button type="button" id="info" class="control-button" aria-label="How to play">ⓘ</button>
       </div>
       <p id="status"></p>
+      <div id="progress"></div>
+      <dialog id="info-dialog">
+        <h2>How to play</h2>
+        <ul>
+          <li>Fill every cell with 🐱 or 🐶. Click a cell to cycle: empty → 🐱 → 🐶 → empty.</li>
+          <li>No more than 2 identical symbols may be next to each other, in a row or a column.</li>
+          <li>Every row and column has exactly 3 🐱 and 3 🐶.</li>
+          <li><b>=</b> between two cells means they hold the same symbol; <b>×</b> means different.</li>
+          <li>Grey cells are given and cannot be changed. Cells that break a rule turn red.</li>
+          <li>The 💡 button fills in one correct cell for you. Undo takes back your last move.</li>
+        </ul>
+        <form method="dialog">
+          <button class="control-button">Got it</button>
+        </form>
+      </dialog>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
