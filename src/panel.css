@@ -9,32 +9,35 @@
   margin-bottom: 28px;
 }
 
-#timer-row {
+/* The board decides the width: the rows above and below stretch to its edges. */
+#game {
+  width: max-content;
+  margin: 0 auto;
+}
+
+#timer-row,
+#board-controls {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 28px;
+}
+
+#timer-row {
+  margin-bottom: 16px;
+}
+
+#board-controls {
+  margin-top: 16px;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
 }
 
 #timer {
   font-variant-numeric: tabular-nums;
   font-size: 18px;
-  min-width: 100px;
-  text-align: right;
-}
-
-#board-area {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-}
-
-.side-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 /* While the stopwatch is paused the board is hidden, so nobody can plan the puzzle for free. */

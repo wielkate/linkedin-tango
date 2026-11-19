@@ -11,17 +11,17 @@
       <p class="hint">Click a cell to cycle: empty → 🐱 → 🐶 → empty</p>
       <button type="button" id="info" class="control-button" aria-label="How to play">ⓘ</button>
       <div id="difficulty"></div>
-      <div id="timer-row">
-        <span id="timer">0 sec</span>
-        <button type="button" id="pause" class="control-button">⏸ Pause</button>
-      </div>
-      <div id="board-area">
-        <div class="side-controls">
-          <button type="button" id="undo" class="control-button">↶ Undo</button>
-          <button type="button" id="reset" class="control-button">Reset</button>
+      <div id="game">
+        <div id="timer-row">
+          <span id="timer">0 sec</span>
+          <button type="button" id="pause" class="control-button">⏸ Pause</button>
         </div>
         <div id="board"></div>
-        <div class="side-controls">
+        <div id="board-controls">
+          <div class="button-group">
+            <button type="button" id="undo" class="control-button">↶ Undo</button>
+            <button type="button" id="reset" class="control-button">Reset</button>
+          </div>
           <button type="button" id="hint" class="control-button">💡 Hint</button>
         </div>
       </div>
