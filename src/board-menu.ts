@@ -1,8 +1,13 @@
 import './board-menu.css';
+import {
+  countSolvedBoardsInRange,
+  findRangeContaining,
+  getAllThousands,
+  getHundredsOfThousand,
+  type BoardRange,
+} from './board-ranges';
+import { formatNumberWithSpaces } from './format-number';
 import { BOARD_COUNT } from './puzzle';
-
-const BOARDS_PER_RANGE = 100;
-const RANGE_COUNT = Math.ceil(BOARD_COUNT / BOARDS_PER_RANGE);
 
 export interface BoardMenuView {
   difficultyLabel: string;
@@ -15,12 +20,14 @@ export interface BoardMenuActions {
   onRandomBoardChosen: () => void;
 }
 
-// The list of all boards in a drawer on the left. 11,222 rows cannot be scrolled, so the
-// boards are grouped: first a grid of ranges (1-100, 101-200, ...) that shows how much of
-// each range is solved, then the 100 boards of the range the player opens.
-// Boards are drawn only for the opened range, so the menu stays fast.
+// The list of all boards in a drawer on the left. 11 222 rows cannot be scrolled, so the
+// boards are grouped in three layers: thousands (1-1 000, ...), the hundreds inside one
+// thousand (1-100, ...) and finally the 100 board numbers of one hundred.
+// A range tile fills with green in proportion to its solved boards.
+// Only the opened layer is drawn, so the menu stays fast.
 export class BoardMenu {
-  private openedRangeIndex: number | null = null;
+  private openedThousand: BoardRange | null = null;
+  private openedHundred: BoardRange | null = null;
   private view: BoardMenuView | null = null;
 
   constructor(
@@ -30,15 +37,26 @@ export class BoardMenu {
 
   render(view: BoardMenuView): void {
     this.view = view;
-    this.drawerElement.replaceChildren(
-      this.createSummary(view),
-      this.createToolbar(),
-      this.openedRangeIndex === null ? this.createRangeGrid(view) : this.createBoardGrid(view, this.openedRangeIndex),
-    );
+    this.drawerElement.replaceChildren(this.createSummary(view), this.createToolbar(), this.createCurrentLayer(view));
   }
 
-  showRangeOfBoard(boardId: number): void {
-    this.openedRangeIndex = Math.floor((boardId - 1) / BOARDS_PER_RANGE);
+  showLayerOfBoard(boardId: number): void {
+    this.openedThousand = findRangeContaining(getAllThousands(), boardId);
+    this.openedHundred = findRangeContaining(getHundredsOfThousand(this.openedThousand), boardId);
+  }
+
+  private createCurrentLayer(view: BoardMenuView): HTMLElement {
+    if (this.openedThousand === null) {
+      return this.createRangeGrid(getAllThousands(), view, (thousand) => {
+        this.openedThousand = thousand;
+      });
+    }
+
+    if (this.openedHundred === null) {
+      return this.createHundredsLayer(this.openedThousand, view);
+    }
+
+    return this.createBoardsLayer(this.openedThousand, this.openedHundred, view);
   }
 
   private createSummary(view: BoardMenuView): HTMLElement {
@@ -49,7 +67,7 @@ export class BoardMenu {
     titleElement.textContent = `${view.difficultyLabel} boards`;
 
     const countElement = document.createElement('p');
-    countElement.textContent = `${view.solvedBoardIds.size.toLocaleString()} of ${BOARD_COUNT.toLocaleString()} solved`;
+    countElement.textContent = `${formatNumberWithSpaces(view.solvedBoardIds.size)} of ${formatNumberWithSpaces(BOARD_COUNT)} solved`;
 
     const barElement = document.createElement('progress');
     barElement.max = BOARD_COUNT;
@@ -69,7 +87,7 @@ export class BoardMenu {
     numberInput.type = 'number';
     numberInput.min = '1';
     numberInput.max = String(BOARD_COUNT);
-    numberInput.placeholder = `Go to # (1-${BOARD_COUNT})`;
+    numberInput.placeholder = `Go to # (1–${formatNumberWithSpaces(BOARD_COUNT)})`;
     numberInput.setAttribute('aria-label', 'Board number');
     numberInput.addEventListener('keydown', (keyboardEvent) => {
       if (keyboardEvent.key === 'Enter') {
@@ -87,42 +105,61 @@ export class BoardMenu {
 
     if (isValidBoardId) {
       this.actions.onBoardChosen(boardId);
-    } else {
-      numberInput.setCustomValidity('Enter a number from 1 to ' + BOARD_COUNT);
-      numberInput.reportValidity();
-      numberInput.setCustomValidity('');
+      return;
     }
+
+    numberInput.setCustomValidity(`Enter a number from 1 to ${formatNumberWithSpaces(BOARD_COUNT)}`);
+    numberInput.reportValidity();
+    numberInput.setCustomValidity('');
   }
 
-  private createRangeGrid(view: BoardMenuView): HTMLElement {
-    const solvedCountPerRange = this.countSolvedBoardsPerRange(view.solvedBoardIds);
+  private createHundredsLayer(thousand: BoardRange, view: BoardMenuView): HTMLElement {
+    const layerElement = document.createElement('div');
+    const backButton = this.createBackButton('← All thousands', () => {
+      this.openedThousand = null;
+    });
+    const hundredsGrid = this.createRangeGrid(getHundredsOfThousand(thousand), view, (hundred) => {
+      this.openedHundred = hundred;
+    });
+
+    layerElement.append(backButton, hundredsGrid);
+    return layerElement;
+  }
+
+  private createBoardsLayer(thousand: BoardRange, hundred: BoardRange, view: BoardMenuView): HTMLElement {
+    const layerElement = document.createElement('div');
+    const backButton = this.createBackButton(`← ${this.formatRange(thousand)}`, () => {
+      this.openedHundred = null;
+    });
+
+    const boardGrid = document.createElement('div');
+    boardGrid.className = 'board-grid';
+
+    for (let boardId = hundred.firstBoardId; boardId <= hundred.lastBoardId; boardId++) {
+      boardGrid.appendChild(this.createBoardTile(view, boardId));
+    }
+
+    layerElement.append(backButton, boardGrid);
+    return layerElement;
+  }
+
+  private createRangeGrid(ranges: BoardRange[], view: BoardMenuView, onRangeOpened: (range: BoardRange) => void): HTMLElement {
     const gridElement = document.createElement('div');
     gridElement.className = 'range-grid';
 
-    for (let rangeIndex = 0; rangeIndex < RANGE_COUNT; rangeIndex++) {
-      gridElement.appendChild(this.createRangeTile(rangeIndex, solvedCountPerRange[rangeIndex]));
+    for (const range of ranges) {
+      gridElement.appendChild(this.createRangeTile(range, view, onRangeOpened));
     }
 
     return gridElement;
   }
 
-  private countSolvedBoardsPerRange(solvedBoardIds: Set<number>): number[] {
-    const solvedCountPerRange = Array<number>(RANGE_COUNT).fill(0);
+  private createRangeTile(range: BoardRange, view: BoardMenuView, onRangeOpened: (range: BoardRange) => void): HTMLButtonElement {
+    const boardsInRange = range.lastBoardId - range.firstBoardId + 1;
+    const solvedCount = countSolvedBoardsInRange(view.solvedBoardIds, range);
 
-    for (const boardId of solvedBoardIds) {
-      solvedCountPerRange[Math.floor((boardId - 1) / BOARDS_PER_RANGE)]++;
-    }
-
-    return solvedCountPerRange;
-  }
-
-  private createRangeTile(rangeIndex: number, solvedCount: number): HTMLButtonElement {
-    const firstBoardId = rangeIndex * BOARDS_PER_RANGE + 1;
-    const lastBoardId = Math.min((rangeIndex + 1) * BOARDS_PER_RANGE, BOARD_COUNT);
-    const boardsInRange = lastBoardId - firstBoardId + 1;
-
-    const tileElement = this.createButton(`${firstBoardId}–${lastBoardId}`, () => {
-      this.openedRangeIndex = rangeIndex;
+    const tileElement = this.createButton(this.formatRange(range), () => {
+      onRangeOpened(range);
       this.renderAgain();
     });
     tileElement.classList.add('range-tile');
@@ -131,34 +168,25 @@ export class BoardMenu {
     return tileElement;
   }
 
-  private createBoardGrid(view: BoardMenuView, rangeIndex: number): HTMLElement {
-    const containerElement = document.createElement('div');
-
-    const backButton = this.createButton('← All ranges', () => {
-      this.openedRangeIndex = null;
-      this.renderAgain();
-    });
-    backButton.classList.add('back-button');
-
-    const gridElement = document.createElement('div');
-    gridElement.className = 'board-grid';
-    const firstBoardId = rangeIndex * BOARDS_PER_RANGE + 1;
-    const lastBoardId = Math.min((rangeIndex + 1) * BOARDS_PER_RANGE, BOARD_COUNT);
-
-    for (let boardId = firstBoardId; boardId <= lastBoardId; boardId++) {
-      gridElement.appendChild(this.createBoardTile(view, boardId));
-    }
-
-    containerElement.append(backButton, gridElement);
-    return containerElement;
-  }
-
   private createBoardTile(view: BoardMenuView, boardId: number): HTMLButtonElement {
-    const tileElement = this.createButton(String(boardId), () => this.actions.onBoardChosen(boardId));
+    const tileElement = this.createButton(formatNumberWithSpaces(boardId), () => this.actions.onBoardChosen(boardId));
     tileElement.classList.add('board-tile');
     tileElement.classList.toggle('solved', view.solvedBoardIds.has(boardId));
     tileElement.classList.toggle('current', boardId === view.currentBoardId);
     return tileElement;
+  }
+
+  private createBackButton(text: string, onBack: () => void): HTMLButtonElement {
+    const backButton = this.createButton(text, () => {
+      onBack();
+      this.renderAgain();
+    });
+    backButton.classList.add('back-button');
+    return backButton;
+  }
+
+  private formatRange(range: BoardRange): string {
+    return `${formatNumberWithSpaces(range.firstBoardId)}–${formatNumberWithSpaces(range.lastBoardId)}`;
   }
 
   private createButton(text: string, onClick: () => void): HTMLButtonElement {

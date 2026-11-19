@@ -8,8 +8,7 @@
   <body>
     <main>
       <button type="button" id="menu-button" class="control-button" aria-label="Open boards menu">☰</button>
-      <h1>Tango</h1>
-      <p id="board-id"></p>
+      <h1 id="title">Tango</h1>
       <button type="button" id="info" class="control-button" aria-label="How to play">ⓘ</button>
       <div id="difficulty"></div>
       <div id="game">
@@ -28,10 +27,11 @@
       </div>
       <p id="status"></p>
       <button type="button" id="next" class="control-button" hidden>Next board →</button>
-      <div id="progress"></div>
       <div id="menu-backdrop" hidden></div>
       <aside id="menu-drawer" aria-label="All boards" inert>
-        <button type="button" id="menu-close" class="control-button" aria-label="Close boards menu">✕</button>
+        <button type="button" id="menu-close" aria-label="Close boards menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5L19 19M19 5L5 19" fill="none" /></svg>
+        </button>
         <div id="menu-content"></div>
       </aside>
       <dialog id="info-dialog">

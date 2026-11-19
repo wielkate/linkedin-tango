@@ -1,5 +1,5 @@
-const PIECE_COUNT = 160;
-const DURATION_MILLISECONDS = 3500;
+const PIECE_COUNT = 260;
+const DURATION_MILLISECONDS = 5000;
 const GRAVITY_PER_FRAME = 0.12;
 const COLORS = ['#e4572e', '#f3a712', '#29335c', '#669bbc', '#2a9d8f', '#d65db1'];
 
@@ -51,10 +51,10 @@ export class Confetti {
   private createPieces(canvasWidth: number): ConfettiPiece[] {
     return Array.from({ length: PIECE_COUNT }, () => ({
       x: Math.random() * canvasWidth,
-      y: -20 - Math.random() * 200,
+      y: -30 - Math.random() * 400,
       velocityX: (Math.random() - 0.5) * 6,
       velocityY: 2 + Math.random() * 4,
-      size: 6 + Math.random() * 6,
+      size: 16 + Math.random() * 14,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       rotation: Math.random() * Math.PI,
       rotationSpeed: (Math.random() - 0.5) * 0.3,
@@ -76,7 +76,7 @@ export class Confetti {
     }
 
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.globalAlpha = Math.min(1, (DURATION_MILLISECONDS - elapsedMilliseconds) / 800);
+    context.globalAlpha = Math.min(1, (DURATION_MILLISECONDS - elapsedMilliseconds) / 1000);
 
     for (const piece of pieces) {
       this.movePiece(piece);
@@ -98,7 +98,7 @@ export class Confetti {
     context.translate(piece.x, piece.y);
     context.rotate(piece.rotation);
     context.fillStyle = piece.color;
-    context.fillRect(-piece.size / 2, -piece.size / 4, piece.size, piece.size / 2);
+    context.fillRect(-piece.size / 2, -piece.size / 3, piece.size, (piece.size * 2) / 3);
     context.restore();
   }
 }

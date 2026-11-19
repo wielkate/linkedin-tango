@@ -1,4 +1,5 @@
 import './style.css';
+import './panel.css';
 import {
   createBoardWithGivenCells,
   getCellValue,
@@ -12,8 +13,9 @@ import { Confetti } from './confetti';
 import { renderDifficultyPicker } from './difficulty';
 import { ChangeHistory } from './history';
 import { findHint } from './hint';
-import { DIFFICULTY_LABELS, loadSolvedBoardIds, renderProgress, saveSolvedBoardIds } from './progress';
-import { DEFAULT_DIFFICULTY, getPuzzle, pickBoardId, type Difficulty } from './puzzle';
+import { formatNumberWithSpaces } from './format-number';
+import { loadSolvedBoardIds, saveSolvedBoardIds } from './solved-boards';
+import { DEFAULT_DIFFICULTY, DIFFICULTY_LABELS, getPuzzle, pickBoardId, type Difficulty } from './puzzle';
 import { renderBoard } from './render';
 import { findCellsBreakingRules, isSolved } from './rules';
 import { Stopwatch, formatDuration } from './stopwatch';
@@ -43,11 +45,10 @@ const menuButton = getRequiredButton('menu-button');
 const menuCloseButton = getRequiredButton('menu-close');
 const menuBackdrop = getRequiredElement('menu-backdrop');
 const menuDrawer = getRequiredElement('menu-drawer');
-const boardIdElement = getRequiredElement('board-id');
+const titleElement = getRequiredElement('title');
 const infoButton = getRequiredButton('info');
 const infoDialog = getRequiredElement('info-dialog') as HTMLDialogElement;
 const timerElement = getRequiredElement('timer');
-const progressElement = getRequiredElement('progress');
 const boardMenu = new BoardMenu(getRequiredElement('menu-content'), {
   onBoardChosen: startPuzzleWithId,
   onRandomBoardChosen: startNextPuzzle,
@@ -147,7 +148,7 @@ function finishPuzzleIfSolved(): void {
 
 // The menu is drawn only when it opens, so playing does not pay for 100+ menu buttons.
 function openMenu(): void {
-  boardMenu.showRangeOfBoard(currentPuzzle.id);
+  boardMenu.showLayerOfBoard(currentPuzzle.id);
   boardMenu.render({
     difficultyLabel: DIFFICULTY_LABELS[selectedDifficulty],
     solvedBoardIds: solvedBoardIds[selectedDifficulty],
@@ -207,8 +208,7 @@ function render(): void {
   nextButton.hidden = !isSolved(board, edgeHints);
   hintButton.disabled = isSolved(board, edgeHints) || isPaused;
   renderTimer();
-  boardIdElement.textContent = `Board #${currentPuzzle.id}`;
-  renderProgress(progressElement, solvedBoardIds, selectedDifficulty);
+  titleElement.textContent = `Tango #${formatNumberWithSpaces(currentPuzzle.id)}`;
   statusElement.textContent = createStatusMessage();
 }
 

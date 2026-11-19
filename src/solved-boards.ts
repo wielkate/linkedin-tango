@@ -1,15 +1,8 @@
-import './panel.css';
-import { BOARD_COUNT, DIFFICULTIES, type Difficulty } from './puzzle';
+import { DIFFICULTIES, type Difficulty } from './puzzle';
 
 const STORAGE_KEY = 'tango-solved-boards';
 
 export type SolvedBoardIds = Record<Difficulty, Set<number>>;
-
-export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-  easy: 'Easy',
-  medium: 'Medium',
-  hard: 'Hard',
-};
 
 // localStorage can be unavailable (private window, blocked site data), so every access is guarded.
 export function loadSolvedBoardIds(): SolvedBoardIds {
@@ -46,22 +39,4 @@ export function saveSolvedBoardIds(solvedBoardIds: SolvedBoardIds): void {
   } catch {
     // Progress just won't survive a reload.
   }
-}
-
-export function renderProgress(
-  progressElement: HTMLElement,
-  solvedBoardIds: SolvedBoardIds,
-  difficulty: Difficulty,
-): void {
-  const solvedCount = solvedBoardIds[difficulty].size;
-
-  const labelElement = document.createElement('p');
-  labelElement.className = 'progress-label';
-  labelElement.textContent = `${DIFFICULTY_LABELS[difficulty]}: ${solvedCount.toLocaleString()} of ${BOARD_COUNT.toLocaleString()} solved`;
-
-  const barElement = document.createElement('progress');
-  barElement.max = BOARD_COUNT;
-  barElement.value = solvedCount;
-
-  progressElement.replaceChildren(labelElement, barElement);
 }

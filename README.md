@@ -1,6 +1,6 @@
 # Tango (LinkedIn-style puzzle)
 
-A minimal browser version of the **Tango** puzzle on a 6×6 grid, with **all 11,222 valid
+A minimal browser version of the **Tango** puzzle on a 6×6 grid, with **all 11 222 valid
 boards** in three difficulty levels (easy, medium, hard). Every start opens a random board.
 
 ## Rules
@@ -32,9 +32,10 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
 
 **Choosing a board**
 
-- **☰** (top-left) opens the list of all boards for the current level. The 11,222 boards are
-  grouped in ranges of 100; a range tile fills with green as you solve its boards. Open a
-  range, then click a number to play it.
+- **☰** (top-left) opens the list of all boards for the current level. The 11 222 boards are
+  grouped in three layers: thousands (1–1 000, ...), hundreds (1–100, ...) and then the
+  board numbers. A range tile fills with green as you solve its boards. Click a number to
+  play that board.
 - **🎲 Random** picks a random unsolved board; **Go to #** jumps to a board number.
 - Solved boards are remembered per level in the browser's `localStorage`.
 
@@ -132,7 +133,8 @@ linkedin-tango/
 ├── src/
 │   ├── controls.css      styling of the difficulty and undo/reset buttons
 │   ├── difficulty.ts     difficulty picker buttons
-│   ├── board-menu.ts     BoardMenu class: the boards drawer (ranges, numbers, progress)
+│   ├── board-menu.ts     BoardMenu class: the boards drawer (thousands, hundreds, numbers)
+│   ├── board-ranges.ts   splitting the boards into ranges and counting solved ones
 │   ├── board-menu.css    styling of the boards drawer
 │   ├── confetti.ts       Confetti class: the celebration when a puzzle is solved
 │   ├── board.ts          board model: types, constants and small helpers
@@ -140,8 +142,9 @@ linkedin-tango/
 │   ├── puzzle.ts         decodes puzzles from src/data and picks the next board
 │   ├── data/             generated: boards.json (all boards) and easy/medium/hard.json (one puzzle per board)
 │   ├── hint.ts           picks a cell for the hint button
-│   ├── panel.css         layout of the timer, side buttons, progress bar and info dialog
-│   ├── progress.ts       solved boards per level (localStorage) and the progress bar
+│   ├── panel.css         layout of the title, timer, side buttons and info dialog
+│   ├── solved-boards.ts  solved boards per level (localStorage)
+│   ├── format-number.ts  writes 11222 as "11 222"
 │   ├── stopwatch.ts      stopwatch and duration formatting
 │   ├── history.ts        change history used by the undo button
 │   ├── error-highlight.css  1-second CSS delay before rule violations turn red
@@ -193,7 +196,7 @@ file, JSON arrays with one element per line, and a linear git history.
 
 ## Roadmap
 
-1. ~~Generate all 11,222 valid boards and store them as static data~~ (done)
+1. ~~Generate all 11 222 valid boards and store them as static data~~ (done)
 2. ~~Solver + puzzle generator with unique-solution check~~ (done, see `scripts/generate-puzzles.mjs`)
 3. ~~Progress tracking (`localStorage`) and timer~~ (done)
 4. GitHub Pages deployment via GitHub Actions

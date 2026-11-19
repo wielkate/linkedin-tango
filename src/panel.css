@@ -5,12 +5,6 @@
   font-size: 20px;
 }
 
-#board-id {
-  margin: 0 0 16px;
-  font-size: 18px;
-  color: #666;
-}
-
 #difficulty {
   margin-bottom: 28px;
 }
@@ -50,21 +44,6 @@
 #board.paused {
   filter: blur(12px);
   pointer-events: none;
-}
-
-#progress {
-  margin-top: 16px;
-}
-
-.progress-label {
-  margin: 0 0 4px;
-  font-size: 14px;
-  color: #666;
-}
-
-progress {
-  width: 240px;
-  accent-color: #333;
 }
 
 #info-dialog {
