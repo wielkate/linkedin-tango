@@ -9,7 +9,12 @@
     <main>
       <h1>Tango</h1>
       <p class="hint">Click a cell to cycle: empty → 🐱 → 🐶 → empty</p>
+      <div id="difficulty"></div>
       <div id="board"></div>
+      <div id="controls">
+        <button type="button" id="undo" class="control-button">↶ Undo</button>
+        <button type="button" id="reset" class="control-button">Reset</button>
+      </div>
       <p id="status"></p>
     </main>
     <script type="module" src="/src/main.ts"></script>

@@ -1,7 +1,7 @@
 # Tango (LinkedIn-style puzzle)
 
 A minimal browser version of the **Tango** puzzle on a 6×6 grid. This first version has
-**one hard-coded board**.
+**hard-coded boards in three difficulty levels** (easy, medium, hard).
 
 ## Rules
 
@@ -14,8 +14,8 @@ A minimal browser version of the **Tango** puzzle on a 6×6 grid. This first ver
 
 ## How to play
 
-Click a cell to cycle: empty → 🐱 → 🐶 → empty. Grey cells are given and locked. Cells that
-break a rule turn red. A "Solved!" message appears when the grid is complete and valid.
+Pick a difficulty above the board (easy has the most clues, hard the fewest). Click a cell to cycle: empty → 🐱 → 🐶 → empty. Undo takes back the last move and Reset clears the board. Grey cells are given and locked. Cells that
+break a rule turn red after one second without a new move. A "Solved!" message appears when the grid is complete and valid.
 
 ## Tech stack
 
@@ -84,7 +84,7 @@ Then open the address Vite prints (by default <http://localhost:5173>).
 3. Run `npm install` once (WebStorm offers this in a banner when it opens `package.json`).
 4. Pick the **dev** run configuration in the run widget at the top right and press ▶.
 
-The **dev** configuration is shared through the repository in `.run/dev.run.xml`; it runs `npm run dev`.
+The **dev** configuration is shared through the repository in `.run/dev.run.xml`; it runs `npm run dev`; every saved change appears in the browser (styles update in place, code changes reload the page).
 
 ## Project structure
 
@@ -93,9 +93,14 @@ linkedin-tango/
 ├── .run/
 │   └── dev.run.xml       WebStorm run configuration that starts `npm run dev`
 ├── src/
+│   ├── controls.css      styling of the difficulty and undo/reset buttons
+│   ├── difficulty.ts     difficulty picker buttons
 │   ├── board.ts          board model: types, constants and small helpers
 │   ├── main.ts           entry point: game state, click handling, status message
-│   ├── puzzle.ts         the hard-coded puzzle: given cells and edge hints
+│   ├── puzzle.ts         loads and types the puzzles from puzzles.json
+│   ├── puzzles.json      the hard-coded puzzles per difficulty: given cells and edge hints
+│   ├── history.ts        change history used by the undo button
+│   ├── error-highlight.css  1-second CSS delay before rule violations turn red
 │   ├── render.ts         builds the DOM for the board and positions the hints
 │   ├── rules.ts          rule checking: which cells break a rule, is the board solved
 │   └── style.css         styling
@@ -147,3 +152,7 @@ conditions, meaningful names, small single-purpose functions, and named conditio
 2. Solver + puzzle generator with unique-solution check
 3. Progress tracking (`localStorage`) and timer
 4. GitHub Pages deployment via GitHub Actions
+
+# Git workflow
+
+- Keep a linear history: pull with `git pull --rebase`, never create merge commits
