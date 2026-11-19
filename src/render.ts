@@ -1,3 +1,4 @@
+import './error-highlight.css';
 import {
   BOARD_SIZE,
   SYMBOL_EMOJIS,

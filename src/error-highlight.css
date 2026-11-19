@@ -1,0 +1,23 @@
+/* A rule-breaking cell turns red one second after it is drawn. The delay is a zero-length
+   animation that starts late: until it starts, the cell keeps its normal colour.
+   renderBoard recreates the cells on every move, which restarts the delay by itself,
+   so no timer or extra render is needed. */
+.cell.error {
+  animation: reveal-error-on-cell 0s linear 1s backwards;
+}
+
+.cell.locked.error {
+  animation-name: reveal-error-on-locked-cell;
+}
+
+@keyframes reveal-error-on-cell {
+  from {
+    background: #fff;
+  }
+}
+
+@keyframes reveal-error-on-locked-cell {
+  from {
+    background: #e3e0d8;
+  }
+}

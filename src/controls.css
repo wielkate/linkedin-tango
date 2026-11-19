@@ -1,0 +1,34 @@
+#controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+#difficulty {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.difficulty-button,
+.control-button {
+  padding: 6px 14px;
+  border: 2px solid #333;
+  border-radius: 999px;
+  background: #fff;
+  color: #333;
+  font: inherit;
+  cursor: pointer;
+}
+
+.control-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.difficulty-button.selected {
+  background: #333;
+  color: #fff;
+}
