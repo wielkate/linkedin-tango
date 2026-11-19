@@ -7,13 +7,33 @@
 // symbols are next to each other in a row or a column.
 //
 // Puzzle: a list of given cells and edge hints that leave exactly one valid board.
-// The puzzle of board N sits at index N - 1 of each difficulty file, as "cells|edges".
+// The puzzle of board N sits on line N + 1 of each difficulty file, as "cells|edges".
 // A cell is its index (row * 6 + column). An edge hint is the index of the edge between two
 // neighbouring cells; its type (same or different) is read from the board itself:
 //   0..29   horizontal edge between (row, column) and (row, column + 1): row * 5 + column
 //   30..59  vertical edge between (row, column) and (row + 1, column): 30 + row * 6 + column
+//
+// Example: board 1 and its easy puzzle (pictures in the example/ folder).
+//
+//   boards.json, line 2:  "110100110100001011110100001011001011"
+//   split into rows of 6: 110100 / 110100 / 001011 / 110100 / 001011 / 001011
+//                         (0 = cat 🐱, 1 = dog 🐶)
+//
+//   easy.json, line 2:    "1,4,19,21,22,33,35|11,13,14,19,29,32,33,43,52,53,58"
+//   given cells (before the "|"):
+//     1  -> row 0, column 1 -> board symbol 1 -> 🐶 shown from the start
+//     4  -> row 0, column 4 -> board symbol 0 -> 🐱
+//     19 -> row 3, column 1 -> 🐶 ... and so on for 21, 22, 33 and 35
+//   edge hints (after the "|"), e.g.:
+//     14 -> horizontal edge, row 14 / 5 = 2, column 14 % 5 = 4: cells (2,4) and (2,5).
+//           Both hold 1 in the board, so the hint is "same" (=).
+//     52 -> vertical edge, cell 52 - 30 = 22 = (3,4) and the cell below it (4,4).
+//           The board holds 0 and 1 there, so the hint is "different" (x).
+//   The game fills in only the given cells and shows the hints; the player finds the rest.
 
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { ClueIndex } from './clue-index.mjs';
+import { formatAsJsonWithOneElementPerLine } from './format-json.mjs';
 
 const BOARD_SIZE = 6;
 const CELL_COUNT = BOARD_SIZE * BOARD_SIZE;
@@ -111,65 +131,6 @@ function listEdges() {
   return edges;
 }
 
-// A bitset says which boards satisfy one clue, so "how many boards fit these clues"
-// is an AND of a few bitsets and a bit count.
-class ClueIndex {
-  constructor(boards, edges) {
-    this.wordCount = Math.ceil(boards.length / 32);
-    this.cellBitsets = this.createBitsets(CELL_COUNT * 2);
-    this.edgeBitsets = this.createBitsets(edges.length * 2);
-
-    boards.forEach((board, boardIndex) => {
-      for (let cell = 0; cell < CELL_COUNT; cell++) {
-        this.setBit(this.cellBitsets[cell * 2 + board[cell]], boardIndex);
-      }
-      edges.forEach(([firstCell, secondCell], edgeIndex) => {
-        const isSame = board[firstCell] === board[secondCell] ? 1 : 0;
-        this.setBit(this.edgeBitsets[edgeIndex * 2 + isSame], boardIndex);
-      });
-    });
-  }
-
-  createBitsets(count) {
-    return Array.from({ length: count }, () => new Uint32Array(this.wordCount));
-  }
-
-  setBit(bitset, boardIndex) {
-    bitset[boardIndex >> 5] |= 1 << (boardIndex & 31);
-  }
-
-  // Number of boards that satisfy every clue, counting stops at the limit.
-  countMatchingBoards(clueBitsets, limit) {
-    let count = 0;
-
-    for (let word = 0; word < this.wordCount; word++) {
-      let combined = 0xffffffff;
-      for (const clueBitset of clueBitsets) {
-        combined &= clueBitset[word];
-      }
-      count += countSetBits(combined >>> 0);
-
-      if (count >= limit) {
-        return count;
-      }
-    }
-
-    return count;
-  }
-}
-
-function countSetBits(value) {
-  let remaining = value;
-  let count = 0;
-
-  while (remaining !== 0) {
-    remaining &= remaining - 1;
-    count++;
-  }
-
-  return count;
-}
-
 // Small deterministic random generator, so the output is the same on every run.
 function createRandomGenerator(seed) {
   let state = seed >>> 0;
@@ -259,14 +220,14 @@ function main() {
   const clueIndex = new ClueIndex(boards, edges);
   mkdirSync(OUTPUT_DIRECTORY, { recursive: true });
 
-  writeFileSync(new URL('boards.json', OUTPUT_DIRECTORY), JSON.stringify(boards.map((board) => board.join(''))));
+  writeFileSync(new URL('boards.json', OUTPUT_DIRECTORY), formatAsJsonWithOneElementPerLine(boards.map((board) => board.join(''))));
 
   let difficultySeed = 1;
   for (const [difficulty, targetClueCount] of Object.entries(TARGET_CLUE_COUNT_PER_DIFFICULTY)) {
     const puzzles = boards.map((board, boardIndex) =>
       createPuzzle(board, boardIndex, difficultySeed, targetClueCount, clueIndex, edges),
     );
-    writeFileSync(new URL(`${difficulty}.json`, OUTPUT_DIRECTORY), JSON.stringify(puzzles));
+    writeFileSync(new URL(`${difficulty}.json`, OUTPUT_DIRECTORY), formatAsJsonWithOneElementPerLine(puzzles));
     console.log(`${difficulty}: ${puzzles.length} puzzles`);
     difficultySeed++;
   }

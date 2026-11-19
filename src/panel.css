@@ -5,6 +5,12 @@
   font-size: 20px;
 }
 
+#board-id {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: #666;
+}
+
 #difficulty {
   margin-bottom: 28px;
 }

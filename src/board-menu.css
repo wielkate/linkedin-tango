@@ -1,0 +1,124 @@
+#menu-button {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  font-size: 20px;
+  z-index: 3;
+}
+
+#menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 4;
+}
+
+#menu-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(360px, 90vw);
+  box-sizing: border-box;
+  padding: 20px 16px;
+  overflow-y: auto;
+  background: #f4f1ea;
+  text-align: left;
+  z-index: 5;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+}
+
+#menu-drawer.open {
+  transform: translateX(0);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
+}
+
+#menu-close {
+  float: right;
+}
+
+.menu-summary h2 {
+  margin: 0 0 4px;
+}
+
+.menu-summary p {
+  margin: 0 0 6px;
+  color: #666;
+}
+
+.menu-summary progress {
+  width: 100%;
+  accent-color: #333;
+}
+
+.menu-toolbar {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.menu-toolbar input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 2px solid #333;
+  border-radius: 999px;
+  font: inherit;
+}
+
+#menu-drawer button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.menu-toolbar button,
+.back-button {
+  padding: 6px 14px;
+  border: 2px solid #333;
+  border-radius: 999px;
+  background: #fff;
+  color: #333;
+}
+
+.back-button {
+  margin-bottom: 12px;
+}
+
+.range-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+/* The tile fills from the left in proportion to how many boards of its range are solved. */
+.range-tile {
+  padding: 8px 2px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #222;
+  font-size: 13px;
+  background: linear-gradient(to right, #b7dcb2 var(--solved-share, 0%), #fff var(--solved-share, 0%));
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.board-tile {
+  padding: 8px 0;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #fff;
+  color: #222;
+}
+
+.board-tile.solved {
+  background: #b7dcb2;
+}
+
+.board-tile.current {
+  outline: 3px solid #333;
+}

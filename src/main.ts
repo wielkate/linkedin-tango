@@ -7,16 +7,19 @@ import {
   toCellKey,
   type CellPosition,
 } from './board';
+import { BoardMenu } from './board-menu';
+import { Confetti } from './confetti';
 import { renderDifficultyPicker } from './difficulty';
 import { ChangeHistory } from './history';
 import { findHint } from './hint';
-import { loadSolvedBoardIds, renderProgress, saveSolvedBoardIds } from './progress';
+import { DIFFICULTY_LABELS, loadSolvedBoardIds, renderProgress, saveSolvedBoardIds } from './progress';
 import { DEFAULT_DIFFICULTY, getPuzzle, pickBoardId, type Difficulty } from './puzzle';
 import { renderBoard } from './render';
 import { findCellsBreakingRules, isSolved } from './rules';
 import { Stopwatch, formatDuration } from './stopwatch';
 
 const TIMER_REFRESH_MILLISECONDS = 1000;
+const CLOCK_EMOJI = '🕒';
 
 let selectedDifficulty: Difficulty = DEFAULT_DIFFICULTY;
 const solvedBoardIds = loadSolvedBoardIds();
@@ -27,6 +30,7 @@ let lockedCellKeys = new Set(givenCells.map(toCellKey));
 
 const changeHistory = new ChangeHistory();
 const stopwatch = new Stopwatch();
+const confetti = new Confetti();
 let wasStopwatchPausedBeforeInfo = false;
 
 const difficultyElement = getRequiredElement('difficulty');
@@ -35,10 +39,19 @@ const resetButton = getRequiredButton('reset');
 const hintButton = getRequiredButton('hint');
 const pauseButton = getRequiredButton('pause');
 const nextButton = getRequiredButton('next');
+const menuButton = getRequiredButton('menu-button');
+const menuCloseButton = getRequiredButton('menu-close');
+const menuBackdrop = getRequiredElement('menu-backdrop');
+const menuDrawer = getRequiredElement('menu-drawer');
+const boardIdElement = getRequiredElement('board-id');
 const infoButton = getRequiredButton('info');
 const infoDialog = getRequiredElement('info-dialog') as HTMLDialogElement;
 const timerElement = getRequiredElement('timer');
 const progressElement = getRequiredElement('progress');
+const boardMenu = new BoardMenu(getRequiredElement('menu-content'), {
+  onBoardChosen: startPuzzleWithId,
+  onRandomBoardChosen: startNextPuzzle,
+});
 const boardElement = getRequiredElement('board');
 const statusElement = getRequiredElement('status');
 
@@ -62,8 +75,13 @@ function startPuzzle(difficulty: Difficulty): void {
 }
 
 function startNextPuzzle(): void {
-  currentPuzzle = getPuzzle(selectedDifficulty, pickBoardId(solvedBoardIds[selectedDifficulty]));
+  startPuzzleWithId(pickBoardId(solvedBoardIds[selectedDifficulty]));
+}
+
+function startPuzzleWithId(boardId: number): void {
+  currentPuzzle = getPuzzle(selectedDifficulty, boardId);
   ({ givenCells, edgeHints } = currentPuzzle);
+  closeMenu();
   resetBoard();
 }
 
@@ -122,8 +140,28 @@ function finishPuzzleIfSolved(): void {
   }
 
   stopwatch.stop();
+  confetti.launch();
   solvedBoardIds[selectedDifficulty].add(currentPuzzle.id);
   saveSolvedBoardIds(solvedBoardIds);
+}
+
+// The menu is drawn only when it opens, so playing does not pay for 100+ menu buttons.
+function openMenu(): void {
+  boardMenu.showRangeOfBoard(currentPuzzle.id);
+  boardMenu.render({
+    difficultyLabel: DIFFICULTY_LABELS[selectedDifficulty],
+    solvedBoardIds: solvedBoardIds[selectedDifficulty],
+    currentBoardId: currentPuzzle.id,
+  });
+  menuDrawer.inert = false;
+  menuDrawer.classList.add('open');
+  menuBackdrop.hidden = false;
+}
+
+function closeMenu(): void {
+  menuDrawer.inert = true;
+  menuDrawer.classList.remove('open');
+  menuBackdrop.hidden = true;
 }
 
 function togglePause(): void {
@@ -150,7 +188,7 @@ function handleInfoClosed(): void {
 }
 
 function renderTimer(): void {
-  timerElement.textContent = formatDuration(stopwatch.getElapsedSeconds());
+  timerElement.textContent = `${CLOCK_EMOJI} ${formatDuration(stopwatch.getElapsedSeconds())}`;
 }
 
 function render(): void {
@@ -169,7 +207,8 @@ function render(): void {
   nextButton.hidden = !isSolved(board, edgeHints);
   hintButton.disabled = isSolved(board, edgeHints) || isPaused;
   renderTimer();
-  renderProgress(progressElement, solvedBoardIds, selectedDifficulty, currentPuzzle.id);
+  boardIdElement.textContent = `Board #${currentPuzzle.id}`;
+  renderProgress(progressElement, solvedBoardIds, selectedDifficulty);
   statusElement.textContent = createStatusMessage();
 }
 
@@ -186,6 +225,14 @@ hintButton.addEventListener('click', revealHint);
 nextButton.addEventListener('click', startNextPuzzle);
 pauseButton.addEventListener('click', togglePause);
 infoButton.addEventListener('click', openInfo);
+menuButton.addEventListener('click', openMenu);
+menuCloseButton.addEventListener('click', closeMenu);
+menuBackdrop.addEventListener('click', closeMenu);
+document.addEventListener('keydown', (keyboardEvent) => {
+  if (keyboardEvent.key === 'Escape') {
+    closeMenu();
+  }
+});
 infoDialog.addEventListener('close', handleInfoClosed);
 window.setInterval(renderTimer, TIMER_REFRESH_MILLISECONDS);
 render();

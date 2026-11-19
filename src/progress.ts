@@ -5,7 +5,7 @@ const STORAGE_KEY = 'tango-solved-boards';
 
 export type SolvedBoardIds = Record<Difficulty, Set<number>>;
 
-const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   easy: 'Easy',
   medium: 'Medium',
   hard: 'Hard',
@@ -52,13 +52,12 @@ export function renderProgress(
   progressElement: HTMLElement,
   solvedBoardIds: SolvedBoardIds,
   difficulty: Difficulty,
-  currentBoardId: number,
 ): void {
   const solvedCount = solvedBoardIds[difficulty].size;
 
   const labelElement = document.createElement('p');
   labelElement.className = 'progress-label';
-  labelElement.textContent = `Board #${currentBoardId} · ${DIFFICULTY_LABELS[difficulty]}: ${solvedCount.toLocaleString()} of ${BOARD_COUNT.toLocaleString()} solved`;
+  labelElement.textContent = `${DIFFICULTY_LABELS[difficulty]}: ${solvedCount.toLocaleString()} of ${BOARD_COUNT.toLocaleString()} solved`;
 
   const barElement = document.createElement('progress');
   barElement.max = BOARD_COUNT;
