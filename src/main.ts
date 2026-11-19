@@ -10,6 +10,7 @@ import {
 } from './board';
 import { BoardMenu } from './board-menu';
 import { Confetti } from './confetti';
+import { SuccessSound } from './success-sound';
 import { renderDifficultyPicker } from './difficulty';
 import { ChangeHistory } from './history';
 import { findHint } from './hint';
@@ -33,6 +34,7 @@ let lockedCellKeys = new Set(givenCells.map(toCellKey));
 const changeHistory = new ChangeHistory();
 const stopwatch = new Stopwatch();
 const confetti = new Confetti();
+const successSound = new SuccessSound();
 let wasStopwatchPausedBeforeInfo = false;
 
 const difficultyElement = getRequiredElement('difficulty');
@@ -142,6 +144,7 @@ function finishPuzzleIfSolved(): void {
 
   stopwatch.stop();
   confetti.launch();
+  successSound.play();
   solvedBoardIds[selectedDifficulty].add(currentPuzzle.id);
   saveSolvedBoardIds(solvedBoardIds);
 }
