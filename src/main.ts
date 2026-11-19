@@ -14,6 +14,7 @@ import { SuccessSound } from './success-sound';
 import { renderDifficultyPicker } from './difficulty';
 import { ChangeHistory } from './history';
 import { findHint } from './hint';
+import { fillBoardWithSolution } from './solution';
 import { formatNumberWithSpaces } from './format-number';
 import { loadSolvedBoardIds, saveSolvedBoardIds } from './solved-boards';
 import { DEFAULT_DIFFICULTY, DIFFICULTY_LABELS, getPuzzle, pickBoardId, type Difficulty } from './puzzle';
@@ -41,6 +42,7 @@ const difficultyElement = getRequiredElement('difficulty');
 const undoButton = getRequiredButton('undo');
 const resetButton = getRequiredButton('reset');
 const hintButton = getRequiredButton('hint');
+const solveButton = getRequiredButton('solve');
 const pauseButton = getRequiredButton('pause');
 const nextButton = getRequiredButton('next');
 const menuButton = getRequiredButton('menu-button');
@@ -135,6 +137,13 @@ function revealHint(): void {
   render();
 }
 
+function solvePuzzle(): void {
+  fillBoardWithSolution(board, currentPuzzle.solution);
+  changeHistory.clear();
+  finishPuzzleIfSolved();
+  render();
+}
+
 function finishPuzzleIfSolved(): void {
   const isRunningAndSolved = !stopwatch.isStopped() && isSolved(board, edgeHints);
 
@@ -210,6 +219,7 @@ function render(): void {
   undoButton.disabled = changeHistory.isEmpty() || isPaused;
   nextButton.hidden = !isSolved(board, edgeHints);
   hintButton.disabled = isSolved(board, edgeHints) || isPaused;
+  solveButton.disabled = isSolved(board, edgeHints) || isPaused;
   renderTimer();
   titleElement.textContent = `Tango #${formatNumberWithSpaces(currentPuzzle.id)}`;
   statusElement.textContent = createStatusMessage();
@@ -225,6 +235,7 @@ function createStatusMessage(): string {
 undoButton.addEventListener('click', undoLastChange);
 resetButton.addEventListener('click', resetBoard);
 hintButton.addEventListener('click', revealHint);
+solveButton.addEventListener('click', solvePuzzle);
 nextButton.addEventListener('click', startNextPuzzle);
 pauseButton.addEventListener('click', togglePause);
 infoButton.addEventListener('click', openInfo);
