@@ -1,4 +1,4 @@
-const SOUND_DELAY_MILLISECONDS = 1000;
+const PLAY_COUNT = 2;
 const SUCCESS_SOUND_URL = new URL('./assets/success.wav', import.meta.url).href;
 
 // Plays the celebration sound when a puzzle is solved.
@@ -13,11 +13,8 @@ export class SuccessSound {
     this.decodedSound.catch(() => undefined);
   }
 
-  // The sound starts one second after the call, so it follows the confetti.
   play(): void {
-    window.setTimeout(() => {
-      this.playNow().catch(() => undefined);
-    }, SOUND_DELAY_MILLISECONDS);
+    this.playRepeatedly().catch(() => undefined);
   }
 
   private async loadSound(): Promise<AudioBuffer> {
@@ -26,13 +23,18 @@ export class SuccessSound {
     return this.audioContext.decodeAudioData(fileBytes);
   }
 
-  private async playNow(): Promise<void> {
+  // Plays the sound PLAY_COUNT times in a row, each starting exactly when the previous one ends.
+  private async playRepeatedly(): Promise<void> {
     const sound = await this.decodedSound;
     // Browsers keep the context suspended until the player has interacted with the page.
     await this.audioContext.resume();
-    const source = this.audioContext.createBufferSource();
-    source.buffer = sound;
-    source.connect(this.audioContext.destination);
-    source.start();
+    const firstStartTime = this.audioContext.currentTime;
+
+    for (let playIndex = 0; playIndex < PLAY_COUNT; playIndex++) {
+      const source = this.audioContext.createBufferSource();
+      source.buffer = sound;
+      source.connect(this.audioContext.destination);
+      source.start(firstStartTime + playIndex * sound.duration);
+    }
   }
 }
