@@ -7,7 +7,6 @@ import {
   type BoardRange,
 } from './board-ranges';
 import { formatNumberWithSpaces } from '../utils/format-number';
-import { BOARD_COUNT } from '../game/puzzle';
 
 export interface BoardMenuView {
   difficultyLabel: string;
@@ -32,6 +31,7 @@ export class BoardMenu {
 
   constructor(
     private readonly drawerElement: HTMLElement,
+    private readonly boardCount: number,
     private readonly actions: BoardMenuActions,
   ) {}
 
@@ -41,13 +41,13 @@ export class BoardMenu {
   }
 
   showLayerOfBoard(boardId: number): void {
-    this.openedThousand = findRangeContaining(getAllThousands(), boardId);
+    this.openedThousand = findRangeContaining(getAllThousands(this.boardCount), boardId);
     this.openedHundred = findRangeContaining(getHundredsOfThousand(this.openedThousand), boardId);
   }
 
   private createCurrentLayer(view: BoardMenuView): HTMLElement {
     if (this.openedThousand === null) {
-      return this.createRangeGrid(getAllThousands(), view, (thousand) => {
+      return this.createRangeGrid(getAllThousands(this.boardCount), view, (thousand) => {
         this.openedThousand = thousand;
       });
     }
@@ -67,10 +67,10 @@ export class BoardMenu {
     titleElement.textContent = `${view.difficultyLabel} boards`;
 
     const countElement = document.createElement('p');
-    countElement.textContent = `${formatNumberWithSpaces(view.solvedBoardIds.size)} of ${formatNumberWithSpaces(BOARD_COUNT)} solved`;
+    countElement.textContent = `${formatNumberWithSpaces(view.solvedBoardIds.size)} of ${formatNumberWithSpaces(this.boardCount)} solved`;
 
     const barElement = document.createElement('progress');
-    barElement.max = BOARD_COUNT;
+    barElement.max = this.boardCount;
     barElement.value = view.solvedBoardIds.size;
 
     summaryElement.append(titleElement, countElement, barElement);
@@ -86,8 +86,8 @@ export class BoardMenu {
     const numberInput = document.createElement('input');
     numberInput.type = 'number';
     numberInput.min = '1';
-    numberInput.max = String(BOARD_COUNT);
-    numberInput.placeholder = `Go to # (1–${formatNumberWithSpaces(BOARD_COUNT)})`;
+    numberInput.max = String(this.boardCount);
+    numberInput.placeholder = `Go to # (1–${formatNumberWithSpaces(this.boardCount)})`;
     numberInput.setAttribute('aria-label', 'Board number');
     numberInput.addEventListener('keydown', (keyboardEvent) => {
       if (keyboardEvent.key === 'Enter') {
@@ -101,14 +101,14 @@ export class BoardMenu {
 
   private chooseBoardFromInput(numberInput: HTMLInputElement): void {
     const boardId = Number(numberInput.value);
-    const isValidBoardId = Number.isInteger(boardId) && boardId >= 1 && boardId <= BOARD_COUNT;
+    const isValidBoardId = Number.isInteger(boardId) && boardId >= 1 && boardId <= this.boardCount;
 
     if (isValidBoardId) {
       this.actions.onBoardChosen(boardId);
       return;
     }
 
-    numberInput.setCustomValidity(`Enter a number from 1 to ${formatNumberWithSpaces(BOARD_COUNT)}`);
+    numberInput.setCustomValidity(`Enter a number from 1 to ${formatNumberWithSpaces(this.boardCount)}`);
     numberInput.reportValidity();
     numberInput.setCustomValidity('');
   }

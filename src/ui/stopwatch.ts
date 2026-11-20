@@ -1,5 +1,4 @@
 const MILLISECONDS_PER_SECOND = 1000;
-const SECONDS_PER_MINUTE = 60;
 
 // Counts the time that passed while running. It can be paused and resumed, and is
 // frozen for good by stop(). Reading the time costs nothing, the caller decides how
@@ -50,16 +49,4 @@ export class Stopwatch {
       this.runningSinceMilliseconds === null ? 0 : Date.now() - this.runningSinceMilliseconds;
     return Math.floor((this.accumulatedMilliseconds + currentRunMilliseconds) / MILLISECONDS_PER_SECOND);
   }
-}
-
-// 45 -> "45 sec", 83 -> "1 min 23 sec".
-export function formatDuration(totalSeconds: number): string {
-  const minutes = Math.floor(totalSeconds / SECONDS_PER_MINUTE);
-  const seconds = totalSeconds % SECONDS_PER_MINUTE;
-
-  if (minutes === 0) {
-    return `${seconds} sec`;
-  }
-
-  return `${minutes} min ${seconds} sec`;
 }

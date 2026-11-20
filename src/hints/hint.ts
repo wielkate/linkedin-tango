@@ -1,17 +1,12 @@
-import {
-  BOARD_SIZE,
-  SYMBOL_EMOJIS,
-  createBoardWithGivenCells,
-  getCellValue,
-  type Board,
-  type CellPosition,
-  type EdgeHint,
-  type PlayerSymbol,
-} from '../game/board';
-import { findSimpleDeductions, type Deduction } from './hint-deductions';
-import { createExplanationMessage, findRelatedPositions } from './hint-explanation';
-import { findDeductionsByLookahead } from './hint-lookahead';
-import { getSolutionSymbol } from '../game/solution';
+import type { Board } from '../game/board';
+import type { CellPosition } from '../game/cell-position';
+import type { Puzzle } from '../game/puzzle';
+import { createBoardOfCorrectCells, findPositionsDifferingFromSolution, getSolutionSymbol } from '../game/solution';
+import { SYMBOL_EMOJIS, type PlayerSymbol } from '../game/symbols';
+import type { Deduction } from './deduction';
+import { findSimpleDeductions } from './hint-deductions';
+import { explainDeduction } from './hint-explanation';
+import { findLookaheadDeductions } from './hint-lookahead';
 
 export interface Hint {
   position: CellPosition;
@@ -24,112 +19,64 @@ export interface Hint {
 
 // Finds a cell that the rules settle, easiest rule first, and says which rule it is.
 // Returns null when every cell already matches the solution.
-export function findHint(board: Board, solution: string[], edgeHints: EdgeHint[]): Hint | null {
-  const cellPositionsToFix = findCellPositionsDifferingFromSolution(board, solution);
+export function findHint(board: Board, puzzle: Puzzle): Hint | null {
+  const cellPositionsToFix = findPositionsDifferingFromSolution(board, puzzle.solution);
 
   if (cellPositionsToFix.length === 0) {
     return null;
   }
 
-  const deduction = findBestDeduction(board, solution, edgeHints, cellPositionsToFix);
+  const deduction = findBestDeduction(board, puzzle, cellPositionsToFix);
   return createHint(board, deduction);
 }
 
-function findBestDeduction(
-  board: Board,
-  solution: string[],
-  edgeHints: EdgeHint[],
-  cellPositionsToFix: CellPosition[],
-): Deduction {
+function findBestDeduction(board: Board, puzzle: Puzzle, cellPositionsToFix: CellPosition[]): Deduction {
   // Only cells that match the solution are trusted, so a wrong move of the player
   // can never lead the hint astray.
-  const trustedBoard = createBoardOfCorrectCells(board, solution);
-  const deductions = findSimpleDeductions(trustedBoard, edgeHints);
-  const deduction = pickDeductionPreferringWrongCells(board, solution, deductions);
+  const trustedBoard = createBoardOfCorrectCells(board, puzzle.solution);
+  const simpleDeduction = pickDeductionPreferringWrongCells(
+    board,
+    findSimpleDeductions(trustedBoard, puzzle.edgeHints),
+  );
 
-  if (deduction !== undefined) {
-    return deduction;
+  if (simpleDeduction !== undefined) {
+    return simpleDeduction;
   }
 
   const lookaheadDeduction = pickDeductionPreferringWrongCells(
     board,
-    solution,
-    findDeductionsByLookahead(trustedBoard, edgeHints),
+    findLookaheadDeductions(trustedBoard, puzzle.edgeHints),
   );
 
-  return lookaheadDeduction ?? createSolutionOnlyDeduction(board, solution, cellPositionsToFix);
-}
-
-function findCellPositionsDifferingFromSolution(board: Board, solution: string[]): CellPosition[] {
-  const positions: CellPosition[] = [];
-
-  for (let row = 0; row < BOARD_SIZE; row++) {
-    for (let column = 0; column < BOARD_SIZE; column++) {
-      const position = { row, column };
-
-      if (getCellValue(board, position) !== getSolutionSymbol(solution, position)) {
-        positions.push(position);
-      }
-    }
-  }
-
-  return positions;
-}
-
-function createBoardOfCorrectCells(board: Board, solution: string[]): Board {
-  const givenCells = [];
-
-  for (let row = 0; row < BOARD_SIZE; row++) {
-    for (let column = 0; column < BOARD_SIZE; column++) {
-      const position = { row, column };
-      const solutionSymbol = getSolutionSymbol(solution, position);
-
-      if (getCellValue(board, position) === solutionSymbol) {
-        givenCells.push({ ...position, value: solutionSymbol });
-      }
-    }
-  }
-
-  return createBoardWithGivenCells(givenCells);
+  return lookaheadDeduction ?? createSolutionOnlyDeduction(board, puzzle, cellPositionsToFix);
 }
 
 // A cell the player filled wrongly is fixed before an empty cell is filled in.
-function pickDeductionPreferringWrongCells(
-  board: Board,
-  solution: string[],
-  deductions: Deduction[],
-): Deduction | undefined {
-  const isCellWrong = (deduction: Deduction): boolean => getCellValue(board, deduction.position) !== null;
+function pickDeductionPreferringWrongCells(board: Board, deductions: Deduction[]): Deduction | undefined {
+  const isCellWrong = (deduction: Deduction): boolean => !board.isEmpty(deduction.position);
   return deductions.find(isCellWrong) ?? deductions[0];
 }
 
-function createSolutionOnlyDeduction(
-  board: Board,
-  solution: string[],
-  cellPositionsToFix: CellPosition[],
-): Deduction {
-  const position = cellPositionsToFix.find((cellPosition) => getCellValue(board, cellPosition) !== null)
-    ?? cellPositionsToFix[0];
-
-  return {
-    position,
-    symbol: getSolutionSymbol(solution, position),
-    reason: { kind: 'solution-only' },
-  };
+function createSolutionOnlyDeduction(board: Board, puzzle: Puzzle, cellPositionsToFix: CellPosition[]): Deduction {
+  const wrongPosition = cellPositionsToFix.find((cellPosition) => !board.isEmpty(cellPosition));
+  const position = wrongPosition ?? cellPositionsToFix[0];
+  return { position, symbol: getSolutionSymbol(puzzle.solution, position), kind: { type: 'solution-only' } };
 }
 
 function createHint(board: Board, deduction: Deduction): Hint {
+  const { explanation, relatedPositions } = explainDeduction(deduction);
+
   return {
     position: deduction.position,
     correctValue: deduction.symbol,
-    explanation: `${describeWrongMove(board, deduction.position)}${createExplanationMessage(deduction)}`,
-    relatedPositions: findRelatedPositions(deduction),
+    explanation: `${describeWrongMove(board, deduction.position)}${explanation}`,
+    relatedPositions,
   };
 }
 
 // When the player had put the wrong symbol in the cell, the explanation starts by saying so.
 function describeWrongMove(board: Board, position: CellPosition): string {
-  const currentValue = getCellValue(board, position);
+  const currentValue = board.getValue(position);
 
   if (currentValue === null) {
     return '';

@@ -139,29 +139,44 @@ linkedin-tango/
 │   ├── clue-index.mjs        ClueIndex class: counts the boards that fit a set of clues
 │   └── format-json.mjs       writes JSON arrays with one element per line
 ├── src/
-│   ├── main.ts               entry point: game state, click handling, status message
+│   ├── main.ts               entry point: creates the GamePage and starts it
 │   ├── style.css             base styling
 │   ├── game/                 the game model and its rules, no DOM
-│   │   ├── board.ts          board model: types, constants and small helpers
-│   │   ├── rules.ts          rule checking: which cells break a rule, is the board solved
-│   │   ├── solution.ts       reads the solution symbol of a cell and fills the board with it
-│   │   ├── puzzle.ts         decodes puzzles from src/data and picks the next board
-│   │   ├── history.ts        change history used by the undo button
-│   │   └── solved-boards.ts  solved boards per level (localStorage)
+│   │   ├── board-constants.ts  board size and the counting rules
+│   │   ├── symbols.ts        the cat and dog symbols and the click cycle
+│   │   ├── cell-position.ts  CellPosition, GivenCell, cell keys and the list of all cell positions
+│   │   ├── board.ts          Board class: the grid of cells
+│   │   ├── line.ts           Line: a row or a column, and helpers to walk along it
+│   │   ├── edge-hint.ts      EdgeHint class: an "=" or "×" between two cells
+│   │   ├── rules.ts          rule checking functions: which cells break a rule, is the board solved
+│   │   ├── solution.ts       Solution: the one correct way to fill the board, and functions that use it
+│   │   ├── puzzle.ts         Puzzle: given cells, edge hints and the solution of one board
+│   │   ├── puzzle-library.ts PuzzleLibrary class: decodes puzzles from src/data and picks the next board
+│   │   ├── puzzle-game.ts    PuzzleGame class: one puzzle being played (clicks, undo, hint, solve)
+│   │   ├── difficulty.ts     the difficulty levels and their labels
+│   │   ├── history.ts        ChangeHistory class: change history used by the undo button
+│   │   └── solved-boards.ts  SolvedBoards class: solved boards per level (localStorage)
 │   ├── hints/                the hint button
-│   │   ├── hint.ts           picks the cell for the hint button and its explanation
+│   │   ├── hint.ts           Hint and findHint(): picks the cell for the hint button
+│   │   ├── deduction.ts      Deduction and DeductionKind: a cell that has to hold a symbol, and which rule says so
 │   │   ├── hint-deductions.ts  the simple rules that settle a cell (signs, pairs, sandwiches, full lines)
 │   │   ├── hint-lookahead.ts   the fallback: assume a symbol and look for a broken rule
-│   │   ├── hint-explanation.ts the sentence and the related cells shown for each rule
+│   │   ├── hint-explanation.ts the sentence and the related cells shown for each kind of rule
+│   │   ├── hint-note-view.ts HintNoteView class: shows the explanation beside the board
 │   │   └── hint-note.css     the light-yellow note beside the board and the hint highlights
 │   ├── board-menu/           the boards drawer
-│   │   ├── board-menu.ts     BoardMenu class: the boards drawer (thousands, hundreds, numbers)
+│   │   ├── board-menu.ts     BoardMenu class: the boards (thousands, hundreds, numbers)
 │   │   ├── board-ranges.ts   splitting the boards into ranges and counting solved ones
+│   │   ├── menu-drawer.ts    MenuDrawer class: opens and closes the drawer
 │   │   └── board-menu.css    styling of the boards drawer
 │   ├── ui/                   the page: board, buttons, timer
-│   │   ├── render.ts         builds the DOM for the board and positions the hints
-│   │   ├── difficulty.ts     difficulty picker buttons
-│   │   ├── stopwatch.ts      stopwatch and duration formatting
+│   │   ├── game-page.ts      GamePage class: connects the page to the game, the stopwatch and the progress
+│   │   ├── board-view.ts     BoardView class: builds the DOM for the board and positions the hints
+│   │   ├── difficulty-picker.ts  DifficultyPicker class: difficulty buttons
+│   │   ├── stopwatch.ts      Stopwatch class
+│   │   ├── timer-display.ts  TimerDisplay class: shows the stopwatch time
+│   │   ├── info-dialog.ts    InfoDialog class: the "how to play" dialog
+│   │   ├── required-element.ts  finds an element of index.html or fails with a clear message
 │   │   ├── controls.css      styling of the difficulty and undo/reset buttons
 │   │   ├── panel.css         layout of the title, timer, side buttons and info dialog
 │   │   └── error-highlight.css  1-second CSS delay before rule violations turn red
@@ -169,8 +184,9 @@ linkedin-tango/
 │   │   ├── confetti.ts       Confetti class: the confetti animation
 │   │   ├── success-sound.ts  SuccessSound class: plays the success sound
 │   │   └── assets/success.wav  the success sound
-│   ├── utils/
-│   │   └── format-number.ts  writes 11222 as "11 222"
+│   ├── utils/                stateless helpers
+│   │   ├── format-number.ts  writes 11222 as "11 222"
+│   │   └── format-duration.ts  writes 83 seconds as "1 min 23 sec"
 │   └── data/                 generated: boards.json (all boards) and easy/medium/hard.json (one puzzle per board)
 ├── .gitattributes        marks package-lock.json as a generated file
 ├── .gitignore            files Git ignores: node_modules, dist, .idea/

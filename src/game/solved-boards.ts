@@ -1,42 +1,55 @@
-import { DIFFICULTIES, type Difficulty } from './puzzle';
+import { DIFFICULTIES, type Difficulty } from './difficulty';
 
 const STORAGE_KEY = 'tango-solved-boards';
 
-export type SolvedBoardIds = Record<Difficulty, Set<number>>;
-
+// The boards the player has solved, per difficulty, kept in localStorage between visits.
 // localStorage can be unavailable (private window, blocked site data), so every access is guarded.
-export function loadSolvedBoardIds(): SolvedBoardIds {
-  const solvedBoardIds = createEmptySolvedBoardIds();
+export class SolvedBoards {
+  private constructor(private readonly boardIdsByDifficulty: Record<Difficulty, Set<number>>) {}
 
-  try {
-    const savedText = localStorage.getItem(STORAGE_KEY);
-    const savedLists: unknown = savedText === null ? {} : JSON.parse(savedText);
+  static loadFromStorage(): SolvedBoards {
+    const boardIdsByDifficulty: Record<Difficulty, Set<number>> = {
+      easy: new Set(),
+      medium: new Set(),
+      hard: new Set(),
+    };
 
-    for (const difficulty of DIFFICULTIES) {
-      const savedList = (savedLists as Record<string, unknown>)[difficulty];
-      if (Array.isArray(savedList)) {
-        solvedBoardIds[difficulty] = new Set(savedList.filter(Number.isInteger));
+    try {
+      const savedText = localStorage.getItem(STORAGE_KEY);
+      const savedLists: unknown = savedText === null ? {} : JSON.parse(savedText);
+
+      for (const difficulty of DIFFICULTIES) {
+        const savedList = (savedLists as Record<string, unknown>)[difficulty];
+
+        if (Array.isArray(savedList)) {
+          boardIdsByDifficulty[difficulty] = new Set(savedList.filter(Number.isInteger));
+        }
       }
+    } catch {
+      // Unreadable saved progress is treated as no progress.
     }
-  } catch {
-    // Unreadable saved progress is treated as no progress.
+
+    return new SolvedBoards(boardIdsByDifficulty);
   }
 
-  return solvedBoardIds;
-}
+  getBoardIds(difficulty: Difficulty): Set<number> {
+    return this.boardIdsByDifficulty[difficulty];
+  }
 
-function createEmptySolvedBoardIds(): SolvedBoardIds {
-  return { easy: new Set(), medium: new Set(), hard: new Set() };
-}
+  markSolved(difficulty: Difficulty, boardId: number): void {
+    this.boardIdsByDifficulty[difficulty].add(boardId);
+    this.saveToStorage();
+  }
 
-export function saveSolvedBoardIds(solvedBoardIds: SolvedBoardIds): void {
-  const savedLists = Object.fromEntries(
-    DIFFICULTIES.map((difficulty) => [difficulty, [...solvedBoardIds[difficulty]]]),
-  );
+  private saveToStorage(): void {
+    const savedLists = Object.fromEntries(
+      DIFFICULTIES.map((difficulty) => [difficulty, [...this.boardIdsByDifficulty[difficulty]]]),
+    );
 
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedLists));
-  } catch {
-    // Progress just won't survive a reload.
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedLists));
+    } catch {
+      // Progress just won't survive a reload.
+    }
   }
 }

@@ -1,36 +1,19 @@
-import {
-  ALL_SYMBOLS,
-  BOARD_SIZE,
-  copyBoard,
-  getCellValue,
-  getOppositeSymbol,
-  setCellValue,
-  toCellKey,
-  type Board,
-  type CellKey,
-  type CellPosition,
-  type EdgeHint,
-  type PlayerSymbol,
-} from '../game/board';
-import { findSimpleDeductions, type Deduction } from './hint-deductions';
+import { Board } from '../game/board';
+import { getAllCellPositions, toCellKey, type CellKey, type CellPosition } from '../game/cell-position';
+import type { EdgeHint } from '../game/edge-hint';
 import { findCellsBreakingRules } from '../game/rules';
+import { ALL_SYMBOLS, getOppositeSymbol, type PlayerSymbol } from '../game/symbols';
+import type { Deduction } from './deduction';
+import { findSimpleDeductions } from './hint-deductions';
 
 // The step after the simple rules: assume a symbol, follow what the simple rules then force,
 // and if that ends in a broken rule, the cell must hold the other symbol.
-export function findDeductionsByLookahead(board: Board, edgeHints: EdgeHint[]): Deduction[] {
-  const deductions: Deduction[] = [];
-
-  for (let row = 0; row < BOARD_SIZE; row++) {
-    for (let column = 0; column < BOARD_SIZE; column++) {
-      deductions.push(...deduceFromAssumptions(board, edgeHints, { row, column }));
-    }
-  }
-
-  return deductions;
+export function findLookaheadDeductions(board: Board, edgeHints: EdgeHint[]): Deduction[] {
+  return getAllCellPositions().flatMap((position) => deduceFromAssumptions(board, edgeHints, position));
 }
 
 function deduceFromAssumptions(board: Board, edgeHints: EdgeHint[], position: CellPosition): Deduction[] {
-  if (getCellValue(board, position) !== null) {
+  if (!board.isEmpty(position)) {
     return [];
   }
 
@@ -41,7 +24,7 @@ function deduceFromAssumptions(board: Board, edgeHints: EdgeHint[], position: Ce
   return rejectedSymbols.map((rejectedSymbol) => ({
     position,
     symbol: getOppositeSymbol(rejectedSymbol),
-    reason: { kind: 'contradiction', rejectedSymbol },
+    kind: { type: 'contradiction', rejectedSymbol },
   }));
 }
 
@@ -51,8 +34,8 @@ function doesAssumptionLeadToContradiction(
   position: CellPosition,
   assumedSymbol: PlayerSymbol,
 ): boolean {
-  const trialBoard = copyBoard(board);
-  setCellValue(trialBoard, position, assumedSymbol);
+  const trialBoard = board.copy();
+  trialBoard.setValue(position, assumedSymbol);
   return doesPropagationLeadToContradiction(trialBoard, edgeHints);
 }
 
@@ -100,6 +83,6 @@ function areDeductionsConflicting(deductions: Deduction[]): boolean {
 
 function applyDeductions(board: Board, deductions: Deduction[]): void {
   for (const deduction of deductions) {
-    setCellValue(board, deduction.position, deduction.symbol);
+    board.setValue(deduction.position, deduction.symbol);
   }
 }

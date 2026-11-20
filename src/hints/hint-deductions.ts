@@ -1,37 +1,12 @@
-import {
-  ALL_SYMBOLS,
-  BOARD_SIZE,
-  MAX_ADJACENT_IDENTICAL,
-  SYMBOLS_PER_LINE,
-  getAllLines,
-  getCellValue,
-  getOppositeSymbol,
-  type Board,
-  type CellPosition,
-  type EdgeHint,
-  type HintType,
-  type Line,
-  type PlayerSymbol,
-} from '../game/board';
+import type { Board } from '../game/board';
+import { FORBIDDEN_STREAK_LENGTH, SYMBOLS_PER_LINE } from '../game/board-constants';
+import type { CellPosition } from '../game/cell-position';
+import type { EdgeHint } from '../game/edge-hint';
+import { getAllLines, getLineWindows, type Line } from '../game/line';
+import { ALL_SYMBOLS, getOppositeSymbol, type PlayerSymbol } from '../game/symbols';
+import type { Deduction } from './deduction';
 
-const WINDOW_LENGTH = MAX_ADJACENT_IDENTICAL + 1;
-
-// Why a cell has to hold a certain symbol. Each kind is one rule the player can apply by hand.
-export type DeductionReason =
-  | { kind: 'edge-hint'; hintType: HintType; partner: CellPosition; partnerSymbol: PlayerSymbol }
-  | { kind: 'neighbouring-pair'; line: Line; pair: CellPosition[]; pairSymbol: PlayerSymbol }
-  | { kind: 'sandwiched'; line: Line; ends: CellPosition[]; endSymbol: PlayerSymbol }
-  | { kind: 'line-complete'; line: Line; completeSymbol: PlayerSymbol; completedPositions: CellPosition[] }
-  | { kind: 'contradiction'; rejectedSymbol: PlayerSymbol }
-  | { kind: 'solution-only' };
-
-export interface Deduction {
-  position: CellPosition;
-  symbol: PlayerSymbol;
-  reason: DeductionReason;
-}
-
-// Every empty cell that one simple rule settles, easiest rules first.
+// Every empty cell that one simple rule settles (the rules a player can apply by hand), easiest rules first.
 // A cell can appear more than once when several rules agree on it (or, on a broken board, disagree).
 export function findSimpleDeductions(board: Board, edgeHints: EdgeHint[]): Deduction[] {
   const lines = getAllLines();
@@ -42,10 +17,6 @@ export function findSimpleDeductions(board: Board, edgeHints: EdgeHint[]): Deduc
     ...lines.flatMap((line) => findSandwichDeductions(board, line)),
     ...lines.flatMap((line) => findCompleteLineDeductions(board, line)),
   ];
-}
-
-function isEmpty(board: Board, position: CellPosition): boolean {
-  return getCellValue(board, position) === null;
 }
 
 function findEdgeHintDeductions(board: Board, edgeHints: EdgeHint[]): Deduction[] {
@@ -63,98 +34,73 @@ function findEdgeHintDeductions(board: Board, edgeHints: EdgeHint[]): Deduction[
 }
 
 function deduceFromEdgeHint(board: Board, edgeHint: EdgeHint): Deduction | null {
-  const firstValue = getCellValue(board, edgeHint.first);
-  const secondValue = getCellValue(board, edgeHint.second);
+  const firstValue = board.getValue(edgeHint.first);
+  const secondValue = board.getValue(edgeHint.second);
   const isOnlyFirstFilled = firstValue !== null && secondValue === null;
   const isOnlySecondFilled = firstValue === null && secondValue !== null;
 
   if (isOnlyFirstFilled) {
-    return createEdgeHintDeduction(edgeHint.type, edgeHint.second, edgeHint.first, firstValue);
+    return createEdgeHintDeduction(edgeHint, edgeHint.second, edgeHint.first, firstValue);
   }
 
   if (isOnlySecondFilled) {
-    return createEdgeHintDeduction(edgeHint.type, edgeHint.first, edgeHint.second, secondValue);
+    return createEdgeHintDeduction(edgeHint, edgeHint.first, edgeHint.second, secondValue);
   }
 
   return null;
 }
 
 function createEdgeHintDeduction(
-  hintType: HintType,
+  edgeHint: EdgeHint,
   emptyPosition: CellPosition,
   partner: CellPosition,
   partnerSymbol: PlayerSymbol,
 ): Deduction {
-  const symbol = hintType === 'same' ? partnerSymbol : getOppositeSymbol(partnerSymbol);
-  return {
-    position: emptyPosition,
-    symbol,
-    reason: { kind: 'edge-hint', hintType, partner, partnerSymbol },
-  };
-}
-
-// Every run of three neighbouring cells in a line.
-function getWindows(line: Line): CellPosition[][] {
-  const windows: CellPosition[][] = [];
-  const lastWindowStartIndex = BOARD_SIZE - WINDOW_LENGTH;
-
-  for (let startIndex = 0; startIndex <= lastWindowStartIndex; startIndex++) {
-    windows.push(line.positions.slice(startIndex, startIndex + WINDOW_LENGTH));
-  }
-
-  return windows;
+  const symbol = edgeHint.type === 'same' ? partnerSymbol : getOppositeSymbol(partnerSymbol);
+  return { position: emptyPosition, symbol, kind: { type: 'edge-hint', hintType: edgeHint.type, partner } };
 }
 
 // Two identical symbols side by side: the cell next to the pair has to be the other symbol.
 function findNeighbouringPairDeductions(board: Board, line: Line): Deduction[] {
   const deductions: Deduction[] = [];
 
-  for (const [firstPosition, middlePosition, lastPosition] of getWindows(line)) {
-    const firstValue = getCellValue(board, firstPosition);
-    const middleValue = getCellValue(board, middlePosition);
-    const lastValue = getCellValue(board, lastPosition);
+  for (const [firstPosition, middlePosition, lastPosition] of getLineWindows(line, FORBIDDEN_STREAK_LENGTH)) {
+    const firstValue = board.getValue(firstPosition);
+    const middleValue = board.getValue(middlePosition);
+    const lastValue = board.getValue(lastPosition);
     const isPairAtStart = firstValue !== null && firstValue === middleValue && lastValue === null;
     const isPairAtEnd = lastValue !== null && lastValue === middleValue && firstValue === null;
 
     if (isPairAtStart) {
-      deductions.push(createPairDeduction(line, lastPosition, [firstPosition, middlePosition], firstValue));
+      deductions.push(createPairDeduction(lastPosition, [firstPosition, middlePosition], firstValue));
     }
 
     if (isPairAtEnd) {
-      deductions.push(createPairDeduction(line, firstPosition, [middlePosition, lastPosition], lastValue));
+      deductions.push(createPairDeduction(firstPosition, [middlePosition, lastPosition], lastValue));
     }
   }
 
   return deductions;
 }
 
-function createPairDeduction(
-  line: Line,
-  emptyPosition: CellPosition,
-  pair: CellPosition[],
-  pairSymbol: PlayerSymbol,
-): Deduction {
-  return {
-    position: emptyPosition,
-    symbol: getOppositeSymbol(pairSymbol),
-    reason: { kind: 'neighbouring-pair', line, pair, pairSymbol },
-  };
+function createPairDeduction(emptyPosition: CellPosition, pair: CellPosition[], pairSymbol: PlayerSymbol): Deduction {
+  return { position: emptyPosition, symbol: getOppositeSymbol(pairSymbol), kind: { type: 'neighbouring-pair', pair } };
 }
 
 // An empty cell between two identical symbols has to be the other symbol.
 function findSandwichDeductions(board: Board, line: Line): Deduction[] {
   const deductions: Deduction[] = [];
 
-  for (const [firstPosition, middlePosition, lastPosition] of getWindows(line)) {
-    const firstValue = getCellValue(board, firstPosition);
-    const lastValue = getCellValue(board, lastPosition);
+  for (const [firstPosition, middlePosition, lastPosition] of getLineWindows(line, FORBIDDEN_STREAK_LENGTH)) {
+    const firstValue = board.getValue(firstPosition);
+    const lastValue = board.getValue(lastPosition);
     const areEndsIdentical = firstValue !== null && firstValue === lastValue;
 
-    if (areEndsIdentical && isEmpty(board, middlePosition)) {
+    if (areEndsIdentical && board.isEmpty(middlePosition)) {
       deductions.push({
         position: middlePosition,
         symbol: getOppositeSymbol(firstValue),
-        reason: { kind: 'sandwiched', line, ends: [firstPosition, lastPosition], endSymbol: firstValue },
+        kind: { type: 'sandwiched', line, ends: [firstPosition, lastPosition], endSymbol: firstValue },
       });
     }
   }
@@ -167,20 +113,18 @@ function findCompleteLineDeductions(board: Board, line: Line): Deduction[] {
   const deductions: Deduction[] = [];
 
   for (const completeSymbol of ALL_SYMBOLS) {
-    const completedPositions = line.positions.filter(
-      (position) => getCellValue(board, position) === completeSymbol,
-    );
+    const completedPositions = line.positions.filter((position) => board.getValue(position) === completeSymbol);
     const isSymbolComplete = completedPositions.length === SYMBOLS_PER_LINE;
 
     if (!isSymbolComplete) {
       continue;
     }
 
-    for (const position of line.positions.filter((linePosition) => isEmpty(board, linePosition))) {
+    for (const position of line.positions.filter((linePosition) => board.isEmpty(linePosition))) {
       deductions.push({
         position,
         symbol: getOppositeSymbol(completeSymbol),
-        reason: { kind: 'line-complete', line, completeSymbol, completedPositions },
+        kind: { type: 'line-complete', completedPositions },
       });
     }
   }
