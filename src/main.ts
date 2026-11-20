@@ -1,5 +1,6 @@
 import './style.css';
 import './panel.css';
+import './hint-note.css';
 import {
   createBoardWithGivenCells,
   getCellValue,
@@ -13,7 +14,7 @@ import { Confetti } from './confetti';
 import { SuccessSound } from './success-sound';
 import { renderDifficultyPicker } from './difficulty';
 import { ChangeHistory } from './history';
-import { findHint } from './hint';
+import { findHint, type Hint } from './hint';
 import { fillBoardWithSolution } from './solution';
 import { formatNumberWithSpaces } from './format-number';
 import { loadSolvedBoardIds, saveSolvedBoardIds } from './solved-boards';
@@ -37,6 +38,8 @@ const stopwatch = new Stopwatch();
 const confetti = new Confetti();
 const successSound = new SuccessSound();
 let wasStopwatchPausedBeforeInfo = false;
+// The hint whose explanation is shown beside the board; any other action clears it.
+let activeHint: Hint | null = null;
 
 const difficultyElement = getRequiredElement('difficulty');
 const undoButton = getRequiredButton('undo');
@@ -58,6 +61,8 @@ const boardMenu = new BoardMenu(getRequiredElement('menu-content'), {
   onRandomBoardChosen: startNextPuzzle,
 });
 const boardElement = getRequiredElement('board');
+const hintNoteElement = getRequiredElement('hint-note');
+const hintNoteTextElement = getRequiredElement('hint-note-text');
 const statusElement = getRequiredElement('status');
 
 function getRequiredElement(elementId: string): HTMLElement {
@@ -91,6 +96,7 @@ function startPuzzleWithId(boardId: number): void {
 }
 
 function resetBoard(): void {
+  activeHint = null;
   changeHistory.clear();
   stopwatch.restart();
   board = createBoardWithGivenCells(givenCells);
@@ -105,6 +111,7 @@ function undoLastChange(): void {
     return;
   }
 
+  activeHint = null;
   setCellValue(board, lastChange.position, lastChange.previousValue);
   finishPuzzleIfSolved();
   render();
@@ -117,6 +124,7 @@ function handleCellClick(position: CellPosition): void {
     return;
   }
 
+  activeHint = null;
   const previousValue = getCellValue(board, position);
   changeHistory.record({ position, previousValue });
   setCellValue(board, position, getNextCellValue(previousValue));
@@ -125,12 +133,13 @@ function handleCellClick(position: CellPosition): void {
 }
 
 function revealHint(): void {
-  const hint = findHint(board, currentPuzzle.solution);
+  const hint = findHint(board, currentPuzzle.solution, edgeHints);
 
   if (hint === null) {
     return;
   }
 
+  activeHint = hint;
   setCellValue(board, hint.position, hint.correctValue);
   lockedCellKeys.add(toCellKey(hint.position));
   finishPuzzleIfSolved();
@@ -138,6 +147,7 @@ function revealHint(): void {
 }
 
 function solvePuzzle(): void {
+  activeHint = null;
   fillBoardWithSolution(board, currentPuzzle.solution);
   changeHistory.clear();
   finishPuzzleIfSolved();
@@ -207,13 +217,22 @@ function renderTimer(): void {
 function render(): void {
   renderDifficultyPicker(difficultyElement, selectedDifficulty, startPuzzle);
   const cellKeysBreakingRules = findCellsBreakingRules(board, edgeHints);
+  const shownHint = findHintToShow();
   renderBoard(
     boardElement,
-    { board, lockedCellKeys, cellKeysBreakingRules, edgeHints },
+    {
+      board,
+      lockedCellKeys,
+      cellKeysBreakingRules,
+      edgeHints,
+      hintTargetCellKey: shownHint === null ? null : toCellKey(shownHint.position),
+      hintRelatedCellKeys: new Set(shownHint?.relatedPositions.map(toCellKey)),
+    },
     handleCellClick,
   );
+  renderHintNote(shownHint);
   const isPaused = stopwatch.isPaused();
-  boardElement.classList.toggle('paused', isPaused);
+  boardElement.classList.toggle('blurred', isPaused || infoDialog.open);
   pauseButton.textContent = isPaused ? '▶ Resume' : '⏸ Pause';
   pauseButton.disabled = stopwatch.isStopped();
   undoButton.disabled = changeHistory.isEmpty() || isPaused;
@@ -223,6 +242,17 @@ function render(): void {
   renderTimer();
   titleElement.textContent = `Tango #${formatNumberWithSpaces(currentPuzzle.id)}`;
   statusElement.textContent = createStatusMessage();
+}
+
+// The explanation is hidden while the board is blurred, so a pause cannot be used to read it.
+function findHintToShow(): Hint | null {
+  const isHintHidden = stopwatch.isPaused() || isSolved(board, edgeHints);
+  return isHintHidden ? null : activeHint;
+}
+
+function renderHintNote(shownHint: Hint | null): void {
+  hintNoteElement.hidden = shownHint === null;
+  hintNoteTextElement.textContent = shownHint === null ? '' : shownHint.explanation;
 }
 
 function createStatusMessage(): string {

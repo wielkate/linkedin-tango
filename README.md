@@ -26,9 +26,17 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
 
 - **Easy / Medium / Hard:** pick a level; easy has the most clues, hard the fewest.
 - **↶ Undo:** takes back the last move. **Reset:** clears the board back to the given cells.
-- **💡 Hint:** fills in one correct cell and locks it.
+- **💡 Hint:** fills in one cell that the rules settle and locks it. A light-yellow note beside the board
+  (under it on a narrow screen) says why, in order of difficulty: an `=` / `×` sign next to a filled cell,
+  two identical symbols side by side, a cell between two identical symbols, or a row or column that
+  already holds its three of a kind. When none of those applies it tries a symbol and explains that it
+  leads to a broken rule. The cell is highlighted and the cells the note talks about are outlined.
+  A cell you filled wrongly is corrected first. The note disappears on your next move.
+- **✨ Solve:** fills in the whole solution. The board then counts as solved, with the confetti,
+  the sound and the board saved as solved, so use it only when you want to give up.
 - **⏸ Pause / ▶ Resume:** freezes the stopwatch and blurs the board.
-- **ⓘ** (top-right): explains the rules and pauses the stopwatch while it is open.
+- **ⓘ** (top-right): explains the rules, pauses the stopwatch and blurs the board while it is open
+  (also on a solved board).
 
 **Choosing a board**
 
@@ -141,7 +149,11 @@ linkedin-tango/
 │   ├── main.ts           entry point: game state, click handling, status message
 │   ├── puzzle.ts         decodes puzzles from src/data and picks the next board
 │   ├── data/             generated: boards.json (all boards) and easy/medium/hard.json (one puzzle per board)
-│   ├── hint.ts           picks a cell for the hint button
+│   ├── hint.ts           picks the cell for the hint button and its explanation
+│   ├── hint-deductions.ts  the simple rules that settle a cell (signs, pairs, sandwiches, full lines)
+│   ├── hint-lookahead.ts   the fallback: assume a symbol and look for a broken rule
+│   ├── hint-explanation.ts the sentence and the related cells shown for each rule
+│   ├── hint-note.css     the light-yellow note beside the board and the hint highlights
 │   ├── panel.css         layout of the title, timer, side buttons and info dialog
 │   ├── solved-boards.ts  solved boards per level (localStorage)
 │   ├── format-number.ts  writes 11222 as "11 222"

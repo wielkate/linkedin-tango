@@ -40,8 +40,9 @@
   font-size: 18px;
 }
 
-/* While the stopwatch is paused the board is hidden, so nobody can plan the puzzle for free. */
-#board.paused {
+/* The board is blurred while the stopwatch is paused, so nobody can plan the puzzle for free,
+   and while the info dialog is open, also after the puzzle is solved and the stopwatch has stopped. */
+#board.blurred {
   filter: blur(12px);
   pointer-events: none;
 }
@@ -53,6 +54,10 @@
   border: 2px solid #333;
   border-radius: 12px;
   text-align: left;
+}
+
+#info-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
 }
 
 #info-dialog h2 {

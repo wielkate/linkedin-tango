@@ -5,7 +5,7 @@ const SUCCESS_SOUND_URL = new URL('./assets/success.wav', import.meta.url).href;
 // The file is decoded once into memory, so every play is the whole sound from its first sample.
 export class SuccessSound {
   private readonly audioContext = new AudioContext();
-  private decodedSound: Promise<AudioBuffer>;
+  private readonly decodedSound: Promise<AudioBuffer>;
 
   constructor() {
     this.decodedSound = this.loadSound();
