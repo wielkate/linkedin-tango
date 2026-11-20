@@ -232,7 +232,7 @@ function render(): void {
   );
   renderHintNote(shownHint);
   const isPaused = stopwatch.isPaused();
-  boardElement.classList.toggle('paused', isPaused);
+  boardElement.classList.toggle('blurred', isPaused || infoDialog.open);
   pauseButton.textContent = isPaused ? '▶ Resume' : '⏸ Pause';
   pauseButton.disabled = stopwatch.isStopped();
   undoButton.disabled = changeHistory.isEmpty() || isPaused;
