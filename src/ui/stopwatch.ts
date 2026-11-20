@@ -14,6 +14,13 @@ export class Stopwatch {
     this.hasStopped = false;
   }
 
+  // Shows a time that was measured earlier, frozen like after stop().
+  freezeAt(seconds: number): void {
+    this.accumulatedMilliseconds = seconds * MILLISECONDS_PER_SECOND;
+    this.runningSinceMilliseconds = null;
+    this.hasStopped = true;
+  }
+
   pause(): void {
     if (this.runningSinceMilliseconds === null) {
       return;
