@@ -14,6 +14,7 @@ import { formatDuration } from '../utils/format-duration';
 import { formatNumberWithSpaces } from '../utils/format-number';
 import { BoardView } from './board-view';
 import { DifficultyPicker } from './difficulty-picker';
+import { drawAttentionTo } from './draw-attention';
 import { InfoDialog } from './info-dialog';
 import { getRequiredButton, getRequiredElement } from './required-element';
 import { Stopwatch } from './stopwatch';
@@ -171,6 +172,13 @@ export class GamePage {
     this.confetti.launch();
     this.successSound.play();
     this.solvedBoards.markSolved(this.selectedDifficulty, this.game.puzzle.id, this.stopwatch.getElapsedSeconds());
+    this.revealNextButton();
+  }
+
+  // On a small screen the button is below the visible part of the page, so it is scrolled into view.
+  private revealNextButton(): void {
+    this.nextButton.hidden = false;
+    drawAttentionTo(this.nextButton);
   }
 
   // The menu is drawn only when it opens, so playing does not pay for 100+ menu buttons.
