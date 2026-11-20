@@ -1,5 +1,3 @@
-import { BOARD_COUNT } from './puzzle';
-
 export const BOARDS_PER_THOUSAND = 1000;
 export const BOARDS_PER_HUNDRED = 100;
 
@@ -8,20 +6,9 @@ export interface BoardRange {
   lastBoardId: number;
 }
 
-// Splits the boards firstBoardId..lastBoardId into consecutive ranges of rangeSize boards.
-// The last range is shorter when the boards do not divide evenly.
-export function splitIntoRanges(firstBoardId: number, lastBoardId: number, rangeSize: number): BoardRange[] {
-  const ranges: BoardRange[] = [];
-
-  for (let rangeStart = firstBoardId; rangeStart <= lastBoardId; rangeStart += rangeSize) {
-    ranges.push({ firstBoardId: rangeStart, lastBoardId: Math.min(rangeStart + rangeSize - 1, lastBoardId) });
-  }
-
-  return ranges;
-}
-
-export function getAllThousands(): BoardRange[] {
-  return splitIntoRanges(1, BOARD_COUNT, BOARDS_PER_THOUSAND);
+// Splits the boards 1..boardCount into thousands.
+export function getAllThousands(boardCount: number): BoardRange[] {
+  return splitIntoRanges(1, boardCount, BOARDS_PER_THOUSAND);
 }
 
 export function getHundredsOfThousand(thousand: BoardRange): BoardRange[] {
@@ -43,4 +30,16 @@ export function countSolvedBoardsInRange(solvedBoardIds: Set<number>, range: Boa
   }
 
   return solvedCount;
+}
+
+// Splits the boards firstBoardId..lastBoardId into consecutive ranges of rangeSize boards.
+// The last range is shorter when the boards do not divide evenly.
+function splitIntoRanges(firstBoardId: number, lastBoardId: number, rangeSize: number): BoardRange[] {
+  const ranges: BoardRange[] = [];
+
+  for (let rangeStart = firstBoardId; rangeStart <= lastBoardId; rangeStart += rangeSize) {
+    ranges.push({ firstBoardId: rangeStart, lastBoardId: Math.min(rangeStart + rangeSize - 1, lastBoardId) });
+  }
+
+  return ranges;
 }

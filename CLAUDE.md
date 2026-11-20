@@ -81,7 +81,12 @@ if (areBothCellsFilled && haveSameValue) {
 ```
 
 When the condition is reused or needs several lines, make it a function
-(`isEdgeHintBroken(board, edgeHint)`).
+(`edgeHint.isBrokenOn(board)`).
+
+## 6. Use a class only for things that hold state over time
+
+Use a class only for things that hold state over time (game, history, stopwatch, UI widgets).
+Keep rule checks, hints and other calculations as pure functions.
 
 # Git workflow
 
