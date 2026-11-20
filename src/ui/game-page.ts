@@ -113,9 +113,23 @@ export class GamePage {
     this.game = new PuzzleGame(this.puzzleLibrary.getPuzzle(this.selectedDifficulty, boardId));
     this.menuDrawer.close();
     this.stopwatch.restart();
+
+    const solveSeconds = this.solvedBoards.getSolveSeconds(this.selectedDifficulty, boardId);
+
+    if (solveSeconds !== null) {
+      this.showPreviouslySolvedBoard(solveSeconds);
+    }
+
     this.render();
   }
 
+  // The board is filled in and the stopwatch frozen at the saved time, without confetti or sound.
+  private showPreviouslySolvedBoard(solveSeconds: number): void {
+    this.game.solve();
+    this.stopwatch.freezeAt(solveSeconds);
+  }
+
+  // Reset starts the board over, also when it was already solved, so it can be played again.
   private resetBoard(): void {
     this.game = new PuzzleGame(this.game.puzzle);
     this.stopwatch.restart();
@@ -156,7 +170,7 @@ export class GamePage {
     this.stopwatch.stop();
     this.confetti.launch();
     this.successSound.play();
-    this.solvedBoards.markSolved(this.selectedDifficulty, this.game.puzzle.id);
+    this.solvedBoards.markSolved(this.selectedDifficulty, this.game.puzzle.id, this.stopwatch.getElapsedSeconds());
   }
 
   // The menu is drawn only when it opens, so playing does not pay for 100+ menu buttons.
