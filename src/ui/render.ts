@@ -11,7 +11,7 @@ import {
   type CellValue,
   type EdgeHint,
   type HintType,
-} from './board';
+} from '../game/board';
 
 export interface BoardView {
   board: Board;

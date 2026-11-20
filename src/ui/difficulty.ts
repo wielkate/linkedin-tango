@@ -1,5 +1,5 @@
 import './controls.css';
-import { DIFFICULTIES, DIFFICULTY_LABELS, type Difficulty } from './puzzle';
+import { DIFFICULTIES, DIFFICULTY_LABELS, type Difficulty } from '../game/puzzle';
 
 // Builds one button per difficulty and marks the selected one.
 export function renderDifficultyPicker(

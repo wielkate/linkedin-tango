@@ -139,30 +139,39 @@ linkedin-tango/
 │   ├── clue-index.mjs        ClueIndex class: counts the boards that fit a set of clues
 │   └── format-json.mjs       writes JSON arrays with one element per line
 ├── src/
-│   ├── controls.css      styling of the difficulty and undo/reset buttons
-│   ├── difficulty.ts     difficulty picker buttons
-│   ├── board-menu.ts     BoardMenu class: the boards drawer (thousands, hundreds, numbers)
-│   ├── board-ranges.ts   splitting the boards into ranges and counting solved ones
-│   ├── board-menu.css    styling of the boards drawer
-│   ├── confetti.ts       Confetti class: the celebration when a puzzle is solved
-│   ├── board.ts          board model: types, constants and small helpers
-│   ├── main.ts           entry point: game state, click handling, status message
-│   ├── puzzle.ts         decodes puzzles from src/data and picks the next board
-│   ├── data/             generated: boards.json (all boards) and easy/medium/hard.json (one puzzle per board)
-│   ├── hint.ts           picks the cell for the hint button and its explanation
-│   ├── hint-deductions.ts  the simple rules that settle a cell (signs, pairs, sandwiches, full lines)
-│   ├── hint-lookahead.ts   the fallback: assume a symbol and look for a broken rule
-│   ├── hint-explanation.ts the sentence and the related cells shown for each rule
-│   ├── hint-note.css     the light-yellow note beside the board and the hint highlights
-│   ├── panel.css         layout of the title, timer, side buttons and info dialog
-│   ├── solved-boards.ts  solved boards per level (localStorage)
-│   ├── format-number.ts  writes 11222 as "11 222"
-│   ├── stopwatch.ts      stopwatch and duration formatting
-│   ├── history.ts        change history used by the undo button
-│   ├── error-highlight.css  1-second CSS delay before rule violations turn red
-│   ├── render.ts         builds the DOM for the board and positions the hints
-│   ├── rules.ts          rule checking: which cells break a rule, is the board solved
-│   └── style.css         styling
+│   ├── main.ts               entry point: game state, click handling, status message
+│   ├── style.css             base styling
+│   ├── game/                 the game model and its rules, no DOM
+│   │   ├── board.ts          board model: types, constants and small helpers
+│   │   ├── rules.ts          rule checking: which cells break a rule, is the board solved
+│   │   ├── solution.ts       reads the solution symbol of a cell and fills the board with it
+│   │   ├── puzzle.ts         decodes puzzles from src/data and picks the next board
+│   │   ├── history.ts        change history used by the undo button
+│   │   └── solved-boards.ts  solved boards per level (localStorage)
+│   ├── hints/                the hint button
+│   │   ├── hint.ts           picks the cell for the hint button and its explanation
+│   │   ├── hint-deductions.ts  the simple rules that settle a cell (signs, pairs, sandwiches, full lines)
+│   │   ├── hint-lookahead.ts   the fallback: assume a symbol and look for a broken rule
+│   │   ├── hint-explanation.ts the sentence and the related cells shown for each rule
+│   │   └── hint-note.css     the light-yellow note beside the board and the hint highlights
+│   ├── board-menu/           the boards drawer
+│   │   ├── board-menu.ts     BoardMenu class: the boards drawer (thousands, hundreds, numbers)
+│   │   ├── board-ranges.ts   splitting the boards into ranges and counting solved ones
+│   │   └── board-menu.css    styling of the boards drawer
+│   ├── ui/                   the page: board, buttons, timer
+│   │   ├── render.ts         builds the DOM for the board and positions the hints
+│   │   ├── difficulty.ts     difficulty picker buttons
+│   │   ├── stopwatch.ts      stopwatch and duration formatting
+│   │   ├── controls.css      styling of the difficulty and undo/reset buttons
+│   │   ├── panel.css         layout of the title, timer, side buttons and info dialog
+│   │   └── error-highlight.css  1-second CSS delay before rule violations turn red
+│   ├── effects/              the celebration when a puzzle is solved
+│   │   ├── confetti.ts       Confetti class: the confetti animation
+│   │   ├── success-sound.ts  SuccessSound class: plays the success sound
+│   │   └── assets/success.wav  the success sound
+│   ├── utils/
+│   │   └── format-number.ts  writes 11222 as "11 222"
+│   └── data/                 generated: boards.json (all boards) and easy/medium/hard.json (one puzzle per board)
 ├── .gitattributes        marks package-lock.json as a generated file
 ├── .gitignore            files Git ignores: node_modules, dist, .idea/
 ├── .npmrc                npm settings: enforce the Node version

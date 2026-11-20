@@ -1,4 +1,4 @@
-import { SYMBOL_EMOJIS, type CellPosition, type Line, type PlayerSymbol } from './board';
+import { SYMBOL_EMOJIS, type CellPosition, type Line, type PlayerSymbol } from '../game/board';
 import type { Deduction } from './hint-deductions';
 
 // The sentence shown next to the board: which rule fixes the cell, in plain words.

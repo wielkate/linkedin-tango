@@ -1,6 +1,6 @@
 import './style.css';
-import './panel.css';
-import './hint-note.css';
+import './ui/panel.css';
+import './hints/hint-note.css';
 import {
   createBoardWithGivenCells,
   getCellValue,
@@ -8,20 +8,20 @@ import {
   setCellValue,
   toCellKey,
   type CellPosition,
-} from './board';
-import { BoardMenu } from './board-menu';
-import { Confetti } from './confetti';
-import { SuccessSound } from './success-sound';
-import { renderDifficultyPicker } from './difficulty';
-import { ChangeHistory } from './history';
-import { findHint, type Hint } from './hint';
-import { fillBoardWithSolution } from './solution';
-import { formatNumberWithSpaces } from './format-number';
-import { loadSolvedBoardIds, saveSolvedBoardIds } from './solved-boards';
-import { DEFAULT_DIFFICULTY, DIFFICULTY_LABELS, getPuzzle, pickBoardId, type Difficulty } from './puzzle';
-import { renderBoard } from './render';
-import { findCellsBreakingRules, isSolved } from './rules';
-import { Stopwatch, formatDuration } from './stopwatch';
+} from './game/board';
+import { BoardMenu } from './board-menu/board-menu';
+import { Confetti } from './effects/confetti';
+import { SuccessSound } from './effects/success-sound';
+import { renderDifficultyPicker } from './ui/difficulty';
+import { ChangeHistory } from './game/history';
+import { findHint, type Hint } from './hints/hint';
+import { fillBoardWithSolution } from './game/solution';
+import { formatNumberWithSpaces } from './utils/format-number';
+import { loadSolvedBoardIds, saveSolvedBoardIds } from './game/solved-boards';
+import { DEFAULT_DIFFICULTY, DIFFICULTY_LABELS, getPuzzle, pickBoardId, type Difficulty } from './game/puzzle';
+import { renderBoard } from './ui/render';
+import { findCellsBreakingRules, isSolved } from './game/rules';
+import { Stopwatch, formatDuration } from './ui/stopwatch';
 
 const TIMER_REFRESH_MILLISECONDS = 1000;
 const CLOCK_EMOJI = '🕒';

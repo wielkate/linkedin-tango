@@ -6,8 +6,8 @@ import {
   getHundredsOfThousand,
   type BoardRange,
 } from './board-ranges';
-import { formatNumberWithSpaces } from './format-number';
-import { BOARD_COUNT } from './puzzle';
+import { formatNumberWithSpaces } from '../utils/format-number';
+import { BOARD_COUNT } from '../game/puzzle';
 
 export interface BoardMenuView {
   difficultyLabel: string;

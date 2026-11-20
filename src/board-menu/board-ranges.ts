@@ -1,4 +1,4 @@
-import { BOARD_COUNT } from './puzzle';
+import { BOARD_COUNT } from '../game/puzzle';
 
 export const BOARDS_PER_THOUSAND = 1000;
 export const BOARDS_PER_HUNDRED = 100;

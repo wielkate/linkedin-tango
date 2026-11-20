@@ -1,9 +1,9 @@
 import type { EdgeHint, GivenCell, HintType } from './board';
 import { BOARD_SIZE } from './board';
-import boardsData from './data/boards.json';
-import easyPuzzlesData from './data/easy.json';
-import hardPuzzlesData from './data/hard.json';
-import mediumPuzzlesData from './data/medium.json';
+import boardsData from '../data/boards.json';
+import easyPuzzlesData from '../data/easy.json';
+import hardPuzzlesData from '../data/hard.json';
+import mediumPuzzlesData from '../data/medium.json';
 
 // src/data holds every valid board (boards.json) and one puzzle per board and difficulty
 // (easy.json, medium.json, hard.json), all made by scripts/generate-puzzles.mjs.

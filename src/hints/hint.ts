@@ -7,11 +7,11 @@ import {
   type CellPosition,
   type EdgeHint,
   type PlayerSymbol,
-} from './board';
+} from '../game/board';
 import { findSimpleDeductions, type Deduction } from './hint-deductions';
 import { createExplanationMessage, findRelatedPositions } from './hint-explanation';
 import { findDeductionsByLookahead } from './hint-lookahead';
-import { getSolutionSymbol } from './solution';
+import { getSolutionSymbol } from '../game/solution';
 
 export interface Hint {
   position: CellPosition;

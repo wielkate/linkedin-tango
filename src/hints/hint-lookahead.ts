@@ -11,9 +11,9 @@ import {
   type CellPosition,
   type EdgeHint,
   type PlayerSymbol,
-} from './board';
+} from '../game/board';
 import { findSimpleDeductions, type Deduction } from './hint-deductions';
-import { findCellsBreakingRules } from './rules';
+import { findCellsBreakingRules } from '../game/rules';
 
 // The step after the simple rules: assume a symbol, follow what the simple rules then force,
 // and if that ends in a broken rule, the cell must hold the other symbol.

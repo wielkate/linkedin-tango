@@ -12,7 +12,7 @@ import {
   type HintType,
   type Line,
   type PlayerSymbol,
-} from './board';
+} from '../game/board';
 
 const WINDOW_LENGTH = MAX_ADJACENT_IDENTICAL + 1;
 
