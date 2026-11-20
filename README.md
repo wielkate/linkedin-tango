@@ -134,6 +134,9 @@ linkedin-tango/
 ├── example/
 │   ├── example_start_board.png   board 1 (easy) at the start
 │   └── example_solved_board.png  board 1 solved
+├── public/
+│   ├── favicon.svg           the browser-tab icon (a cat and a dog)
+│   └── apple-touch-icon.png  the same icon as a 180×180 PNG for iOS home screens
 ├── scripts/
 │   ├── generate-puzzles.mjs  generates src/data (all boards and their puzzles)
 │   ├── clue-index.mjs        ClueIndex class: counts the boards that fit a set of clues
