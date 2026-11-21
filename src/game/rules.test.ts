@@ -131,3 +131,105 @@ describe("isSolved", () => {
     expect(isSolved(createBoardFromRows(SOLVED_ROWS), [sameHint])).toBe(false);
   });
 });
+
+describe("findCellsBreakingRules edge cases", () => {
+  it("marks all four cells of a run of four identical symbols", () => {
+    const board = createBoardWithTopRows(["DCCCC."]);
+    expect(findBrokenKeys(board)).toEqual(
+      toKeys([1, 2, 3, 4].map((column) => ({ row: 0, column }))),
+    );
+  });
+
+  it("marks a streak at the very end of a line", () => {
+    const board = createBoardWithTopRows(["...DDD"]);
+    expect(findBrokenKeys(board)).toEqual(
+      toKeys([3, 4, 5].map((column) => ({ row: 0, column }))),
+    );
+  });
+
+  it("does not join a streak across the end of one row and the start of the next", () => {
+    const board = createBoardWithTopRows(["....CC", "C....."]);
+    expect(findBrokenKeys(board)).toEqual([]);
+  });
+
+  it("marks a streak down the last column", () => {
+    const board = createBoardFromRows([
+      "......",
+      "......",
+      "......",
+      ".....C",
+      ".....C",
+      ".....C",
+    ]);
+    expect(findBrokenKeys(board)).toEqual(
+      toKeys([3, 4, 5].map((row) => ({ row, column: 5 }))),
+    );
+  });
+
+  it("marks the symbol with too many cells in each of two lines", () => {
+    const board = createBoardWithTopRows(["CCDDCC", "DDCCDD"]);
+    expect(findBrokenKeys(board)).toContain("0,0");
+    expect(findBrokenKeys(board)).toContain("1,0");
+  });
+
+  it("marks too many symbols in a column", () => {
+    const board = createBoardFromRows([
+      "D.....",
+      "C.....",
+      "D.....",
+      "C.....",
+      "D.....",
+      "D.....",
+    ]);
+    const dogRows = [0, 2, 4, 5];
+    expect(findBrokenKeys(board)).toEqual(
+      expect.arrayContaining(dogRows.map((row) => `${row},0`)),
+    );
+    expect(findBrokenKeys(board)).not.toContain("1,0");
+  });
+
+  it("marks cells that break several rules once", () => {
+    const board = createBoardWithTopRows(["CCCC.."]);
+    const hint = new EdgeHint(
+      { row: 0, column: 0 },
+      { row: 0, column: 1 },
+      "different",
+    );
+    const brokenKeys = findBrokenKeys(board, [hint]);
+    expect(new Set(brokenKeys).size).toBe(brokenKeys.length);
+  });
+
+  it("marks a broken vertical edge hint", () => {
+    const board = createBoardFromRows(["D.....", "C....."]);
+    const sameHint = new EdgeHint(
+      { row: 0, column: 0 },
+      { row: 1, column: 0 },
+      "same",
+    );
+    expect(findBrokenKeys(board, [sameHint])).toEqual(["0,0", "1,0"]);
+  });
+
+  it("allows exactly three of a symbol in a line", () => {
+    const board = createBoardWithTopRows(["CDCDCD"]);
+    expect(findBrokenKeys(board)).toEqual([]);
+  });
+});
+
+describe("isSolved edge cases", () => {
+  it("is false for a full board with every cell the same", () => {
+    const board = createBoardFromRows(Array<string>(6).fill("CCCCCC"));
+    expect(isSolved(board, [])).toBe(false);
+  });
+
+  it("is false for an empty board", () => {
+    expect(isSolved(Board.createEmpty(), [])).toBe(false);
+  });
+
+  it("is true when every edge hint is kept", () => {
+    const keptHints = [
+      new EdgeHint({ row: 0, column: 0 }, { row: 0, column: 1 }, "same"),
+      new EdgeHint({ row: 0, column: 1 }, { row: 0, column: 2 }, "different"),
+    ];
+    expect(isSolved(createBoardFromRows(SOLVED_ROWS), keptHints)).toBe(true);
+  });
+});
