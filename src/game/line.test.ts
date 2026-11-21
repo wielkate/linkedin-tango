@@ -66,3 +66,17 @@ describe("describeLine", () => {
     expect(describeLine(firstColumn)).toBe("column 1");
   });
 });
+
+describe("getLineWindows edge cases", () => {
+  const [firstLine] = getAllLines();
+
+  it("gives one single-cell window per cell for a window length of one", () => {
+    expect(getLineWindows(firstLine, 1)).toHaveLength(BOARD_SIZE);
+  });
+
+  it("does not change the line it walks along", () => {
+    const positionsBefore = [...firstLine.positions];
+    getLineWindows(firstLine, 3);
+    expect(firstLine.positions).toEqual(positionsBefore);
+  });
+});

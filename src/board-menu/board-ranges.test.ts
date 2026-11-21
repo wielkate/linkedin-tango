@@ -76,3 +76,41 @@ describe("countSolvedBoardsInRange", () => {
     expect(countSolvedBoardsInRange(new Set(), range)).toBe(0);
   });
 });
+
+describe("board ranges edge cases", () => {
+  it("handles a single board and a board count just over a thousand", () => {
+    expect(getAllThousands(1)).toEqual([{ firstBoardId: 1, lastBoardId: 1 }]);
+    expect(getAllThousands(1001)[1]).toEqual({
+      firstBoardId: 1001,
+      lastBoardId: 1001,
+    });
+  });
+
+  it("splits a one-board thousand into one one-board hundred", () => {
+    expect(
+      getHundredsOfThousand({ firstBoardId: 1001, lastBoardId: 1001 }),
+    ).toEqual([{ firstBoardId: 1001, lastBoardId: 1001 }]);
+  });
+
+  it("covers every board exactly once in the hundreds", () => {
+    const boardIds = getAllThousands(BOARD_COUNT)
+      .flatMap(getHundredsOfThousand)
+      .flatMap(({ firstBoardId, lastBoardId }) =>
+        Array.from(
+          { length: lastBoardId - firstBoardId + 1 },
+          (_, offset) => firstBoardId + offset,
+        ),
+      );
+    expect(boardIds).toHaveLength(BOARD_COUNT);
+    expect(new Set(boardIds).size).toBe(BOARD_COUNT);
+  });
+
+  it("does not count a board id below the first range", () => {
+    expect(
+      countSolvedBoardsInRange(new Set([0, -5]), {
+        firstBoardId: 1,
+        lastBoardId: 100,
+      }),
+    ).toBe(0);
+  });
+});

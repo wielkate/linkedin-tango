@@ -50,3 +50,38 @@ describe("parseBoardAddress", () => {
     expect(parseBoardAddress("#easy/-3", BOARD_COUNT)).toBeNull();
   });
 });
+
+describe("parseBoardAddress edge cases", () => {
+  it("rejects a difficulty written in capital letters", () => {
+    expect(parseBoardAddress("#Easy/5", BOARD_COUNT)).toBeNull();
+  });
+
+  it("rejects surrounding spaces, extra segments and a trailing slash", () => {
+    expect(parseBoardAddress(" #easy/5", BOARD_COUNT)).toBeNull();
+    expect(parseBoardAddress("#easy/5 ", BOARD_COUNT)).toBeNull();
+    expect(parseBoardAddress("#easy/5/6", BOARD_COUNT)).toBeNull();
+    expect(parseBoardAddress("#easy/5/", BOARD_COUNT)).toBeNull();
+  });
+
+  it("rejects decimal and exponent board numbers", () => {
+    expect(parseBoardAddress("#easy/1.5", BOARD_COUNT)).toBeNull();
+    expect(parseBoardAddress("#easy/1e3", BOARD_COUNT)).toBeNull();
+  });
+
+  it("reads a board number written with leading zeros", () => {
+    expect(parseBoardAddress("#easy/007", BOARD_COUNT)).toEqual({
+      difficulty: "easy",
+      boardId: 7,
+    });
+  });
+
+  it("rejects every address when there are no boards", () => {
+    expect(parseBoardAddress("#easy/1", 0)).toBeNull();
+  });
+
+  it("rejects a board number too large to be exact", () => {
+    expect(
+      parseBoardAddress(`#easy/${"9".repeat(30)}`, BOARD_COUNT),
+    ).toBeNull();
+  });
+});

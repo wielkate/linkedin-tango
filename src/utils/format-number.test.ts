@@ -20,3 +20,15 @@ describe("formatNumberWithSpaces", () => {
     );
   });
 });
+
+describe("formatNumberWithSpaces edge cases", () => {
+  it("handles the boundaries between group sizes", () => {
+    expect(formatNumberWithSpaces(99999)).toBe(`99${NON_BREAKING_SPACE}999`);
+    expect(formatNumberWithSpaces(100000)).toBe(`100${NON_BREAKING_SPACE}000`);
+  });
+
+  it("does not put a space after a minus sign", () => {
+    expect(formatNumberWithSpaces(-1000)).toBe(`-1${NON_BREAKING_SPACE}000`);
+    expect(formatNumberWithSpaces(-999)).toBe("-999");
+  });
+});

@@ -18,3 +18,14 @@ describe("formatDuration", () => {
     expect(formatDuration(3725)).toBe("62 min 5 sec");
   });
 });
+
+describe("formatDuration edge cases", () => {
+  it("switches format exactly at one minute", () => {
+    expect(formatDuration(59)).toBe("59 sec");
+    expect(formatDuration(60)).toBe("1 min 0 sec");
+  });
+
+  it("handles a very long time", () => {
+    expect(formatDuration(86400)).toBe("1440 min 0 sec");
+  });
+});

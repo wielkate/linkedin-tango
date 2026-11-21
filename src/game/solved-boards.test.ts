@@ -74,3 +74,47 @@ describe("SolvedBoards", () => {
     expect(solvedBoards.getSolveSeconds("easy", 3)).toBe(10);
   });
 });
+
+describe("SolvedBoards edge cases", () => {
+  it("treats a saved null or a non-object as no progress", () => {
+    for (const savedText of ["null", "42", '"text"', "[]"]) {
+      storage.setItem(STORAGE_KEY, savedText);
+      expect(SolvedBoards.loadFromStorage().getBoardIds("easy").size).toBe(0);
+    }
+  });
+
+  it("ignores saved difficulties it does not know", () => {
+    storage.setItem(STORAGE_KEY, JSON.stringify({ impossible: { 1: 5 } }));
+    const solvedBoards = SolvedBoards.loadFromStorage();
+    expect(solvedBoards.getBoardIds("easy").size).toBe(0);
+  });
+
+  it("loads a difficulty even when another one is missing", () => {
+    storage.setItem(STORAGE_KEY, JSON.stringify({ hard: { 9: 12 } }));
+    const solvedBoards = SolvedBoards.loadFromStorage();
+    expect(solvedBoards.getSolveSeconds("hard", 9)).toBe(12);
+    expect(solvedBoards.getBoardIds("medium").size).toBe(0);
+  });
+
+  it("keeps a zero-second time as the best time", () => {
+    const solvedBoards = SolvedBoards.loadFromStorage();
+    solvedBoards.markSolved("easy", 2, 0);
+    expect(solvedBoards.getSolveSeconds("easy", 2)).toBe(0);
+    expect(solvedBoards.getBoardIds("easy")).toEqual(new Set([2]));
+  });
+
+  it("does not accept an equal time as a new best", () => {
+    const solvedBoards = SolvedBoards.loadFromStorage();
+    solvedBoards.markSolved("easy", 4, 30);
+    storage.setItem(STORAGE_KEY, "untouched");
+    solvedBoards.markSolved("easy", 4, 30);
+    expect(storage.getItem(STORAGE_KEY)).toBe("untouched");
+  });
+
+  it("returns a copy of the solved ids, so callers cannot change the progress", () => {
+    const solvedBoards = SolvedBoards.loadFromStorage();
+    solvedBoards.markSolved("easy", 6, 10);
+    solvedBoards.getBoardIds("easy").delete(6);
+    expect(solvedBoards.getBoardIds("easy")).toEqual(new Set([6]));
+  });
+});
