@@ -7,9 +7,9 @@ import { CAT, DOG } from "./symbols";
 describe("Board", () => {
   it("starts empty", () => {
     const board = Board.createEmpty();
-    expect(getAllCellPositions().every((position) => board.isEmpty(position))).toBe(
-      true,
-    );
+    expect(
+      getAllCellPositions().every((position) => board.isEmpty(position)),
+    ).toBe(true);
     expect(board.isFilled()).toBe(false);
   });
 

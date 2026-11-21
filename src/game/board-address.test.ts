@@ -27,12 +27,16 @@ describe("parseBoardAddress", () => {
 
   it("accepts the first and the last board", () => {
     expect(parseBoardAddress("#easy/1", BOARD_COUNT)).not.toBeNull();
-    expect(parseBoardAddress(`#easy/${BOARD_COUNT}`, BOARD_COUNT)).not.toBeNull();
+    expect(
+      parseBoardAddress(`#easy/${BOARD_COUNT}`, BOARD_COUNT),
+    ).not.toBeNull();
   });
 
   it("ignores board ids outside the range", () => {
     expect(parseBoardAddress("#easy/0", BOARD_COUNT)).toBeNull();
-    expect(parseBoardAddress(`#easy/${BOARD_COUNT + 1}`, BOARD_COUNT)).toBeNull();
+    expect(
+      parseBoardAddress(`#easy/${BOARD_COUNT + 1}`, BOARD_COUNT),
+    ).toBeNull();
   });
 
   it("ignores unknown difficulties", () => {
