@@ -116,13 +116,15 @@ Then open the address Vite prints (by default <http://localhost:5173>).
 
 ### 3. Commands
 
-| Command           | What it does                                                                                                                                                            | When to use it                                                                        |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `npm install`     | Downloads every dependency listed in `package.json` into `node_modules/` and updates `package-lock.json` if needed.                                                     | Once after cloning, and after changing dependencies.                                  |
-| `npm ci`          | Installs exactly the versions in `package-lock.json`, deletes `node_modules/` first and never modifies the lock file.                                                   | Clean, reproducible installs (also the right choice when the lock file is read-only). |
-| `npm run dev`     | Starts the Vite development server with hot reload: the page updates whenever you save a source file. Stop it with `Ctrl+C`.                                            | While developing.                                                                     |
-| `npm run build`   | First runs `tsc --noEmit` (type-checks all code and writes no files, so type errors stop the build), then `vite build` (bundles the game into static files in `dist/`). | Before publishing, and to check that the types are correct.                           |
-| `npm run preview` | Serves the already built `dist/` folder locally (by default <http://localhost:4173>), exactly as a static host would.                                                   | After `npm run build`, to test the production build.                                  |
+| Command              | What it does                                                                                                                                                            | When to use it                                                                        |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `npm install`        | Downloads every dependency listed in `package.json` into `node_modules/` and updates `package-lock.json` if needed.                                                     | Once after cloning, and after changing dependencies.                                  |
+| `npm ci`             | Installs exactly the versions in `package-lock.json`, deletes `node_modules/` first and never modifies the lock file.                                                   | Clean, reproducible installs (also the right choice when the lock file is read-only). |
+| `npm run dev`        | Starts the Vite development server with hot reload: the page updates whenever you save a source file. Stop it with `Ctrl+C`.                                            | While developing.                                                                     |
+| `npm run build`      | First runs `tsc --noEmit` (type-checks all code and writes no files, so type errors stop the build), then `vite build` (bundles the game into static files in `dist/`). | Before publishing, and to check that the types are correct.                           |
+| `npm run preview`    | Serves the already built `dist/` folder locally (by default <http://localhost:4173>), exactly as a static host would.                                                   | After `npm run build`, to test the production build.                                  |
+| `npm test`           | Runs every unit test once with Vitest and exits.                                                                                                                        | Before every commit and pull request.                                                 |
+| `npm run test:watch` | Runs Vitest in watch mode: the tests that a saved file affects run again.                                                                                               | While writing code or tests.                                                          |
 
 ## Run in WebStorm
 
@@ -198,9 +200,11 @@ linkedin-tango/
 │   │   ├── confetti.ts       Confetti class: the confetti animation
 │   │   ├── success-sound.ts  SuccessSound class: plays the success sound
 │   │   └── assets/success.wav  the success sound
+│   ├── test-support/         helpers shared by the tests (a board from text, a fake localStorage)
 │   ├── utils/                stateless helpers
 │   │   ├── format-number.ts  writes 11222 as "11 222"
 │   │   └── format-duration.ts  writes 83 seconds as "1 min 23 sec"
+│   │   (every `<name>.test.ts` file sits next to the `<name>.ts` file it tests)
 │   └── data/                 generated: boards.json (all boards) and easy/medium/hard.json (one puzzle per board)
 ├── .gitattributes        marks package-lock.json as a generated file
 ├── .gitignore            files Git ignores: node_modules, dist, .idea/
