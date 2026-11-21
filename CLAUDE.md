@@ -54,6 +54,19 @@ When the condition is reused or needs several lines, make it a function
 Use a class only for things that hold state over time (game, history, stopwatch, UI widgets).
 Keep rule checks, hints and other calculations as pure functions.
 
+# Tests
+
+- Unit tests use Vitest (`npm test`). A test file sits next to the file it tests and is named
+  `<name>.test.ts`.
+- Test the behaviour, not the implementation. A test name says what happens
+  (`"keeps only the best time"`), and a test checks one thing.
+- Shared test helpers live in `src/test-support/`. Build boards from text with
+  `createBoardFromRows` instead of setting cells one by one.
+- Tests never touch the network, the real clock or the real `localStorage`: pass in or fake them.
+- Coverage must stay at 90% or more (`npm run test:coverage`). Code that needs a browser is
+  listed under `coverage.exclude` in `vite.config.ts`; keep logic out of those files so it can be tested.
+- New logic comes with tests, and a fixed bug comes with a test that failed before the fix.
+
 # Git workflow
 
 - Keep a linear history: pull with `git pull --rebase`, never create merge commits

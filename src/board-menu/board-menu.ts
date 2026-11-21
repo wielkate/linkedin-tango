@@ -171,10 +171,7 @@ export class BoardMenu {
       },
     );
 
-    layerElement.append(
-      backButton,
-      this.createBoardGroups(hundred, view),
-    );
+    layerElement.append(backButton, this.createBoardGroups(hundred, view));
     return layerElement;
   }
 
