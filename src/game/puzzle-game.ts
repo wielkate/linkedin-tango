@@ -81,6 +81,8 @@ export class PuzzleGame {
     this.activeHint = hint;
     this.board.setValue(hint.position, hint.correctValue);
     this.lockedCellKeys.add(toCellKey(hint.position));
+    // The cell is locked now, so undo must not put the old symbol back into it.
+    this.changeHistory.forgetChangesAt(hint.position);
   }
 
   solve(): void {
