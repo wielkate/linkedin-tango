@@ -125,6 +125,13 @@ describe("the stored puzzles", () => {
     }
   });
 
+  it("can have no edge hints at all", () => {
+    const puzzle = library.getPuzzle("hard", 4274);
+
+    expect(puzzle.edgeHints).toEqual([]);
+    expect(puzzle.givenCells).toHaveLength(9);
+  });
+
   it("start without rule violations", () => {
     for (const difficulty of DIFFICULTIES) {
       for (const boardId of ALL_BOARD_IDS.filter((id) => id % 25 === 0)) {
