@@ -120,6 +120,19 @@ export class GamePage {
         this.menuDrawer.close();
       }
     });
+    document.addEventListener("visibilitychange", () =>
+      this.pauseWhenTabIsHidden(),
+    );
+  }
+
+  // The player resumes by hand after coming back, so time spent elsewhere is never counted.
+  private pauseWhenTabIsHidden(): void {
+    if (document.visibilityState !== "hidden") {
+      return;
+    }
+
+    this.stopwatch.pause();
+    this.render();
   }
 
   private pickNextPuzzle(): Puzzle {
