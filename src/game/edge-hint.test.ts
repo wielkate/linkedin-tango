@@ -54,3 +54,37 @@ describe("EdgeHint", () => {
     expect(sameHint.isBrokenOn(createBoardWith(null, null))).toBe(false);
   });
 });
+
+describe("EdgeHint edge cases", () => {
+  it("accepts vertical neighbours", () => {
+    const verticalHint = new EdgeHint(
+      { row: 2, column: 3 },
+      { row: 3, column: 3 },
+      "different",
+    );
+    const board = Board.createEmpty();
+    board.setValue({ row: 2, column: 3 }, CAT);
+    board.setValue({ row: 3, column: 3 }, CAT);
+    expect(verticalHint.isBrokenOn(board)).toBe(true);
+  });
+
+  it("does not care which cell is listed first", () => {
+    const board = createBoardWith(CAT, DOG);
+    const forwardHint = new EdgeHint(first, second, "same");
+    const backwardHint = new EdgeHint(second, first, "same");
+    expect(backwardHint.isBrokenOn(board)).toBe(forwardHint.isBrokenOn(board));
+  });
+
+  it("rejects the same cell twice and cells two apart", () => {
+    expect(() => new EdgeHint(first, first, "same")).toThrow(/not neighbours/);
+    expect(() => new EdgeHint(first, { row: 0, column: 2 }, "same")).toThrow(
+      /not neighbours/,
+    );
+  });
+
+  it("names the offending cells in the error", () => {
+    expect(
+      () => new EdgeHint({ row: 0, column: 0 }, { row: 4, column: 4 }, "same"),
+    ).toThrow("0,0 and 4,4");
+  });
+});
