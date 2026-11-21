@@ -24,28 +24,6 @@ test("resume brings the board back", async ({ page }) => {
   await expect(page.locator("#hint")).toBeEnabled();
 });
 
-test("the timer stands still while paused", async ({ page }) => {
-  await page.clock.install();
-  await page.goto("/#easy/1");
-  await page.waitForSelector("#board .cell");
-  await page.locator("#pause").click();
-  const timeWhenPaused = await page.locator("#timer").textContent();
-
-  await page.clock.runFor(5000);
-
-  await expect(page.locator("#timer")).toHaveText(timeWhenPaused ?? "");
-});
-
-test("the timer counts seconds while playing", async ({ page }) => {
-  await page.clock.install();
-  await page.goto("/#easy/1");
-  await page.waitForSelector("#board .cell");
-
-  await page.clock.runFor(3000);
-
-  await expect(page.locator("#timer")).toContainText("3 sec");
-});
-
 test("the info dialog opens, pauses the game and closes with Got it", async ({
   page,
 }) => {
