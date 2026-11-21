@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { Board } from "./board";
-import { toCellKey, type CellPosition } from "./cell-position";
-import { EdgeHint } from "./edge-hint";
-import { findCellsBreakingRules, isSolved } from "./rules";
 import {
   createBoardFromRows,
   createBoardWithTopRows,
 } from "../test-support/create-board";
+import { Board } from "./board";
+import { toCellKey, type CellPosition } from "./cell-position";
+import { EdgeHint } from "./edge-hint";
+import { findCellsBreakingRules, isSolved } from "./rules";
 
 function toKeys(positions: CellPosition[]): string[] {
   return positions.map(toCellKey).sort();
@@ -31,26 +31,12 @@ describe("findCellsBreakingRules", () => {
   });
 
   it("finds nothing on a correct unfinished board", () => {
-    const board = createBoardFromRows([
-      "CD....",
-      "......",
-      "......",
-      "......",
-      "......",
-      "......",
-    ]);
+    const board = createBoardWithTopRows(["CD...."]);
     expect(findBrokenKeys(board)).toEqual([]);
   });
 
   it("marks three identical symbols in a row", () => {
-    const board = createBoardFromRows([
-      "CCC...",
-      "......",
-      "......",
-      "......",
-      "......",
-      "......",
-    ]);
+    const board = createBoardWithTopRows(["CCC..."]);
     expect(findBrokenKeys(board)).toEqual(
       toKeys([
         { row: 0, column: 0 },
@@ -61,14 +47,7 @@ describe("findCellsBreakingRules", () => {
   });
 
   it("marks three identical symbols in a column", () => {
-    const board = createBoardFromRows([
-      "D.....",
-      "D.....",
-      "D.....",
-      "......",
-      "......",
-      "......",
-    ]);
+    const board = createBoardWithTopRows(["D.....", "D.....", "D....."]);
     expect(findBrokenKeys(board)).toEqual(
       toKeys([
         { row: 0, column: 0 },
@@ -79,51 +58,23 @@ describe("findCellsBreakingRules", () => {
   });
 
   it("allows two identical symbols next to each other", () => {
-    const board = createBoardFromRows([
-      "CCDD..",
-      "......",
-      "......",
-      "......",
-      "......",
-      "......",
-    ]);
+    const board = createBoardWithTopRows(["CCDD.."]);
     expect(findBrokenKeys(board)).toEqual([]);
   });
 
   it("does not count a gap between identical symbols as a streak", () => {
-    const board = createBoardFromRows([
-      "CC.C..",
-      "......",
-      "......",
-      "......",
-      "......",
-      "......",
-    ]);
+    const board = createBoardWithTopRows(["CC.C.."]);
     expect(findBrokenKeys(board)).toEqual([]);
   });
 
   it("marks every cat in a line that has four cats", () => {
-    const board = createBoardFromRows([
-      "CDCDCC",
-      "......",
-      "......",
-      "......",
-      "......",
-      "......",
-    ]);
+    const board = createBoardWithTopRows(["CDCDCC"]);
     const catPositions = [0, 2, 4, 5].map((column) => ({ row: 0, column }));
     expect(findBrokenKeys(board)).toEqual(toKeys(catPositions));
   });
 
   it("marks both cells of a broken edge hint", () => {
-    const board = createBoardFromRows([
-      "CC....",
-      "......",
-      "......",
-      "......",
-      "......",
-      "......",
-    ]);
+    const board = createBoardWithTopRows(["CC...."]);
     const differentHint = new EdgeHint(
       { row: 0, column: 0 },
       { row: 0, column: 1 },
@@ -138,14 +89,7 @@ describe("findCellsBreakingRules", () => {
   });
 
   it("ignores an edge hint that is kept", () => {
-    const board = createBoardFromRows([
-      "CD....",
-      "......",
-      "......",
-      "......",
-      "......",
-      "......",
-    ]);
+    const board = createBoardWithTopRows(["CD...."]);
     const differentHint = new EdgeHint(
       { row: 0, column: 0 },
       { row: 0, column: 1 },
