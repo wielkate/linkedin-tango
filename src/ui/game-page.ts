@@ -1,24 +1,28 @@
-import { BoardMenu } from '../board-menu/board-menu';
-import { MenuDrawer } from '../board-menu/menu-drawer';
-import { Confetti } from '../effects/confetti';
-import { SuccessSound } from '../effects/success-sound';
-import { toCellKey, type CellPosition } from '../game/cell-position';
-import { DEFAULT_DIFFICULTY, DIFFICULTY_LABELS, type Difficulty } from '../game/difficulty';
-import { PuzzleGame } from '../game/puzzle-game';
-import type { Puzzle } from '../game/puzzle';
-import type { PuzzleLibrary } from '../game/puzzle-library';
-import type { SolvedBoards } from '../game/solved-boards';
-import type { Hint } from '../hints/hint';
-import { HintNoteView } from '../hints/hint-note-view';
-import { formatDuration } from '../utils/format-duration';
-import { formatNumberWithSpaces } from '../utils/format-number';
-import { BoardView } from './board-view';
-import { DifficultyPicker } from './difficulty-picker';
-import { drawAttentionTo } from './draw-attention';
-import { InfoDialog } from './info-dialog';
-import { getRequiredButton, getRequiredElement } from './required-element';
-import { Stopwatch } from './stopwatch';
-import { TimerDisplay } from './timer-display';
+import { BoardMenu } from "../board-menu/board-menu";
+import { MenuDrawer } from "../board-menu/menu-drawer";
+import { Confetti } from "../effects/confetti";
+import { SuccessSound } from "../effects/success-sound";
+import { toCellKey, type CellPosition } from "../game/cell-position";
+import {
+  DEFAULT_DIFFICULTY,
+  DIFFICULTY_LABELS,
+  type Difficulty,
+} from "../game/difficulty";
+import { PuzzleGame } from "../game/puzzle-game";
+import type { Puzzle } from "../game/puzzle";
+import type { PuzzleLibrary } from "../game/puzzle-library";
+import type { SolvedBoards } from "../game/solved-boards";
+import type { Hint } from "../hints/hint";
+import { HintNoteView } from "../hints/hint-note-view";
+import { formatDuration } from "../utils/format-duration";
+import { formatNumberWithSpaces } from "../utils/format-number";
+import { BoardView } from "./board-view";
+import { DifficultyPicker } from "./difficulty-picker";
+import { drawAttentionTo } from "./draw-attention";
+import { InfoDialog } from "./info-dialog";
+import { getRequiredButton, getRequiredElement } from "./required-element";
+import { Stopwatch } from "./stopwatch";
+import { TimerDisplay } from "./timer-display";
 
 const TIMER_REFRESH_MILLISECONDS = 1000;
 
@@ -33,71 +37,99 @@ export class GamePage {
   private readonly confetti = new Confetti();
   private readonly successSound = new SuccessSound();
 
-  private readonly boardView = new BoardView(getRequiredElement('board'), (position) => this.handleCellClick(position));
+  private readonly boardView = new BoardView(
+    getRequiredElement("board"),
+    (position) => this.handleCellClick(position),
+  );
   private readonly difficultyPicker = new DifficultyPicker(
-    getRequiredElement('difficulty'),
+    getRequiredElement("difficulty"),
     (difficulty) => this.startPuzzle(difficulty),
   );
-  private readonly hintNoteView = new HintNoteView(getRequiredElement('hint-note'), getRequiredElement('hint-note-text'));
-  private readonly timerDisplay = new TimerDisplay(getRequiredElement('timer'), this.stopwatch);
-  private readonly menuDrawer = new MenuDrawer(getRequiredElement('menu-drawer'), getRequiredElement('menu-backdrop'));
+  private readonly hintNoteView = new HintNoteView(
+    getRequiredElement("hint-note"),
+    getRequiredElement("hint-note-text"),
+  );
+  private readonly timerDisplay = new TimerDisplay(
+    getRequiredElement("timer"),
+    this.stopwatch,
+  );
+  private readonly menuDrawer = new MenuDrawer(
+    getRequiredElement("menu-drawer"),
+    getRequiredElement("menu-backdrop"),
+  );
   private readonly infoDialog = new InfoDialog(
-    getRequiredElement('info-dialog') as HTMLDialogElement,
+    getRequiredElement("info-dialog") as HTMLDialogElement,
     () => this.handleInfoClosed(),
   );
   private readonly boardMenu: BoardMenu;
 
-  private readonly undoButton = getRequiredButton('undo');
-  private readonly resetButton = getRequiredButton('reset');
-  private readonly hintButton = getRequiredButton('hint');
-  private readonly solveButton = getRequiredButton('solve');
-  private readonly pauseButton = getRequiredButton('pause');
-  private readonly nextButton = getRequiredButton('next');
-  private readonly menuButton = getRequiredButton('menu-button');
-  private readonly menuCloseButton = getRequiredButton('menu-close');
-  private readonly menuBackdropElement = getRequiredElement('menu-backdrop');
-  private readonly infoButton = getRequiredButton('info');
-  private readonly titleElement = getRequiredElement('title');
-  private readonly statusElement = getRequiredElement('status');
+  private readonly undoButton = getRequiredButton("undo");
+  private readonly resetButton = getRequiredButton("reset");
+  private readonly hintButton = getRequiredButton("hint");
+  private readonly solveButton = getRequiredButton("solve");
+  private readonly pauseButton = getRequiredButton("pause");
+  private readonly nextButton = getRequiredButton("next");
+  private readonly menuButton = getRequiredButton("menu-button");
+  private readonly menuCloseButton = getRequiredButton("menu-close");
+  private readonly menuBackdropElement = getRequiredElement("menu-backdrop");
+  private readonly infoButton = getRequiredButton("info");
+  private readonly titleElement = getRequiredElement("title");
+  private readonly statusElement = getRequiredElement("status");
 
   constructor(
     private readonly puzzleLibrary: PuzzleLibrary,
     private readonly solvedBoards: SolvedBoards,
   ) {
     this.game = new PuzzleGame(this.pickNextPuzzle());
-    this.boardMenu = new BoardMenu(getRequiredElement('menu-content'), puzzleLibrary.getBoardCount(), {
-      onBoardChosen: (boardId) => this.startPuzzleWithId(boardId),
-      onRandomBoardChosen: () => this.startNextPuzzle(),
-    });
+    this.boardMenu = new BoardMenu(
+      getRequiredElement("menu-content"),
+      puzzleLibrary.getBoardCount(),
+      {
+        onBoardChosen: (boardId) => this.startPuzzleWithId(boardId),
+        onRandomBoardChosen: () => this.startNextPuzzle(),
+      },
+    );
   }
 
   start(): void {
     this.listenToEvents();
-    window.setInterval(() => this.timerDisplay.render(), TIMER_REFRESH_MILLISECONDS);
+    window.setInterval(
+      () => this.timerDisplay.render(),
+      TIMER_REFRESH_MILLISECONDS,
+    );
     this.render();
   }
 
   private listenToEvents(): void {
-    this.undoButton.addEventListener('click', () => this.undoLastChange());
-    this.resetButton.addEventListener('click', () => this.resetBoard());
-    this.hintButton.addEventListener('click', () => this.revealHint());
-    this.solveButton.addEventListener('click', () => this.solvePuzzle());
-    this.nextButton.addEventListener('click', () => this.startNextPuzzle());
-    this.pauseButton.addEventListener('click', () => this.togglePause());
-    this.infoButton.addEventListener('click', () => this.openInfo());
-    this.menuButton.addEventListener('click', () => this.openMenu());
-    this.menuCloseButton.addEventListener('click', () => this.menuDrawer.close());
-    this.menuBackdropElement.addEventListener('click', () => this.menuDrawer.close());
-    document.addEventListener('keydown', (keyboardEvent) => {
-      if (keyboardEvent.key === 'Escape') {
+    this.undoButton.addEventListener("click", () => this.undoLastChange());
+    this.resetButton.addEventListener("click", () => this.resetBoard());
+    this.hintButton.addEventListener("click", () => this.revealHint());
+    this.solveButton.addEventListener("click", () => this.solvePuzzle());
+    this.nextButton.addEventListener("click", () => this.startNextPuzzle());
+    this.pauseButton.addEventListener("click", () => this.togglePause());
+    this.infoButton.addEventListener("click", () => this.openInfo());
+    this.menuButton.addEventListener("click", () => this.openMenu());
+    this.menuCloseButton.addEventListener("click", () =>
+      this.menuDrawer.close(),
+    );
+    this.menuBackdropElement.addEventListener("click", () =>
+      this.menuDrawer.close(),
+    );
+    document.addEventListener("keydown", (keyboardEvent) => {
+      if (keyboardEvent.key === "Escape") {
         this.menuDrawer.close();
       }
     });
   }
 
   private pickNextPuzzle(): Puzzle {
-    const solvedBoardIds = this.solvedBoards.getBoardIds(this.selectedDifficulty);
-    return this.puzzleLibrary.getPuzzle(this.selectedDifficulty, this.puzzleLibrary.pickBoardId(solvedBoardIds));
+    const solvedBoardIds = this.solvedBoards.getBoardIds(
+      this.selectedDifficulty,
+    );
+    return this.puzzleLibrary.getPuzzle(
+      this.selectedDifficulty,
+      this.puzzleLibrary.pickBoardId(solvedBoardIds),
+    );
   }
 
   private startPuzzle(difficulty: Difficulty): void {
@@ -106,16 +138,23 @@ export class GamePage {
   }
 
   private startNextPuzzle(): void {
-    const solvedBoardIds = this.solvedBoards.getBoardIds(this.selectedDifficulty);
+    const solvedBoardIds = this.solvedBoards.getBoardIds(
+      this.selectedDifficulty,
+    );
     this.startPuzzleWithId(this.puzzleLibrary.pickBoardId(solvedBoardIds));
   }
 
   private startPuzzleWithId(boardId: number): void {
-    this.game = new PuzzleGame(this.puzzleLibrary.getPuzzle(this.selectedDifficulty, boardId));
+    this.game = new PuzzleGame(
+      this.puzzleLibrary.getPuzzle(this.selectedDifficulty, boardId),
+    );
     this.menuDrawer.close();
     this.stopwatch.restart();
 
-    const solveSeconds = this.solvedBoards.getSolveSeconds(this.selectedDifficulty, boardId);
+    const solveSeconds = this.solvedBoards.getSolveSeconds(
+      this.selectedDifficulty,
+      boardId,
+    );
 
     if (solveSeconds !== null) {
       this.showPreviouslySolvedBoard(solveSeconds);
@@ -162,7 +201,8 @@ export class GamePage {
   }
 
   private finishPuzzleIfSolved(): void {
-    const isRunningAndSolved = !this.stopwatch.isStopped() && this.game.isSolved();
+    const isRunningAndSolved =
+      !this.stopwatch.isStopped() && this.game.isSolved();
 
     if (!isRunningAndSolved) {
       return;
@@ -171,7 +211,11 @@ export class GamePage {
     this.stopwatch.stop();
     this.confetti.launch();
     this.successSound.play();
-    this.solvedBoards.markSolved(this.selectedDifficulty, this.game.puzzle.id, this.stopwatch.getElapsedSeconds());
+    this.solvedBoards.markSolved(
+      this.selectedDifficulty,
+      this.game.puzzle.id,
+      this.stopwatch.getElapsedSeconds(),
+    );
     this.revealNextButton();
   }
 
@@ -226,7 +270,7 @@ export class GamePage {
     this.renderBoard(shownHint);
     this.hintNoteView.render(shownHint);
     this.boardView.setBlurred(isPaused || this.infoDialog.isOpen());
-    this.pauseButton.textContent = isPaused ? '▶ Resume' : '⏸ Pause';
+    this.pauseButton.textContent = isPaused ? "▶ Resume" : "⏸ Pause";
     this.pauseButton.disabled = this.stopwatch.isStopped();
     this.undoButton.disabled = !this.game.canUndo() || isPaused;
     this.nextButton.hidden = !isSolved;
@@ -243,7 +287,8 @@ export class GamePage {
       lockedCellKeys: this.game.getLockedCellKeys(),
       cellKeysBreakingRules: this.game.findCellsBreakingRules(),
       edgeHints: this.game.puzzle.edgeHints,
-      hintTargetCellKey: shownHint === null ? null : toCellKey(shownHint.position),
+      hintTargetCellKey:
+        shownHint === null ? null : toCellKey(shownHint.position),
       hintRelatedCellKeys: new Set(shownHint?.relatedPositions.map(toCellKey)),
     });
   }
@@ -259,6 +304,6 @@ export class GamePage {
       return `🎉 Solved in ${formatDuration(this.stopwatch.getElapsedSeconds())}!`;
     }
 
-    return '';
+    return "";
   }
 }

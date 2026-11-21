@@ -1,6 +1,6 @@
 export const CAT = 0;
 export const DOG = 1;
-export const SYMBOL_EMOJIS = ['🐱', '🐶'] as const;
+export const SYMBOL_EMOJIS = ["🐱", "🐶"] as const;
 
 export type PlayerSymbol = typeof CAT | typeof DOG;
 export type CellValue = PlayerSymbol | null;

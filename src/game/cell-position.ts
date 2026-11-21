@@ -1,5 +1,5 @@
-import { BOARD_SIZE } from './board-constants';
-import type { PlayerSymbol } from './symbols';
+import { BOARD_SIZE } from "./board-constants";
+import type { PlayerSymbol } from "./symbols";
 
 export interface CellPosition {
   row: number;
@@ -16,7 +16,10 @@ export function toCellKey(position: CellPosition): CellKey {
   return `${position.row},${position.column}`;
 }
 
-export function areNeighbouringCells(first: CellPosition, second: CellPosition): boolean {
+export function areNeighbouringCells(
+  first: CellPosition,
+  second: CellPosition,
+): boolean {
   const rowDistance = Math.abs(first.row - second.row);
   const columnDistance = Math.abs(first.column - second.column);
   return rowDistance + columnDistance === 1;

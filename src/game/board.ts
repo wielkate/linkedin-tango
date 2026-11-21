@@ -1,6 +1,10 @@
-import { BOARD_SIZE } from './board-constants';
-import { getAllCellPositions, type CellPosition, type GivenCell } from './cell-position';
-import type { CellValue } from './symbols';
+import { BOARD_SIZE } from "./board-constants";
+import {
+  getAllCellPositions,
+  type CellPosition,
+  type GivenCell,
+} from "./cell-position";
+import type { CellValue } from "./symbols";
 
 // The grid of cells the player fills in. A cell is empty (null), a cat or a dog.
 export class Board {

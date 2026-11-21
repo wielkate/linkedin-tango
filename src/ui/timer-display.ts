@@ -1,7 +1,7 @@
-import { formatDuration } from '../utils/format-duration';
-import type { Stopwatch } from './stopwatch';
+import { formatDuration } from "../utils/format-duration";
+import type { Stopwatch } from "./stopwatch";
 
-const CLOCK_EMOJI = '🕒';
+const CLOCK_EMOJI = "🕒";
 
 // Shows the time of a stopwatch. Call render() whenever the display should refresh.
 export class TimerDisplay {

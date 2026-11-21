@@ -24,7 +24,10 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
 
 **Buttons**
 
-- **Easy / Medium / Hard:** pick a level; easy has the most clues, hard the fewest.
+- **Easy / Medium / Hard:** pick a level; easy has the most clues, hard the fewest. An easy
+  puzzle can be solved with the simple rules alone, so nothing has to be tried out; medium and
+  hard puzzles may also need the try-a-symbol step. The hint button can explain every step of
+  every puzzle.
 - **↶ Undo:** takes back the last move. **Reset:** clears the board back to the given cells.
 - **💡 Hint:** fills in one cell that the rules settle and locks it. A light-yellow note beside the board
   (under it on a narrow screen) says why, in order of difficulty: an `=` / `×` sign next to a filled cell,
@@ -52,8 +55,8 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
 Board 1 on the easy level, as the game starts and when solved. How the data is stored and
 decoded is explained at the top of [`scripts/generate-puzzles.mjs`](scripts/generate-puzzles.mjs).
 
-| Start | Solved |
-| --- | --- |
+| Start                                                    | Solved                                              |
+| -------------------------------------------------------- | --------------------------------------------------- |
 | ![Board 1 at the start](example/example_start_board.png) | ![Board 1 solved](example/example_solved_board.png) |
 
 ## Tech stack
@@ -108,13 +111,13 @@ Then open the address Vite prints (by default <http://localhost:5173>).
 
 ### 3. Commands
 
-| Command | What it does | When to use it |
-| --- | --- | --- |
-| `npm install` | Downloads every dependency listed in `package.json` into `node_modules/` and updates `package-lock.json` if needed. | Once after cloning, and after changing dependencies. |
-| `npm ci` | Installs exactly the versions in `package-lock.json`, deletes `node_modules/` first and never modifies the lock file. | Clean, reproducible installs (also the right choice when the lock file is read-only). |
-| `npm run dev` | Starts the Vite development server with hot reload: the page updates whenever you save a source file. Stop it with `Ctrl+C`. | While developing. |
-| `npm run build` | First runs `tsc --noEmit` (type-checks all code and writes no files, so type errors stop the build), then `vite build` (bundles the game into static files in `dist/`). | Before publishing, and to check that the types are correct. |
-| `npm run preview` | Serves the already built `dist/` folder locally (by default <http://localhost:4173>), exactly as a static host would. | After `npm run build`, to test the production build. |
+| Command           | What it does                                                                                                                                                            | When to use it                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `npm install`     | Downloads every dependency listed in `package.json` into `node_modules/` and updates `package-lock.json` if needed.                                                     | Once after cloning, and after changing dependencies.                                  |
+| `npm ci`          | Installs exactly the versions in `package-lock.json`, deletes `node_modules/` first and never modifies the lock file.                                                   | Clean, reproducible installs (also the right choice when the lock file is read-only). |
+| `npm run dev`     | Starts the Vite development server with hot reload: the page updates whenever you save a source file. Stop it with `Ctrl+C`.                                            | While developing.                                                                     |
+| `npm run build`   | First runs `tsc --noEmit` (type-checks all code and writes no files, so type errors stop the build), then `vite build` (bundles the game into static files in `dist/`). | Before publishing, and to check that the types are correct.                           |
+| `npm run preview` | Serves the already built `dist/` folder locally (by default <http://localhost:4173>), exactly as a static host would.                                                   | After `npm run build`, to test the production build.                                  |
 
 ## Run in WebStorm
 
@@ -134,9 +137,14 @@ linkedin-tango/
 ├── example/
 │   ├── example_start_board.png   board 1 (easy) at the start
 │   └── example_solved_board.png  board 1 solved
+├── public/
+│   ├── favicon.svg           the browser-tab icon (a cat and a dog)
+│   └── apple-touch-icon.png  the same icon as a 180×180 PNG for iOS home screens
 ├── scripts/
 │   ├── generate-puzzles.mjs  generates src/data (all boards and their puzzles)
 │   ├── clue-index.mjs        ClueIndex class: counts the boards that fit a set of clues
+│   ├── deduction-solver.mjs  solves a puzzle with the steps of the hint button (simple rules, then
+│   │                         try-a-symbol) to tell which puzzles the hint can explain to the end
 │   └── format-json.mjs       writes JSON arrays with one element per line
 ├── src/
 │   ├── main.ts               entry point: creates the GamePage and starts it

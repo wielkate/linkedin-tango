@@ -27,7 +27,8 @@ export class ClueIndex {
   }
 
   setBit(bitset, boardIndex) {
-    bitset[Math.floor(boardIndex / BITS_PER_WORD)] |= 1 << (boardIndex % BITS_PER_WORD);
+    bitset[Math.floor(boardIndex / BITS_PER_WORD)] |=
+      1 << (boardIndex % BITS_PER_WORD);
   }
 
   // Number of boards that satisfy every clue, counting stops at the limit.
@@ -61,4 +62,3 @@ function countSetBits(value) {
 
   return count;
 }
-

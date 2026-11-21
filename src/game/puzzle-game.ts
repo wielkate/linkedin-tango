@@ -1,11 +1,11 @@
-import type { Board } from './board';
-import { toCellKey, type CellKey, type CellPosition } from './cell-position';
-import { ChangeHistory } from './history';
-import { createLockedCellKeys, createStartBoard, type Puzzle } from './puzzle';
-import { findCellsBreakingRules, isSolved } from './rules';
-import { fillBoardWithSolution } from './solution';
-import { getNextCellValue } from './symbols';
-import { findHint, type Hint } from '../hints/hint';
+import type { Board } from "./board";
+import { toCellKey, type CellKey, type CellPosition } from "./cell-position";
+import { ChangeHistory } from "./history";
+import { createLockedCellKeys, createStartBoard, type Puzzle } from "./puzzle";
+import { findCellsBreakingRules, isSolved } from "./rules";
+import { fillBoardWithSolution } from "./solution";
+import { getNextCellValue } from "./symbols";
+import { findHint, type Hint } from "../hints/hint";
 
 // One puzzle being played: the board the player fills in, which cells are locked,
 // the changes that can be undone and the hint shown last. It knows nothing about the page.

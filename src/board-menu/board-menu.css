@@ -118,7 +118,11 @@
   color: #222;
   font-size: 15px;
   white-space: nowrap;
-  background: linear-gradient(to right, #b7dcb2 var(--solved-share, 0%), #fff var(--solved-share, 0%));
+  background: linear-gradient(
+    to right,
+    #b7dcb2 var(--solved-share, 0%),
+    #fff var(--solved-share, 0%)
+  );
 }
 
 .board-grid {

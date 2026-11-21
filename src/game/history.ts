@@ -1,5 +1,5 @@
-import type { CellPosition } from './cell-position';
-import type { CellValue } from './symbols';
+import type { CellPosition } from "./cell-position";
+import type { CellValue } from "./symbols";
 
 export interface CellChange {
   position: CellPosition;

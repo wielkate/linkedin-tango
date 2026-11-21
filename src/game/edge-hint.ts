@@ -1,7 +1,11 @@
-import type { Board } from './board';
-import { areNeighbouringCells, toCellKey, type CellPosition } from './cell-position';
+import type { Board } from "./board";
+import {
+  areNeighbouringCells,
+  toCellKey,
+  type CellPosition,
+} from "./cell-position";
 
-export type HintType = 'same' | 'different';
+export type HintType = "same" | "different";
 
 // A hint sits on the shared edge of two neighbouring cells:
 // "=" means they hold the same symbol, "×" means they hold different symbols.
@@ -25,7 +29,7 @@ export class EdgeHint {
     }
 
     const haveSameValue = firstValue === secondValue;
-    const shouldHaveSameValue = this.type === 'same';
+    const shouldHaveSameValue = this.type === "same";
     return haveSameValue !== shouldHaveSameValue;
   }
 
@@ -35,7 +39,9 @@ export class EdgeHint {
     if (!areNeighbours) {
       const firstKey = toCellKey(this.first);
       const secondKey = toCellKey(this.second);
-      throw new Error(`A hint must sit on the edge of two neighbouring cells, but ${firstKey} and ${secondKey} are not neighbours.`);
+      throw new Error(
+        `A hint must sit on the edge of two neighbouring cells, but ${firstKey} and ${secondKey} are not neighbours.`,
+      );
     }
   }
 }

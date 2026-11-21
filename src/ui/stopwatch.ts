@@ -31,7 +31,8 @@ export class Stopwatch {
   }
 
   resume(): void {
-    const canResume = !this.hasStopped && this.runningSinceMilliseconds === null;
+    const canResume =
+      !this.hasStopped && this.runningSinceMilliseconds === null;
 
     if (canResume) {
       this.runningSinceMilliseconds = Date.now();
@@ -53,7 +54,12 @@ export class Stopwatch {
 
   getElapsedSeconds(): number {
     const currentRunMilliseconds =
-      this.runningSinceMilliseconds === null ? 0 : Date.now() - this.runningSinceMilliseconds;
-    return Math.floor((this.accumulatedMilliseconds + currentRunMilliseconds) / MILLISECONDS_PER_SECOND);
+      this.runningSinceMilliseconds === null
+        ? 0
+        : Date.now() - this.runningSinceMilliseconds;
+    return Math.floor(
+      (this.accumulatedMilliseconds + currentRunMilliseconds) /
+        MILLISECONDS_PER_SECOND,
+    );
   }
 }
