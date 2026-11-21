@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { ChangeHistory } from "./history";
+import { ChangeHistory, type CellChange } from "./history";
 import { CAT } from "./symbols";
 
-const firstChange = { position: { row: 0, column: 0 }, previousValue: null };
-const secondChange = { position: { row: 1, column: 2 }, previousValue: CAT };
+const firstChange: CellChange = {
+  position: { row: 0, column: 0 },
+  previousValue: null,
+};
+const secondChange: CellChange = {
+  position: { row: 1, column: 2 },
+  previousValue: CAT,
+};
 
 describe("ChangeHistory", () => {
   it("starts empty", () => {
