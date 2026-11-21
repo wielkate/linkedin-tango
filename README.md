@@ -24,7 +24,10 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
 
 **Buttons**
 
-- **Easy / Medium / Hard:** pick a level; easy has the most clues, hard the fewest.
+- **Easy / Medium / Hard:** pick a level; easy has the most clues, hard the fewest. An easy
+  puzzle can be solved with the simple rules alone, so nothing has to be tried out; medium and
+  hard puzzles may also need the try-a-symbol step. The hint button can explain every step of
+  every puzzle.
 - **↶ Undo:** takes back the last move. **Reset:** clears the board back to the given cells.
 - **💡 Hint:** fills in one cell that the rules settle and locks it. A light-yellow note beside the board
   (under it on a narrow screen) says why, in order of difficulty: an `=` / `×` sign next to a filled cell,
@@ -140,6 +143,8 @@ linkedin-tango/
 ├── scripts/
 │   ├── generate-puzzles.mjs  generates src/data (all boards and their puzzles)
 │   ├── clue-index.mjs        ClueIndex class: counts the boards that fit a set of clues
+│   ├── deduction-solver.mjs  solves a puzzle with the steps of the hint button (simple rules, then
+│   │                         try-a-symbol) to tell which puzzles the hint can explain to the end
 │   └── format-json.mjs       writes JSON arrays with one element per line
 ├── src/
 │   ├── main.ts               entry point: creates the GamePage and starts it
