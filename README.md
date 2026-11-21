@@ -35,8 +35,9 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
   already holds its three of a kind. When none of those applies it tries a symbol and explains that it
   leads to a broken rule. The cell is highlighted and the cells the note talks about are outlined.
   A cell you filled wrongly is corrected first. The note disappears on your next move.
-- **✨ Solve:** fills in the whole solution. The board then counts as solved, with the confetti,
-  the sound and the board saved as solved, so use it only when you want to give up.
+- **✨ Solve:** fills in the whole solution and stops the stopwatch. It counts as giving up: there
+  is no confetti or sound, the board is not saved as solved (its menu tile stays unfilled) and an
+  earlier best time on that board is kept. Use **Reset** to play the board again.
 - **⏸ Pause / ▶ Resume:** freezes the stopwatch and blurs the board.
 - **ⓘ** (top-right): explains the rules, pauses the stopwatch and blurs the board while it is open
   (also on a solved board).

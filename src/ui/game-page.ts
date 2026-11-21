@@ -34,6 +34,7 @@ export class GamePage {
   private game: PuzzleGame;
   private wasStopwatchPausedBeforeInfo = false;
   private wasStopwatchPausedByHiddenTab = false;
+  private hasGivenUpOnPuzzle = false;
 
   private readonly stopwatch = new Stopwatch();
   private readonly confetti = new Confetti();
@@ -233,6 +234,7 @@ export class GamePage {
     this.game = new PuzzleGame(
       this.puzzleLibrary.getPuzzle(this.selectedDifficulty, boardId),
     );
+    this.hasGivenUpOnPuzzle = false;
     this.menuDrawer.close();
     this.stopwatch.restart();
     this.showPreviouslySolvedBoardIfSaved();
@@ -258,6 +260,7 @@ export class GamePage {
   // Reset starts the board over, also when it was already solved, so it can be played again.
   private resetBoard(): void {
     this.game = new PuzzleGame(this.game.puzzle);
+    this.hasGivenUpOnPuzzle = false;
     this.stopwatch.restart();
     this.render();
   }
@@ -280,9 +283,13 @@ export class GamePage {
     this.render();
   }
 
+  // Showing the solution is giving up: the stopwatch stops, but there is no celebration and
+  // nothing is saved, so the board stays unsolved in the menu and keeps any earlier best time.
   private solvePuzzle(): void {
     this.game.solve();
-    this.finishPuzzleIfSolved();
+    this.stopwatch.stop();
+    this.hasGivenUpOnPuzzle = true;
+    this.revealNextButton();
     this.render();
   }
 
@@ -386,6 +393,10 @@ export class GamePage {
   }
 
   private createStatusMessage(isSolved: boolean): string {
+    if (this.hasGivenUpOnPuzzle) {
+      return "Cheating detected 😈";
+    }
+
     if (isSolved) {
       return `🎉 Solved in ${formatDuration(this.stopwatch.getElapsedSeconds())}!`;
     }
