@@ -32,6 +32,7 @@ export class GamePage {
   private selectedDifficulty: Difficulty = DEFAULT_DIFFICULTY;
   private game: PuzzleGame;
   private wasStopwatchPausedBeforeInfo = false;
+  private wasStopwatchPausedByHiddenTab = false;
 
   private readonly stopwatch = new Stopwatch();
   private readonly confetti = new Confetti();
@@ -121,17 +122,37 @@ export class GamePage {
       }
     });
     document.addEventListener("visibilitychange", () =>
-      this.pauseWhenTabIsHidden(),
+      this.handleTabVisibilityChange(),
     );
   }
 
-  // The player resumes by hand after coming back, so time spent elsewhere is never counted.
+  private handleTabVisibilityChange(): void {
+    if (document.visibilityState === "hidden") {
+      this.pauseWhenTabIsHidden();
+    } else {
+      this.resumeWhenTabIsVisible();
+    }
+  }
+
+  // Time spent in another tab is never counted.
   private pauseWhenTabIsHidden(): void {
-    if (document.visibilityState !== "hidden") {
+    if (!this.stopwatch.isRunning()) {
       return;
     }
 
     this.stopwatch.pause();
+    this.wasStopwatchPausedByHiddenTab = true;
+    this.render();
+  }
+
+  // Only a pause made by hiding the tab is undone, so a pause chosen by the player stays.
+  private resumeWhenTabIsVisible(): void {
+    if (!this.wasStopwatchPausedByHiddenTab) {
+      return;
+    }
+
+    this.wasStopwatchPausedByHiddenTab = false;
+    this.stopwatch.resume();
     this.render();
   }
 

@@ -48,6 +48,10 @@ export class Stopwatch {
     return this.hasStopped;
   }
 
+  isRunning(): boolean {
+    return this.runningSinceMilliseconds !== null;
+  }
+
   isPaused(): boolean {
     return !this.hasStopped && this.runningSinceMilliseconds === null;
   }
