@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { toCellKey } from "./cell-position";
+import { getAllCellPositions, toCellKey } from "./cell-position";
 import { PuzzleGame } from "./puzzle-game";
 import { PuzzleLibrary } from "./puzzle-library";
 import { findPositionsDifferingFromSolution } from "./solution";
@@ -122,5 +122,126 @@ describe("PuzzleGame", () => {
       game.revealHint();
       expect(game.getActiveHint()).toBeNull();
     });
+  });
+});
+
+describe("PuzzleGame edge cases", () => {
+  it("ignores a click on a cell the hint filled in", () => {
+    game.revealHint();
+    const hintPosition = game.getActiveHint()!.position;
+    const valueBefore = game.getBoard().getValue(hintPosition);
+
+    game.clickCell(hintPosition);
+    expect(game.getBoard().getValue(hintPosition)).toBe(valueBefore);
+  });
+
+  it("locks a new cell with every hint", () => {
+    const lockedBefore = game.getLockedCellKeys().size;
+    game.revealHint();
+    game.revealHint();
+    expect(game.getLockedCellKeys().size).toBe(lockedBefore + 2);
+  });
+
+  it("keeps a hint-filled cell filled when undo goes back over a click on it", () => {
+    let checkedScenarioCount = 0;
+
+    for (const position of getAllCellPositions()) {
+      const playedGame = new PuzzleGame(library.getPuzzle("easy", 1));
+      const isLocked = playedGame.getLockedCellKeys().has(toCellKey(position));
+
+      if (isLocked) {
+        continue;
+      }
+
+      const correctValue = Number(
+        playedGame.puzzle.solution.rowTexts[position.row][position.column],
+      );
+      // Put a wrong symbol on the cell, so the hint can correct that very cell.
+      playedGame.clickCell(position);
+      if (playedGame.getBoard().getValue(position) === correctValue) {
+        playedGame.clickCell(position);
+      }
+
+      playedGame.revealHint();
+      const hint = playedGame.getActiveHint();
+      const isHintOnClickedCell =
+        hint?.position.row === position.row &&
+        hint.position.column === position.column;
+
+      if (!isHintOnClickedCell) {
+        continue;
+      }
+
+      checkedScenarioCount++;
+      playedGame.undo();
+      expect(playedGame.getBoard().getValue(position)).toBe(correctValue);
+    }
+
+    expect(checkedScenarioCount).toBeGreaterThan(0);
+  });
+
+  it("has nothing left to undo once the hint fixed the only clicked cell", () => {
+    for (const position of getAllCellPositions()) {
+      const playedGame = new PuzzleGame(library.getPuzzle("easy", 1));
+
+      if (playedGame.getLockedCellKeys().has(toCellKey(position))) {
+        continue;
+      }
+
+      playedGame.clickCell(position);
+      playedGame.revealHint();
+      const hint = playedGame.getActiveHint();
+      const isHintOnClickedCell =
+        hint?.position.row === position.row &&
+        hint.position.column === position.column;
+
+      if (isHintOnClickedCell) {
+        expect(playedGame.canUndo()).toBe(false);
+      }
+    }
+  });
+
+  it("can be undone to the start without touching the given cells", () => {
+    const position = findFreePosition(game);
+    game.clickCell(position);
+    game.clickCell(position);
+    game.undo();
+    game.undo();
+    game.undo();
+
+    for (const givenCell of game.puzzle.givenCells) {
+      expect(game.getBoard().getValue(givenCell)).toBe(givenCell.value);
+    }
+  });
+
+  it("stays solved after solve() is called twice", () => {
+    game.solve();
+    game.solve();
+    expect(game.isSolved()).toBe(true);
+  });
+
+  it("keeps a solved board solved when a locked cell is clicked", () => {
+    game.solve();
+    game.clickCell(game.puzzle.givenCells[0]);
+    expect(game.isSolved()).toBe(true);
+  });
+
+  it("can be played to the end by clicking only", () => {
+    const solutionRows = game.puzzle.solution.rowTexts;
+    const lockedCellKeys = game.getLockedCellKeys();
+
+    for (let row = 0; row < 6; row++) {
+      for (let column = 0; column < 6; column++) {
+        const position = { row, column };
+        const isFree = !lockedCellKeys.has(toCellKey(position));
+        const wantedValue = Number(solutionRows[row][column]);
+
+        while (isFree && game.getBoard().getValue(position) !== wantedValue) {
+          game.clickCell(position);
+        }
+      }
+    }
+
+    expect(game.isSolved()).toBe(true);
   });
 });
