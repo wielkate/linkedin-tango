@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 // Vite reads this file whenever you run `npm run dev`, `npm run build` or `npm run preview`.
 //
@@ -15,6 +15,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   base: "./",
   test: {
+    exclude: [...configDefaults.exclude, "e2e/**"],
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],

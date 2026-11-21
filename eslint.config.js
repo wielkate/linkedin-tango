@@ -4,7 +4,15 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist/**", "node_modules/**"] },
+  {
+    ignores: [
+      "dist/**",
+      "node_modules/**",
+      "coverage/**",
+      "test-results/**",
+      "playwright-report/**",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -12,7 +20,7 @@ export default tseslint.config(
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ["scripts/**/*.mjs", "*.config.{js,ts,mjs}"],
+    files: ["scripts/**/*.mjs", "e2e/**/*.ts", "*.config.{js,ts,mjs}"],
     languageOptions: { globals: globals.node },
   },
   eslintConfigPrettier,
