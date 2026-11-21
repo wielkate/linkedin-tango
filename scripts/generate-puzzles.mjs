@@ -31,15 +31,15 @@
 //           The board holds 0 and 1 there, so the hint is "different" (x).
 //   The game fills in only the given cells and shows the hints; the player finds the rest.
 
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { ClueIndex } from './clue-index.mjs';
-import { formatAsJsonWithOneElementPerLine } from './format-json.mjs';
+import { mkdirSync, writeFileSync } from "node:fs";
+import { ClueIndex } from "./clue-index.mjs";
+import { formatAsJsonWithOneElementPerLine } from "./format-json.mjs";
 
 const BOARD_SIZE = 6;
 const CELL_COUNT = BOARD_SIZE * BOARD_SIZE;
 const SYMBOLS_PER_LINE = BOARD_SIZE / 2;
 const MAX_ADJACENT_IDENTICAL = 2;
-const OUTPUT_DIRECTORY = new URL('../src/data/', import.meta.url);
+const OUTPUT_DIRECTORY = new URL("../src/data/", import.meta.url);
 
 // Easy keeps the most clues, hard removes clues until none can go.
 // A target of 0 means "remove as many clues as possible".
@@ -101,7 +101,8 @@ function areColumnsStillValid(rows) {
     const columnValues = rows.map((row) => row[column]);
     const dogCount = columnValues.reduce((total, value) => total + value, 0);
     const catCount = columnValues.length - dogCount;
-    const hasTooManyOfOneSymbol = dogCount > SYMBOLS_PER_LINE || catCount > SYMBOLS_PER_LINE;
+    const hasTooManyOfOneSymbol =
+      dogCount > SYMBOLS_PER_LINE || catCount > SYMBOLS_PER_LINE;
 
     if (hasTooManyOfOneSymbol || hasTooLongStreak(columnValues)) {
       return false;
@@ -146,19 +147,33 @@ function shuffle(items, nextRandom) {
 
   for (let index = shuffled.length - 1; index > 0; index--) {
     const swapIndex = Math.floor(nextRandom() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    [shuffled[index], shuffled[swapIndex]] = [
+      shuffled[swapIndex],
+      shuffled[index],
+    ];
   }
 
   return shuffled;
 }
 
-function createPuzzle(board, boardIndex, difficultySeed, targetClueCount, clueIndex, edges) {
+function createPuzzle(
+  board,
+  boardIndex,
+  difficultySeed,
+  targetClueCount,
+  clueIndex,
+  edges,
+) {
   const nextRandom = createRandomGenerator(boardIndex * 7919 + difficultySeed);
-  const givenCells = new Set(Array.from({ length: CELL_COUNT }, (_, cell) => cell));
+  const givenCells = new Set(
+    Array.from({ length: CELL_COUNT }, (_, cell) => cell),
+  );
   const hintEdges = new Set(edges.keys());
 
   const clueBitsetsOf = () => [
-    ...[...givenCells].map((cell) => clueIndex.cellBitsets[cell * 2 + board[cell]]),
+    ...[...givenCells].map(
+      (cell) => clueIndex.cellBitsets[cell * 2 + board[cell]],
+    ),
     ...[...hintEdges].map((edge) => {
       const [firstCell, secondCell] = edges[edge];
       const isSame = board[firstCell] === board[secondCell] ? 1 : 0;
@@ -168,29 +183,34 @@ function createPuzzle(board, boardIndex, difficultySeed, targetClueCount, clueIn
 
   const removableClues = shuffle(
     [
-      ...[...givenCells].map((cell) => ({ kind: 'cell', id: cell })),
-      ...[...hintEdges].map((edge) => ({ kind: 'edge', id: edge })),
+      ...[...givenCells].map((cell) => ({ kind: "cell", id: cell })),
+      ...[...hintEdges].map((edge) => ({ kind: "edge", id: edge })),
     ],
     nextRandom,
   );
 
   for (const clue of removableClues) {
-    const clueSet = clue.kind === 'cell' ? givenCells : hintEdges;
-    const hasReachedTarget = countUsefulClues(givenCells, hintEdges, edges) <= targetClueCount;
+    const clueSet = clue.kind === "cell" ? givenCells : hintEdges;
+    const hasReachedTarget =
+      countUsefulClues(givenCells, hintEdges, edges) <= targetClueCount;
 
     if (hasReachedTarget) {
       break;
     }
 
     clueSet.delete(clue.id);
-    const isStillUnique = clueIndex.countMatchingBoards(clueBitsetsOf(), 2) === 1;
+    const isStillUnique =
+      clueIndex.countMatchingBoards(clueBitsetsOf(), 2) === 1;
 
     if (!isStillUnique) {
       clueSet.add(clue.id);
     }
   }
 
-  return encodePuzzle(givenCells, removeHintsBetweenGivenCells(givenCells, hintEdges, edges));
+  return encodePuzzle(
+    givenCells,
+    removeHintsBetweenGivenCells(givenCells, hintEdges, edges),
+  );
 }
 
 function isHintBetweenGivenCells(givenCells, edge, edges) {
@@ -199,17 +219,22 @@ function isHintBetweenGivenCells(givenCells, edge, edges) {
 }
 
 function removeHintsBetweenGivenCells(givenCells, hintEdges, edges) {
-  return [...hintEdges].filter((edge) => !isHintBetweenGivenCells(givenCells, edge, edges));
+  return [...hintEdges].filter(
+    (edge) => !isHintBetweenGivenCells(givenCells, edge, edges),
+  );
 }
 
 function countUsefulClues(givenCells, hintEdges, edges) {
-  return givenCells.size + removeHintsBetweenGivenCells(givenCells, hintEdges, edges).length;
+  return (
+    givenCells.size +
+    removeHintsBetweenGivenCells(givenCells, hintEdges, edges).length
+  );
 }
 
 function encodePuzzle(givenCells, hintEdges) {
   const sortedCells = [...givenCells].sort((first, second) => first - second);
   const sortedEdges = [...hintEdges].sort((first, second) => first - second);
-  return `${sortedCells.join(',')}|${sortedEdges.join(',')}`;
+  return `${sortedCells.join(",")}|${sortedEdges.join(",")}`;
 }
 
 function main() {
@@ -220,14 +245,29 @@ function main() {
   const clueIndex = new ClueIndex(boards, edges);
   mkdirSync(OUTPUT_DIRECTORY, { recursive: true });
 
-  writeFileSync(new URL('boards.json', OUTPUT_DIRECTORY), formatAsJsonWithOneElementPerLine(boards.map((board) => board.join(''))));
+  writeFileSync(
+    new URL("boards.json", OUTPUT_DIRECTORY),
+    formatAsJsonWithOneElementPerLine(boards.map((board) => board.join(""))),
+  );
 
   let difficultySeed = 1;
-  for (const [difficulty, targetClueCount] of Object.entries(TARGET_CLUE_COUNT_PER_DIFFICULTY)) {
+  for (const [difficulty, targetClueCount] of Object.entries(
+    TARGET_CLUE_COUNT_PER_DIFFICULTY,
+  )) {
     const puzzles = boards.map((board, boardIndex) =>
-      createPuzzle(board, boardIndex, difficultySeed, targetClueCount, clueIndex, edges),
+      createPuzzle(
+        board,
+        boardIndex,
+        difficultySeed,
+        targetClueCount,
+        clueIndex,
+        edges,
+      ),
     );
-    writeFileSync(new URL(`${difficulty}.json`, OUTPUT_DIRECTORY), formatAsJsonWithOneElementPerLine(puzzles));
+    writeFileSync(
+      new URL(`${difficulty}.json`, OUTPUT_DIRECTORY),
+      formatAsJsonWithOneElementPerLine(puzzles),
+    );
     console.log(`${difficulty}: ${puzzles.length} puzzles`);
     difficultySeed++;
   }

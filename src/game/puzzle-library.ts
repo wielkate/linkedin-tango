@@ -1,13 +1,13 @@
-import boardsData from '../data/boards.json';
-import easyPuzzlesData from '../data/easy.json';
-import hardPuzzlesData from '../data/hard.json';
-import mediumPuzzlesData from '../data/medium.json';
-import { BOARD_SIZE } from './board-constants';
-import type { CellPosition, GivenCell } from './cell-position';
-import type { Difficulty } from './difficulty';
-import { EdgeHint, type HintType } from './edge-hint';
-import type { Puzzle } from './puzzle';
-import type { Solution } from './solution';
+import boardsData from "../data/boards.json";
+import easyPuzzlesData from "../data/easy.json";
+import hardPuzzlesData from "../data/hard.json";
+import mediumPuzzlesData from "../data/medium.json";
+import { BOARD_SIZE } from "./board-constants";
+import type { CellPosition, GivenCell } from "./cell-position";
+import type { Difficulty } from "./difficulty";
+import { EdgeHint, type HintType } from "./edge-hint";
+import type { Puzzle } from "./puzzle";
+import type { Solution } from "./solution";
 
 // src/data holds every valid board (boards.json) and one puzzle per board and difficulty
 // (easy.json, medium.json, hard.json), all made by scripts/generate-puzzles.mjs.
@@ -30,15 +30,20 @@ export class PuzzleLibrary {
 
   getPuzzle(difficulty: Difficulty, boardId: number): Puzzle {
     const boardText = boardsData[boardId - 1];
-    const [cellsText, edgesText] = this.puzzlesDataByDifficulty[difficulty][boardId - 1].split('|');
+    const [cellsText, edgesText] =
+      this.puzzlesDataByDifficulty[difficulty][boardId - 1].split("|");
 
     const solution: Solution = { rowTexts: this.splitIntoRows(boardText) };
 
     return {
       id: boardId,
       solution,
-      givenCells: this.parseNumbers(cellsText).map((cellIndex) => this.decodeGivenCell(boardText, cellIndex)),
-      edgeHints: this.parseNumbers(edgesText).map((edgeIndex) => this.decodeEdgeHint(boardText, edgeIndex)),
+      givenCells: this.parseNumbers(cellsText).map((cellIndex) =>
+        this.decodeGivenCell(boardText, cellIndex),
+      ),
+      edgeHints: this.parseNumbers(edgesText).map((edgeIndex) =>
+        this.decodeEdgeHint(boardText, edgeIndex),
+      ),
     };
   }
 
@@ -46,21 +51,29 @@ export class PuzzleLibrary {
   // or any random board once every one of them is solved.
   pickBoardId(solvedBoardIds: Set<number>): number {
     const allBoardIds = this.listAllBoardIds();
-    const unsolvedBoardIds = allBoardIds.filter((boardId) => !solvedBoardIds.has(boardId));
-    const candidateBoardIds = unsolvedBoardIds.length > 0 ? unsolvedBoardIds : allBoardIds;
-    return candidateBoardIds[Math.floor(Math.random() * candidateBoardIds.length)];
+    const unsolvedBoardIds = allBoardIds.filter(
+      (boardId) => !solvedBoardIds.has(boardId),
+    );
+    const candidateBoardIds =
+      unsolvedBoardIds.length > 0 ? unsolvedBoardIds : allBoardIds;
+    return candidateBoardIds[
+      Math.floor(Math.random() * candidateBoardIds.length)
+    ];
   }
 
   private listAllBoardIds(): number[] {
-    return Array.from({ length: this.getBoardCount() }, (_, index) => index + 1);
+    return Array.from(
+      { length: this.getBoardCount() },
+      (_, index) => index + 1,
+    );
   }
 
   private parseNumbers(text: string): number[] {
-    if (text === '') {
+    if (text === "") {
       return [];
     }
 
-    return text.split(',').map(Number);
+    return text.split(",").map(Number);
   }
 
   private splitIntoRows(boardText: string): string[] {
@@ -76,16 +89,22 @@ export class PuzzleLibrary {
   private decodeGivenCell(boardText: string, cellIndex: number): GivenCell {
     return {
       ...this.toPosition(cellIndex),
-      value: Number(boardText[cellIndex]) as GivenCell['value'],
+      value: Number(boardText[cellIndex]) as GivenCell["value"],
     };
   }
 
   private decodeEdgeHint(boardText: string, edgeIndex: number): EdgeHint {
-    const [firstCellIndex, secondCellIndex] = this.getEdgeCellIndexes(edgeIndex);
-    const hasSameSymbols = boardText[firstCellIndex] === boardText[secondCellIndex];
-    const type: HintType = hasSameSymbols ? 'same' : 'different';
+    const [firstCellIndex, secondCellIndex] =
+      this.getEdgeCellIndexes(edgeIndex);
+    const hasSameSymbols =
+      boardText[firstCellIndex] === boardText[secondCellIndex];
+    const type: HintType = hasSameSymbols ? "same" : "different";
 
-    return new EdgeHint(this.toPosition(firstCellIndex), this.toPosition(secondCellIndex), type);
+    return new EdgeHint(
+      this.toPosition(firstCellIndex),
+      this.toPosition(secondCellIndex),
+      type,
+    );
   }
 
   private getEdgeCellIndexes(edgeIndex: number): [number, number] {

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from "vite";
 
 // Vite reads this file whenever you run `npm run dev`, `npm run build` or `npm run preview`.
 //
@@ -9,5 +9,5 @@ import { defineConfig } from 'vite';
 //
 // Every other setting uses Vite's defaults (dev server on port 5173, build output in dist/).
 export default defineConfig({
-  base: './',
+  base: "./",
 });

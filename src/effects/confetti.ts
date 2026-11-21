@@ -1,7 +1,14 @@
 const PIECE_COUNT = 260;
 const DURATION_MILLISECONDS = 5000;
 const GRAVITY_PER_FRAME = 0.12;
-const COLORS = ['#e4572e', '#f3a712', '#29335c', '#669bbc', '#2a9d8f', '#d65db1'];
+const COLORS = [
+  "#e4572e",
+  "#f3a712",
+  "#29335c",
+  "#669bbc",
+  "#2a9d8f",
+  "#d65db1",
+];
 
 interface ConfettiPiece {
   x: number;
@@ -20,7 +27,9 @@ export class Confetti {
   private canvas: HTMLCanvasElement | null = null;
 
   launch(): void {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const isAlreadyRunning = this.canvas !== null;
 
     if (prefersReducedMotion || isAlreadyRunning) {
@@ -28,7 +37,7 @@ export class Confetti {
     }
 
     const canvas = this.createCanvas();
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
 
     if (context === null) {
       canvas.remove();
@@ -36,14 +45,20 @@ export class Confetti {
     }
 
     this.canvas = canvas;
-    this.animate(canvas, context, this.createPieces(canvas.width), performance.now());
+    this.animate(
+      canvas,
+      context,
+      this.createPieces(canvas.width),
+      performance.now(),
+    );
   }
 
   private createCanvas(): HTMLCanvasElement {
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:10;';
+    canvas.style.cssText =
+      "position:fixed;inset:0;pointer-events:none;z-index:10;";
     document.body.appendChild(canvas);
     return canvas;
   }
@@ -76,14 +91,19 @@ export class Confetti {
     }
 
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.globalAlpha = Math.min(1, (DURATION_MILLISECONDS - elapsedMilliseconds) / 1000);
+    context.globalAlpha = Math.min(
+      1,
+      (DURATION_MILLISECONDS - elapsedMilliseconds) / 1000,
+    );
 
     for (const piece of pieces) {
       this.movePiece(piece);
       this.drawPiece(context, piece);
     }
 
-    requestAnimationFrame(() => this.animate(canvas, context, pieces, startedAtMilliseconds));
+    requestAnimationFrame(() =>
+      this.animate(canvas, context, pieces, startedAtMilliseconds),
+    );
   }
 
   private movePiece(piece: ConfettiPiece): void {
@@ -93,12 +113,20 @@ export class Confetti {
     piece.rotation += piece.rotationSpeed;
   }
 
-  private drawPiece(context: CanvasRenderingContext2D, piece: ConfettiPiece): void {
+  private drawPiece(
+    context: CanvasRenderingContext2D,
+    piece: ConfettiPiece,
+  ): void {
     context.save();
     context.translate(piece.x, piece.y);
     context.rotate(piece.rotation);
     context.fillStyle = piece.color;
-    context.fillRect(-piece.size / 2, -piece.size / 3, piece.size, (piece.size * 2) / 3);
+    context.fillRect(
+      -piece.size / 2,
+      -piece.size / 3,
+      piece.size,
+      (piece.size * 2) / 3,
+    );
     context.restore();
   }
 }

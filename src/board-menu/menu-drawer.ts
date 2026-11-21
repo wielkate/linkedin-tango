@@ -7,13 +7,13 @@ export class MenuDrawer {
 
   open(): void {
     this.drawerElement.inert = false;
-    this.drawerElement.classList.add('open');
+    this.drawerElement.classList.add("open");
     this.backdropElement.hidden = false;
   }
 
   close(): void {
     this.drawerElement.inert = true;
-    this.drawerElement.classList.remove('open');
+    this.drawerElement.classList.remove("open");
     this.backdropElement.hidden = true;
   }
 }

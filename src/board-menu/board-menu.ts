@@ -1,12 +1,12 @@
-import './board-menu.css';
+import "./board-menu.css";
 import {
   countSolvedBoardsInRange,
   findRangeContaining,
   getAllThousands,
   getHundredsOfThousand,
   type BoardRange,
-} from './board-ranges';
-import { formatNumberWithSpaces } from '../utils/format-number';
+} from "./board-ranges";
+import { formatNumberWithSpaces } from "../utils/format-number";
 
 export interface BoardMenuView {
   difficultyLabel: string;
@@ -37,39 +37,57 @@ export class BoardMenu {
 
   render(view: BoardMenuView): void {
     this.view = view;
-    this.drawerElement.replaceChildren(this.createSummary(view), this.createToolbar(), this.createCurrentLayer(view));
+    this.drawerElement.replaceChildren(
+      this.createSummary(view),
+      this.createToolbar(),
+      this.createCurrentLayer(view),
+    );
   }
 
   showLayerOfBoard(boardId: number): void {
-    this.openedThousand = findRangeContaining(getAllThousands(this.boardCount), boardId);
-    this.openedHundred = findRangeContaining(getHundredsOfThousand(this.openedThousand), boardId);
+    this.openedThousand = findRangeContaining(
+      getAllThousands(this.boardCount),
+      boardId,
+    );
+    this.openedHundred = findRangeContaining(
+      getHundredsOfThousand(this.openedThousand),
+      boardId,
+    );
   }
 
   private createCurrentLayer(view: BoardMenuView): HTMLElement {
     if (this.openedThousand === null) {
-      return this.createRangeGrid(getAllThousands(this.boardCount), view, (thousand) => {
-        this.openedThousand = thousand;
-      });
+      return this.createRangeGrid(
+        getAllThousands(this.boardCount),
+        view,
+        (thousand) => {
+          this.openedThousand = thousand;
+        },
+      );
     }
 
     if (this.openedHundred === null) {
       return this.createHundredsLayer(this.openedThousand, view);
     }
 
-    return this.createBoardsLayer(this.openedThousand, this.openedHundred, view);
+    return this.createBoardsLayer(
+      this.openedThousand,
+      this.openedHundred,
+      view,
+    );
   }
 
   private createSummary(view: BoardMenuView): HTMLElement {
-    const summaryElement = document.createElement('div');
-    summaryElement.className = 'menu-summary';
+    const summaryElement = document.createElement("div");
+    summaryElement.className = "menu-summary";
 
-    const titleElement = document.createElement('h2');
+    const titleElement = document.createElement("h2");
     titleElement.textContent = `${view.difficultyLabel} boards`;
 
-    const countElement = document.createElement('p');
+    const countElement = document.createElement("p");
     countElement.textContent = `${formatNumberWithSpaces(view.solvedBoardIds.size)} of ${formatNumberWithSpaces(this.boardCount)} solved`;
 
-    const barElement = document.createElement('progress');
+    const barElement = document.createElement("progress");
     barElement.max = this.boardCount;
     barElement.value = view.solvedBoardIds.size;
 
@@ -78,19 +96,21 @@ export class BoardMenu {
   }
 
   private createToolbar(): HTMLElement {
-    const toolbarElement = document.createElement('div');
-    toolbarElement.className = 'menu-toolbar';
+    const toolbarElement = document.createElement("div");
+    toolbarElement.className = "menu-toolbar";
 
-    const randomButton = this.createButton('🎲 Random', () => this.actions.onRandomBoardChosen());
+    const randomButton = this.createButton("🎲 Random", () =>
+      this.actions.onRandomBoardChosen(),
+    );
 
-    const numberInput = document.createElement('input');
-    numberInput.type = 'number';
-    numberInput.min = '1';
+    const numberInput = document.createElement("input");
+    numberInput.type = "number";
+    numberInput.min = "1";
     numberInput.max = String(this.boardCount);
     numberInput.placeholder = `Go to # (1–${formatNumberWithSpaces(this.boardCount)})`;
-    numberInput.setAttribute('aria-label', 'Board number');
-    numberInput.addEventListener('keydown', (keyboardEvent) => {
-      if (keyboardEvent.key === 'Enter') {
+    numberInput.setAttribute("aria-label", "Board number");
+    numberInput.addEventListener("keydown", (keyboardEvent) => {
+      if (keyboardEvent.key === "Enter") {
         this.chooseBoardFromInput(numberInput);
       }
     });
@@ -101,41 +121,62 @@ export class BoardMenu {
 
   private chooseBoardFromInput(numberInput: HTMLInputElement): void {
     const boardId = Number(numberInput.value);
-    const isValidBoardId = Number.isInteger(boardId) && boardId >= 1 && boardId <= this.boardCount;
+    const isValidBoardId =
+      Number.isInteger(boardId) && boardId >= 1 && boardId <= this.boardCount;
 
     if (isValidBoardId) {
       this.actions.onBoardChosen(boardId);
       return;
     }
 
-    numberInput.setCustomValidity(`Enter a number from 1 to ${formatNumberWithSpaces(this.boardCount)}`);
+    numberInput.setCustomValidity(
+      `Enter a number from 1 to ${formatNumberWithSpaces(this.boardCount)}`,
+    );
     numberInput.reportValidity();
-    numberInput.setCustomValidity('');
+    numberInput.setCustomValidity("");
   }
 
-  private createHundredsLayer(thousand: BoardRange, view: BoardMenuView): HTMLElement {
-    const layerElement = document.createElement('div');
-    const backButton = this.createBackButton('← All thousands', () => {
+  private createHundredsLayer(
+    thousand: BoardRange,
+    view: BoardMenuView,
+  ): HTMLElement {
+    const layerElement = document.createElement("div");
+    const backButton = this.createBackButton("← All thousands", () => {
       this.openedThousand = null;
     });
-    const hundredsGrid = this.createRangeGrid(getHundredsOfThousand(thousand), view, (hundred) => {
-      this.openedHundred = hundred;
-    });
+    const hundredsGrid = this.createRangeGrid(
+      getHundredsOfThousand(thousand),
+      view,
+      (hundred) => {
+        this.openedHundred = hundred;
+      },
+    );
 
     layerElement.append(backButton, hundredsGrid);
     return layerElement;
   }
 
-  private createBoardsLayer(thousand: BoardRange, hundred: BoardRange, view: BoardMenuView): HTMLElement {
-    const layerElement = document.createElement('div');
-    const backButton = this.createBackButton(`← ${this.formatRange(thousand)}`, () => {
-      this.openedHundred = null;
-    });
+  private createBoardsLayer(
+    thousand: BoardRange,
+    hundred: BoardRange,
+    view: BoardMenuView,
+  ): HTMLElement {
+    const layerElement = document.createElement("div");
+    const backButton = this.createBackButton(
+      `← ${this.formatRange(thousand)}`,
+      () => {
+        this.openedHundred = null;
+      },
+    );
 
-    const boardGrid = document.createElement('div');
-    boardGrid.className = 'board-grid';
+    const boardGrid = document.createElement("div");
+    boardGrid.className = "board-grid";
 
-    for (let boardId = hundred.firstBoardId; boardId <= hundred.lastBoardId; boardId++) {
+    for (
+      let boardId = hundred.firstBoardId;
+      boardId <= hundred.lastBoardId;
+      boardId++
+    ) {
       boardGrid.appendChild(this.createBoardTile(view, boardId));
     }
 
@@ -143,9 +184,13 @@ export class BoardMenu {
     return layerElement;
   }
 
-  private createRangeGrid(ranges: BoardRange[], view: BoardMenuView, onRangeOpened: (range: BoardRange) => void): HTMLElement {
-    const gridElement = document.createElement('div');
-    gridElement.className = 'range-grid';
+  private createRangeGrid(
+    ranges: BoardRange[],
+    view: BoardMenuView,
+    onRangeOpened: (range: BoardRange) => void,
+  ): HTMLElement {
+    const gridElement = document.createElement("div");
+    gridElement.className = "range-grid";
 
     for (const range of ranges) {
       gridElement.appendChild(this.createRangeTile(range, view, onRangeOpened));
@@ -154,7 +199,11 @@ export class BoardMenu {
     return gridElement;
   }
 
-  private createRangeTile(range: BoardRange, view: BoardMenuView, onRangeOpened: (range: BoardRange) => void): HTMLButtonElement {
+  private createRangeTile(
+    range: BoardRange,
+    view: BoardMenuView,
+    onRangeOpened: (range: BoardRange) => void,
+  ): HTMLButtonElement {
     const boardsInRange = range.lastBoardId - range.firstBoardId + 1;
     const solvedCount = countSolvedBoardsInRange(view.solvedBoardIds, range);
 
@@ -162,26 +211,37 @@ export class BoardMenu {
       onRangeOpened(range);
       this.renderAgain();
     });
-    tileElement.classList.add('range-tile');
-    tileElement.style.setProperty('--solved-share', `${(solvedCount / boardsInRange) * 100}%`);
+    tileElement.classList.add("range-tile");
+    tileElement.style.setProperty(
+      "--solved-share",
+      `${(solvedCount / boardsInRange) * 100}%`,
+    );
     tileElement.title = `${solvedCount} of ${boardsInRange} solved`;
     return tileElement;
   }
 
-  private createBoardTile(view: BoardMenuView, boardId: number): HTMLButtonElement {
-    const tileElement = this.createButton(formatNumberWithSpaces(boardId), () => this.actions.onBoardChosen(boardId));
-    tileElement.classList.add('board-tile');
-    tileElement.classList.toggle('solved', view.solvedBoardIds.has(boardId));
-    tileElement.classList.toggle('current', boardId === view.currentBoardId);
+  private createBoardTile(
+    view: BoardMenuView,
+    boardId: number,
+  ): HTMLButtonElement {
+    const tileElement = this.createButton(formatNumberWithSpaces(boardId), () =>
+      this.actions.onBoardChosen(boardId),
+    );
+    tileElement.classList.add("board-tile");
+    tileElement.classList.toggle("solved", view.solvedBoardIds.has(boardId));
+    tileElement.classList.toggle("current", boardId === view.currentBoardId);
     return tileElement;
   }
 
-  private createBackButton(text: string, onBack: () => void): HTMLButtonElement {
+  private createBackButton(
+    text: string,
+    onBack: () => void,
+  ): HTMLButtonElement {
     const backButton = this.createButton(text, () => {
       onBack();
       this.renderAgain();
     });
-    backButton.classList.add('back-button');
+    backButton.classList.add("back-button");
     return backButton;
   }
 
@@ -190,10 +250,10 @@ export class BoardMenu {
   }
 
   private createButton(text: string, onClick: () => void): HTMLButtonElement {
-    const buttonElement = document.createElement('button');
-    buttonElement.type = 'button';
+    const buttonElement = document.createElement("button");
+    buttonElement.type = "button";
     buttonElement.textContent = text;
-    buttonElement.addEventListener('click', onClick);
+    buttonElement.addEventListener("click", onClick);
     return buttonElement;
   }
 

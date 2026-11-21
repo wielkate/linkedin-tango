@@ -1,4 +1,4 @@
-import type { Hint } from './hint';
+import type { Hint } from "./hint";
 
 // The light-yellow note beside the board that explains the last hint.
 export class HintNoteView {
@@ -9,6 +9,7 @@ export class HintNoteView {
 
   render(shownHint: Hint | null): void {
     this.noteElement.hidden = shownHint === null;
-    this.textElement.textContent = shownHint === null ? '' : shownHint.explanation;
+    this.textElement.textContent =
+      shownHint === null ? "" : shownHint.explanation;
   }
 }

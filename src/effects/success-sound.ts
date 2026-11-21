@@ -1,4 +1,4 @@
-const SUCCESS_SOUND_URL = new URL('./assets/success.wav', import.meta.url).href;
+const SUCCESS_SOUND_URL = new URL("./assets/success.wav", import.meta.url).href;
 
 // Plays the celebration sound when a puzzle is solved.
 // The file is decoded once into memory, so every play is the whole sound from its first sample.

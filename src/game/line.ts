@@ -1,7 +1,7 @@
-import { BOARD_SIZE } from './board-constants';
-import type { CellPosition } from './cell-position';
+import { BOARD_SIZE } from "./board-constants";
+import type { CellPosition } from "./cell-position";
 
-export type LineDirection = 'row' | 'column';
+export type LineDirection = "row" | "column";
 
 // A row or a column of the board: which one it is (counted from 0) and its cell positions in order.
 export interface Line {
@@ -17,7 +17,7 @@ function createRow(row: number): Line {
     positions.push({ row, column });
   }
 
-  return { direction: 'row', index: row, positions };
+  return { direction: "row", index: row, positions };
 }
 
 function createColumn(column: number): Line {
@@ -27,7 +27,7 @@ function createColumn(column: number): Line {
     positions.push({ row, column });
   }
 
-  return { direction: 'column', index: column, positions };
+  return { direction: "column", index: column, positions };
 }
 
 function createAllLines(): Line[] {
@@ -50,7 +50,10 @@ export function getAllLines(): Line[] {
 }
 
 // Every run of windowLength neighbouring cells in the line.
-export function getLineWindows(line: Line, windowLength: number): CellPosition[][] {
+export function getLineWindows(
+  line: Line,
+  windowLength: number,
+): CellPosition[][] {
   const windows: CellPosition[][] = [];
   const lastWindowStartIndex = line.positions.length - windowLength;
 

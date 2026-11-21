@@ -4,7 +4,7 @@ export class InfoDialog {
     private readonly dialogElement: HTMLDialogElement,
     onClosed: () => void,
   ) {
-    dialogElement.addEventListener('close', onClosed);
+    dialogElement.addEventListener("close", onClosed);
   }
 
   open(): void {
