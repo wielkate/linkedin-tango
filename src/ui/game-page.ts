@@ -2,6 +2,7 @@ import { BoardMenu } from "../board-menu/board-menu";
 import { MenuDrawer } from "../board-menu/menu-drawer";
 import { Confetti } from "../effects/confetti";
 import { SuccessSound } from "../effects/success-sound";
+import { formatBoardAddress, parseBoardAddress } from "../game/board-address";
 import { toCellKey, type CellPosition } from "../game/cell-position";
 import {
   DEFAULT_DIFFICULTY,
@@ -81,7 +82,7 @@ export class GamePage {
     private readonly puzzleLibrary: PuzzleLibrary,
     private readonly solvedBoards: SolvedBoards,
   ) {
-    this.game = new PuzzleGame(this.pickNextPuzzle());
+    this.game = new PuzzleGame(this.findPuzzleOfCurrentAddress());
     this.boardMenu = new BoardMenu(
       getRequiredElement("menu-content"),
       puzzleLibrary.getBoardCount(),
@@ -98,7 +99,56 @@ export class GamePage {
       () => this.timerDisplay.render(),
       TIMER_REFRESH_MILLISECONDS,
     );
+    this.showPreviouslySolvedBoardIfSaved();
+    this.writeAddressOfCurrentPuzzle();
     this.render();
+  }
+
+  // A valid address such as "#hard/123" resumes that puzzle; otherwise a random one is picked.
+  // Setting the difficulty here makes the picker and the saved progress match the address.
+  private findPuzzleOfCurrentAddress(): Puzzle {
+    const address = parseBoardAddress(
+      window.location.hash,
+      this.puzzleLibrary.getBoardCount(),
+    );
+
+    if (address === null) {
+      return this.pickNextPuzzle();
+    }
+
+    this.selectedDifficulty = address.difficulty;
+    return this.puzzleLibrary.getPuzzle(address.difficulty, address.boardId);
+  }
+
+  private writeAddressOfCurrentPuzzle(): void {
+    const addressText = formatBoardAddress({
+      difficulty: this.selectedDifficulty,
+      boardId: this.game.puzzle.id,
+    });
+    window.history.replaceState(null, "", addressText);
+  }
+
+  // Runs when the player edits the address by hand or uses a link to another board.
+  private handleAddressChange(): void {
+    const address = parseBoardAddress(
+      window.location.hash,
+      this.puzzleLibrary.getBoardCount(),
+    );
+
+    if (address === null) {
+      return;
+    }
+
+    const isAlreadyOpen =
+      address.difficulty === this.selectedDifficulty &&
+      address.boardId === this.game.puzzle.id;
+
+    if (isAlreadyOpen) {
+      return;
+    }
+
+    this.selectedDifficulty = address.difficulty;
+    this.startPuzzleWithId(address.boardId);
   }
 
   private listenToEvents(): void {
@@ -124,6 +174,7 @@ export class GamePage {
     document.addEventListener("visibilitychange", () =>
       this.handleTabVisibilityChange(),
     );
+    window.addEventListener("hashchange", () => this.handleAddressChange());
   }
 
   private handleTabVisibilityChange(): void {
@@ -184,21 +235,22 @@ export class GamePage {
     );
     this.menuDrawer.close();
     this.stopwatch.restart();
-
-    const solveSeconds = this.solvedBoards.getSolveSeconds(
-      this.selectedDifficulty,
-      boardId,
-    );
-
-    if (solveSeconds !== null) {
-      this.showPreviouslySolvedBoard(solveSeconds);
-    }
-
+    this.showPreviouslySolvedBoardIfSaved();
+    this.writeAddressOfCurrentPuzzle();
     this.render();
   }
 
   // The board is filled in and the stopwatch frozen at the saved time, without confetti or sound.
-  private showPreviouslySolvedBoard(solveSeconds: number): void {
+  private showPreviouslySolvedBoardIfSaved(): void {
+    const solveSeconds = this.solvedBoards.getSolveSeconds(
+      this.selectedDifficulty,
+      this.game.puzzle.id,
+    );
+
+    if (solveSeconds === null) {
+      return;
+    }
+
     this.game.solve();
     this.stopwatch.freezeAt(solveSeconds);
   }

@@ -49,6 +49,10 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
   play that board.
 - **🎲 Random** picks a random unsolved board; **Go to #** jumps to a board number.
 - Solved boards are remembered per level in the browser's `localStorage`.
+- The address shows the open board, for example `#hard/123` (level and board number). Reloading the
+  page, or sharing the link, opens the same board; an address that is not a real board is ignored
+  and a random board is picked. The moves you made are not saved yet, so a reload starts the board
+  from its given cells.
 
 ## Example board
 
@@ -159,6 +163,7 @@ linkedin-tango/
 │   │   ├── rules.ts          rule checking functions: which cells break a rule, is the board solved
 │   │   ├── solution.ts       Solution: the one correct way to fill the board, and functions that use it
 │   │   ├── puzzle.ts         Puzzle: given cells, edge hints and the solution of one board
+│   │   ├── board-address.ts  BoardAddress: reads and writes the open board in the page address (#hard/123)
 │   │   ├── puzzle-library.ts PuzzleLibrary class: decodes puzzles from src/data and picks the next board
 │   │   ├── puzzle-game.ts    PuzzleGame class: one puzzle being played (clicks, undo, hint, solve)
 │   │   ├── difficulty.ts     the difficulty levels and their labels
