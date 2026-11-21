@@ -125,6 +125,12 @@
   );
 }
 
+.board-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
 .board-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

@@ -8,6 +8,8 @@ import {
 } from "./board-ranges";
 import { formatNumberWithSpaces } from "../utils/format-number";
 
+const BOARDS_PER_GROUP = 25;
+
 export interface BoardMenuView {
   difficultyLabel: string;
   solvedBoardIds: Set<number>;
@@ -169,19 +171,51 @@ export class BoardMenu {
       },
     );
 
-    const boardGrid = document.createElement("div");
-    boardGrid.className = "board-grid";
+    layerElement.append(
+      backButton,
+      this.createBoardGroups(hundred, view),
+    );
+    return layerElement;
+  }
+
+  // A hundred boards are shown as blocks of 5 × 5 tiles with a space between the blocks.
+  private createBoardGroups(
+    hundred: BoardRange,
+    view: BoardMenuView,
+  ): HTMLElement {
+    const groupsElement = document.createElement("div");
+    groupsElement.className = "board-groups";
 
     for (
-      let boardId = hundred.firstBoardId;
-      boardId <= hundred.lastBoardId;
-      boardId++
+      let firstBoardIdOfGroup = hundred.firstBoardId;
+      firstBoardIdOfGroup <= hundred.lastBoardId;
+      firstBoardIdOfGroup += BOARDS_PER_GROUP
     ) {
-      boardGrid.appendChild(this.createBoardTile(view, boardId));
+      const lastBoardIdOfGroup = Math.min(
+        firstBoardIdOfGroup + BOARDS_PER_GROUP - 1,
+        hundred.lastBoardId,
+      );
+      groupsElement.appendChild(
+        this.createBoardGroup(view, firstBoardIdOfGroup, lastBoardIdOfGroup),
+      );
     }
 
-    layerElement.append(backButton, boardGrid);
-    return layerElement;
+    return groupsElement;
+  }
+
+  private createBoardGroup(
+    view: BoardMenuView,
+    firstBoardId: number,
+    lastBoardId: number,
+  ): HTMLElement {
+    const groupElement = document.createElement("div");
+    groupElement.className = "board-grid";
+
+    for (let boardId = firstBoardId; boardId <= lastBoardId; boardId++) {
+      groupElement.appendChild(this.createBoardTile(view, boardId));
+    }
+
+    return groupElement;
   }
 
   private createRangeGrid(

@@ -2,6 +2,7 @@ import { BoardMenu } from "../board-menu/board-menu";
 import { MenuDrawer } from "../board-menu/menu-drawer";
 import { Confetti } from "../effects/confetti";
 import { SuccessSound } from "../effects/success-sound";
+import { formatBoardAddress, parseBoardAddress } from "../game/board-address";
 import { toCellKey, type CellPosition } from "../game/cell-position";
 import {
   DEFAULT_DIFFICULTY,
@@ -32,6 +33,8 @@ export class GamePage {
   private selectedDifficulty: Difficulty = DEFAULT_DIFFICULTY;
   private game: PuzzleGame;
   private wasStopwatchPausedBeforeInfo = false;
+  private wasStopwatchPausedByHiddenTab = false;
+  private hasGivenUpOnPuzzle = false;
 
   private readonly stopwatch = new Stopwatch();
   private readonly confetti = new Confetti();
@@ -80,7 +83,7 @@ export class GamePage {
     private readonly puzzleLibrary: PuzzleLibrary,
     private readonly solvedBoards: SolvedBoards,
   ) {
-    this.game = new PuzzleGame(this.pickNextPuzzle());
+    this.game = new PuzzleGame(this.findPuzzleOfCurrentAddress());
     this.boardMenu = new BoardMenu(
       getRequiredElement("menu-content"),
       puzzleLibrary.getBoardCount(),
@@ -97,7 +100,56 @@ export class GamePage {
       () => this.timerDisplay.render(),
       TIMER_REFRESH_MILLISECONDS,
     );
+    this.showPreviouslySolvedBoardIfSaved();
+    this.writeAddressOfCurrentPuzzle();
     this.render();
+  }
+
+  // A valid address such as "#hard/123" resumes that puzzle; otherwise a random one is picked.
+  // Setting the difficulty here makes the picker and the saved progress match the address.
+  private findPuzzleOfCurrentAddress(): Puzzle {
+    const address = parseBoardAddress(
+      window.location.hash,
+      this.puzzleLibrary.getBoardCount(),
+    );
+
+    if (address === null) {
+      return this.pickNextPuzzle();
+    }
+
+    this.selectedDifficulty = address.difficulty;
+    return this.puzzleLibrary.getPuzzle(address.difficulty, address.boardId);
+  }
+
+  private writeAddressOfCurrentPuzzle(): void {
+    const addressText = formatBoardAddress({
+      difficulty: this.selectedDifficulty,
+      boardId: this.game.puzzle.id,
+    });
+    window.history.replaceState(null, "", addressText);
+  }
+
+  // Runs when the player edits the address by hand or uses a link to another board.
+  private handleAddressChange(): void {
+    const address = parseBoardAddress(
+      window.location.hash,
+      this.puzzleLibrary.getBoardCount(),
+    );
+
+    if (address === null) {
+      return;
+    }
+
+    const isAlreadyOpen =
+      address.difficulty === this.selectedDifficulty &&
+      address.boardId === this.game.puzzle.id;
+
+    if (isAlreadyOpen) {
+      return;
+    }
+
+    this.selectedDifficulty = address.difficulty;
+    this.startPuzzleWithId(address.boardId);
   }
 
   private listenToEvents(): void {
@@ -120,6 +172,40 @@ export class GamePage {
         this.menuDrawer.close();
       }
     });
+    document.addEventListener("visibilitychange", () =>
+      this.handleTabVisibilityChange(),
+    );
+    window.addEventListener("hashchange", () => this.handleAddressChange());
+  }
+
+  private handleTabVisibilityChange(): void {
+    if (document.visibilityState === "hidden") {
+      this.pauseWhenTabIsHidden();
+    } else {
+      this.resumeWhenTabIsVisible();
+    }
+  }
+
+  // Time spent in another tab is never counted.
+  private pauseWhenTabIsHidden(): void {
+    if (!this.stopwatch.isRunning()) {
+      return;
+    }
+
+    this.stopwatch.pause();
+    this.wasStopwatchPausedByHiddenTab = true;
+    this.render();
+  }
+
+  // Only a pause made by hiding the tab is undone, so a pause chosen by the player stays.
+  private resumeWhenTabIsVisible(): void {
+    if (!this.wasStopwatchPausedByHiddenTab) {
+      return;
+    }
+
+    this.wasStopwatchPausedByHiddenTab = false;
+    this.stopwatch.resume();
+    this.render();
   }
 
   private pickNextPuzzle(): Puzzle {
@@ -148,23 +234,25 @@ export class GamePage {
     this.game = new PuzzleGame(
       this.puzzleLibrary.getPuzzle(this.selectedDifficulty, boardId),
     );
+    this.hasGivenUpOnPuzzle = false;
     this.menuDrawer.close();
     this.stopwatch.restart();
-
-    const solveSeconds = this.solvedBoards.getSolveSeconds(
-      this.selectedDifficulty,
-      boardId,
-    );
-
-    if (solveSeconds !== null) {
-      this.showPreviouslySolvedBoard(solveSeconds);
-    }
-
+    this.showPreviouslySolvedBoardIfSaved();
+    this.writeAddressOfCurrentPuzzle();
     this.render();
   }
 
   // The board is filled in and the stopwatch frozen at the saved time, without confetti or sound.
-  private showPreviouslySolvedBoard(solveSeconds: number): void {
+  private showPreviouslySolvedBoardIfSaved(): void {
+    const solveSeconds = this.solvedBoards.getSolveSeconds(
+      this.selectedDifficulty,
+      this.game.puzzle.id,
+    );
+
+    if (solveSeconds === null) {
+      return;
+    }
+
     this.game.solve();
     this.stopwatch.freezeAt(solveSeconds);
   }
@@ -172,6 +260,7 @@ export class GamePage {
   // Reset starts the board over, also when it was already solved, so it can be played again.
   private resetBoard(): void {
     this.game = new PuzzleGame(this.game.puzzle);
+    this.hasGivenUpOnPuzzle = false;
     this.stopwatch.restart();
     this.render();
   }
@@ -194,9 +283,13 @@ export class GamePage {
     this.render();
   }
 
+  // Showing the solution is giving up: the stopwatch stops, but there is no celebration and
+  // nothing is saved, so the board stays unsolved in the menu and keeps any earlier best time.
   private solvePuzzle(): void {
     this.game.solve();
-    this.finishPuzzleIfSolved();
+    this.stopwatch.stop();
+    this.hasGivenUpOnPuzzle = true;
+    this.revealNextButton();
     this.render();
   }
 
@@ -300,6 +393,10 @@ export class GamePage {
   }
 
   private createStatusMessage(isSolved: boolean): string {
+    if (this.hasGivenUpOnPuzzle) {
+      return "Cheating detected 😈";
+    }
+
     if (isSolved) {
       return `🎉 Solved in ${formatDuration(this.stopwatch.getElapsedSeconds())}!`;
     }

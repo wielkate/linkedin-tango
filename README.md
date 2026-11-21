@@ -35,8 +35,9 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
   already holds its three of a kind. When none of those applies it tries a symbol and explains that it
   leads to a broken rule. The cell is highlighted and the cells the note talks about are outlined.
   A cell you filled wrongly is corrected first. The note disappears on your next move.
-- **✨ Solve:** fills in the whole solution. The board then counts as solved, with the confetti,
-  the sound and the board saved as solved, so use it only when you want to give up.
+- **✨ Solve:** fills in the whole solution and stops the stopwatch. It counts as giving up: there
+  is no confetti or sound, the board is not saved as solved (its menu tile stays unfilled) and an
+  earlier best time on that board is kept. Use **Reset** to play the board again.
 - **⏸ Pause / ▶ Resume:** freezes the stopwatch and blurs the board.
 - **ⓘ** (top-right): explains the rules, pauses the stopwatch and blurs the board while it is open
   (also on a solved board).
@@ -49,6 +50,10 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
   play that board.
 - **🎲 Random** picks a random unsolved board; **Go to #** jumps to a board number.
 - Solved boards are remembered per level in the browser's `localStorage`.
+- The address shows the open board, for example `#hard/123` (level and board number). Reloading the
+  page, or sharing the link, opens the same board; an address that is not a real board is ignored
+  and a random board is picked. The moves you made are not saved yet, so a reload starts the board
+  from its given cells.
 
 ## Example board
 
@@ -159,6 +164,7 @@ linkedin-tango/
 │   │   ├── rules.ts          rule checking functions: which cells break a rule, is the board solved
 │   │   ├── solution.ts       Solution: the one correct way to fill the board, and functions that use it
 │   │   ├── puzzle.ts         Puzzle: given cells, edge hints and the solution of one board
+│   │   ├── board-address.ts  BoardAddress: reads and writes the open board in the page address (#hard/123)
 │   │   ├── puzzle-library.ts PuzzleLibrary class: decodes puzzles from src/data and picks the next board
 │   │   ├── puzzle-game.ts    PuzzleGame class: one puzzle being played (clicks, undo, hint, solve)
 │   │   ├── difficulty.ts     the difficulty levels and their labels
