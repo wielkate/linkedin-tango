@@ -63,6 +63,8 @@ Keep rule checks, hints and other calculations as pure functions.
 - Shared test helpers live in `src/test-support/`. Build boards from text with
   `createBoardFromRows` instead of setting cells one by one.
 - Tests never touch the network, the real clock or the real `localStorage`: pass in or fake them.
+- Coverage must stay at 90% or more (`npm run test:coverage`). Code that needs a browser is
+  listed under `coverage.exclude` in `vite.config.ts`; keep logic out of those files so it can be tested.
 - New logic comes with tests, and a fixed bug comes with a test that failed before the fix.
 
 # Git workflow
