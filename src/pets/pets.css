@@ -1,11 +1,12 @@
 /* A visiting cat or dog. The picture rests on its screen edge: the bottom of the picture is at
    the edge, and --pet-rotation turns it for the other three edges.
-   The animals sit behind the page (z-index -1) and ignore the mouse. */
+   The animals are drawn over the text and the buttons, but under the board (see #board in style.css),
+   and they ignore the mouse, so every button still works. */
 .pet {
   --pet-look-x: 0;
   --pet-look-y: 0;
   position: fixed;
-  z-index: -1;
+  z-index: 1;
   width: var(--pet-size);
   height: var(--pet-size);
   pointer-events: none;
@@ -116,11 +117,12 @@
 }
 
 /* Paw prints of an invisible animal walking across the screen. Each print waits for its turn
-   (--paw-print-delay), shows, and fades out (--paw-print-lifetime). They sit behind the game. */
+   (--paw-print-delay), shows, and fades out (--paw-print-lifetime). Like the animals, they are drawn
+   over the text and the buttons, but under the board. */
 .paw-print-trail {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
   overflow: hidden;
   pointer-events: none;
   color: #8b7a68;

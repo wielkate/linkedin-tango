@@ -14,7 +14,7 @@ const RETRY_WHILE_TAB_HIDDEN_MILLISECONDS = 2000;
 const SLIDE_MILLISECONDS = 700;
 
 // Now and then a cat or a dog peeks in from a random edge of the screen, looks around and leaves.
-// They sit behind the game and ignore the mouse, so they never get in the way.
+// They are drawn over the text and buttons but under the board, and they ignore the mouse.
 export class PetPeeker {
   private isRunning = false;
   private nextVisitTimer: number | undefined;

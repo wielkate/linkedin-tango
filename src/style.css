@@ -40,6 +40,8 @@ main {
     )
   );
   position: relative;
+  /* Above the visiting animals and paw prints (z-index 1 in pets.css), so none covers the board. */
+  z-index: 2;
   display: grid;
   grid-template-columns: repeat(var(--board-size), var(--cell-size));
   grid-auto-rows: var(--cell-size);

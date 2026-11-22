@@ -42,9 +42,9 @@ export const ROTATION_DEGREES_BY_EDGE: Record<ScreenEdge, number> = {
   right: 270,
 };
 
-const MIN_SIZE_PIXELS = 90;
-const MAX_SIZE_PIXELS = 260;
-const LARGEST_SHARE_OF_SMALLER_SIDE = 0.45;
+const MIN_SIZE_PIXELS = 110;
+const MAX_SIZE_PIXELS = 480;
+const LARGEST_SHARE_OF_SMALLER_SIDE = 0.55;
 const PAW_ONLY_CHANCE = 0.25;
 const SHOWN_FRACTION_RANGE_BY_APPEARANCE: Record<
   PetAppearance,

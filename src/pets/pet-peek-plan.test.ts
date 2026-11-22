@@ -55,16 +55,16 @@ describe("planPeek", () => {
     expect(sizes.size).toBeGreaterThan(50);
   });
 
-  it("keeps the size between 90 and 260 pixels on a big screen", () => {
+  it("keeps the size between 110 and 480 pixels on a big screen", () => {
     for (const plan of planManyPeeks(DESKTOP_VIEWPORT)) {
-      expect(plan.sizePixels).toBeGreaterThanOrEqual(90);
-      expect(plan.sizePixels).toBeLessThanOrEqual(260);
+      expect(plan.sizePixels).toBeGreaterThanOrEqual(110);
+      expect(plan.sizePixels).toBeLessThanOrEqual(480);
     }
   });
 
-  it("keeps animals under half of the smaller side of a phone screen", () => {
+  it("keeps animals under 55% of the smaller side of a phone screen", () => {
     for (const plan of planManyPeeks(PHONE_VIEWPORT)) {
-      expect(plan.sizePixels).toBeLessThanOrEqual(PHONE_VIEWPORT.widthPixels * 0.45);
+      expect(plan.sizePixels).toBeLessThanOrEqual(PHONE_VIEWPORT.widthPixels * 0.55);
     }
   });
 
