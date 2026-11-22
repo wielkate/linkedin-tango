@@ -1,0 +1,112 @@
+/* A visiting cat or dog. The picture rests on its screen edge: the bottom of the picture is at
+   the edge, and --pet-rotation turns it for the other three edges.
+   The animals sit behind the page (z-index -1) and ignore the mouse. */
+.pet {
+  --pet-look-x: 0;
+  --pet-look-y: 0;
+  position: fixed;
+  z-index: -1;
+  width: var(--pet-size);
+  height: var(--pet-size);
+  pointer-events: none;
+  /* Hidden: moved down by its own height, behind the edge. */
+  transform: rotate(var(--pet-rotation)) translateY(100%);
+  /* Leaving the screen. */
+  transition: transform 0.7s ease-in;
+}
+
+.pet--peeking {
+  transform: rotate(var(--pet-rotation))
+    translateY(calc((1 - var(--pet-shown)) * 100%));
+  /* Arriving, with a little overshoot. */
+  transition: transform 0.7s cubic-bezier(0.25, 1, 0.35, 1.12);
+}
+
+.pet--bottom {
+  bottom: 0;
+  left: calc(var(--pet-position) * (100% - var(--pet-size)));
+}
+
+.pet--top {
+  top: 0;
+  left: calc(var(--pet-position) * (100% - var(--pet-size)));
+}
+
+.pet--left {
+  left: 0;
+  top: calc(var(--pet-position) * (100% - var(--pet-size)));
+}
+
+.pet--right {
+  right: 0;
+  top: calc(var(--pet-position) * (100% - var(--pet-size)));
+}
+
+.pet-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The head tilts a little towards the side the pet looks at. */
+.pet--head .pet-art {
+  transform: rotate(calc(var(--pet-look-x) * 5deg));
+  transform-origin: 50% calc(var(--pet-shown) * 100%);
+  transition: transform 0.35s ease-out;
+}
+
+/* The pupils move inside the eyes. The numbers are units of the 200 x 200 picture. */
+.pet-pupils {
+  transform: translate(
+    calc(var(--pet-look-x) * 4px),
+    calc(var(--pet-look-y) * 3px)
+  );
+  transition: transform 0.3s ease-out;
+}
+
+.pet-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pet-blink 4.5s infinite;
+}
+
+/* The paws stay at the edge: they follow the cut line however much of the head shows. */
+.pet-paws {
+  transform: translateY(calc((var(--pet-shown) * 200 - 148) * 1px));
+}
+
+.pet-arm {
+  transform-origin: 100px calc(var(--pet-shown) * 200px);
+  animation: pet-wave 1.1s ease-in-out infinite;
+}
+
+@keyframes pet-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes pet-wave {
+  0%,
+  100% {
+    transform: rotate(-9deg);
+  }
+  50% {
+    transform: rotate(9deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet,
+  .pet-eyes,
+  .pet-arm {
+    animation: none;
+    transition: none;
+  }
+}
