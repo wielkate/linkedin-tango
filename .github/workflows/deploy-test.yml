@@ -1,0 +1,52 @@
+name: Deploy test build
+
+# Publishes a build to https://wielkate.github.io/linkedin-tango/test/ so a pull request or an
+# experiment can be tried on a phone before it reaches master. The newest build replaces the
+# previous one: there is one test site, not one per pull request.
+#
+# - A pull request from this repository deploys its branch on every push to it.
+# - "Run workflow" in the Actions tab deploys any branch you pick.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-test:
+    name: Build the branch and publish it under /test
+    # A pull request from a fork gets a read-only token, so it cannot publish.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: dist
+          publish_branch: gh-pages
+          destination_dir: test
+          # Unlike the master deploy, replace the previous test build completely.
+          keep_files: false
+      - name: Tell the pull request where the test build is
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+          TEST_SITE_ADDRESS: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test/
+        run: |
+          gh pr comment "$PULL_REQUEST_NUMBER" --edit-last --create-if-none \
+            --body "Test build of ${GITHUB_SHA::7}: $TEST_SITE_ADDRESS"

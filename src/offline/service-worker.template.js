@@ -7,7 +7,9 @@
 // game opens without a network. A new release is installed next to the old one and takes over
 // when every tab of the old one is closed, so a game in progress never loses its files.
 
-const CACHE_PREFIX = "tango-";
+// The folder the worker lives in is part of the prefix, so the game at /linkedin-tango/ and a
+// test build at /linkedin-tango/test/ never delete each other's cache.
+const CACHE_PREFIX = `tango-${new URL("./", self.location).pathname}-`;
 const CACHE_VERSION = "__CACHE_VERSION__";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 const PRECACHE_PATHS = JSON.parse("__PRECACHE_PATHS__");

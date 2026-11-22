@@ -239,6 +239,20 @@ URLs the browser would look for the files at `https://<user>.github.io/assets/..
 With a relative base, the same `dist/` folder works under any path. Everything else uses
 Vite's defaults (dev server on port 5173, build output in `dist/`).
 
+### Deployment: live game and test build
+
+Two workflows publish to the `gh-pages` branch, which GitHub Pages serves
+(Settings > Pages > Source: Deploy from a branch > `gh-pages` / root):
+
+| Address                                           | Built from                                                                                                                             | Workflow                            |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `https://wielkate.github.io/linkedin-tango/`      | `master`, on every push                                                                                                                | `.github/workflows/deploy.yml`      |
+| `https://wielkate.github.io/linkedin-tango/test/` | a pull request from this repository (every push to it), or any branch started by hand under Actions > Deploy test build > Run workflow | `.github/workflows/deploy-test.yml` |
+
+There is one test site: the newest test build replaces the previous one. Both sites share one
+origin, so they share `localStorage` (solved boards and times). Their offline caches are kept
+apart because the cache name contains the site folder.
+
 ### Offline play
 
 After the game has been opened once, it opens again without a network, and it can be installed
@@ -282,4 +296,4 @@ file, JSON arrays with one element per line, and a linear git history.
 1. ~~Generate all 11 222 valid boards and store them as static data~~ (done)
 2. ~~Solver + puzzle generator with unique-solution check~~ (done, see `scripts/generate-puzzles.mjs`)
 3. ~~Progress tracking (`localStorage`) and timer~~ (done)
-4. ~~GitHub Pages deployment via GitHub Actions~~ (done, see `.github/workflows/deploy.yml`)
+4. ~~GitHub Pages deployment via GitHub Actions~~ (done, see `.github/workflows/deploy.yml`; a test build under `/test/` comes from `deploy-test.yml`)

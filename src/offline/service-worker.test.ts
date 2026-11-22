@@ -7,7 +7,7 @@ import {
 import template from "./service-worker.template.js?raw";
 
 const SITE = "https://example.test/linkedin-tango/";
-const CURRENT_CACHE_NAME = "tango-version-1";
+const CURRENT_CACHE_NAME = "tango-/linkedin-tango/-version-1";
 
 function createInstalledWorker(): FakeServiceWorkerScope {
   const precachePaths = createPrecachePaths(["index.html", "assets/app.js"]);
@@ -146,7 +146,7 @@ describe("service worker", () => {
   });
 
   it("deletes the caches of older versions when it activates", async () => {
-    await worker.createCache("tango-version-0");
+    await worker.createCache("tango-/linkedin-tango/-version-0");
     await worker.createCache("another-app-cache");
     await worker.install();
 
@@ -156,6 +156,16 @@ describe("service worker", () => {
       "another-app-cache",
       CURRENT_CACHE_NAME,
     ]);
+  });
+
+  it("keeps the cache of the game published in another folder of the same site", async () => {
+    const otherFolderCacheName = "tango-/linkedin-tango/test/-version-0";
+    await worker.createCache(otherFolderCacheName);
+    await worker.install();
+
+    await worker.activate();
+
+    expect(await worker.listCacheNames()).toContain(otherFolderCacheName);
   });
 
   it("takes control of the open page when it activates", async () => {
