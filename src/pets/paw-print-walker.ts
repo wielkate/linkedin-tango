@@ -10,7 +10,7 @@ const DELAY_BETWEEN_WALKS_MILLISECONDS: [number, number] = [20000, 45000];
 const RETRY_WHILE_TAB_HIDDEN_MILLISECONDS = 2000;
 
 // Now and then an invisible cat or dog walks across the screen and leaves a trail of paw prints
-// that appear one after another and fade away. The prints are drawn under the board and ignore the mouse.
+// that appear one after another and fade away. The prints are drawn behind everything, so they never cover the text, the buttons or the board.
 export class PawPrintWalker {
   private isRunning = false;
   private nextWalkTimer: number | undefined;
