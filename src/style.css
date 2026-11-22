@@ -108,6 +108,13 @@ main {
     margin: 20px 0;
   }
 
+  /* The buttons must stay narrower than the board, otherwise the page scrolls sideways. */
+  body .control-button,
+  body .difficulty-button {
+    font-size: 13px;
+    padding: 5px 11px;
+  }
+
   body #info,
   body #menu-button {
     font-size: 16px;
