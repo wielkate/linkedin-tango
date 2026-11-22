@@ -20,6 +20,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 #timer-row {
@@ -33,6 +35,28 @@
 .button-group {
   display: flex;
   gap: 8px;
+}
+
+/* On a narrow phone the four buttons below the board would be wider than the board. */
+@media (max-width: 400px) {
+  #board-controls .control-button {
+    padding: 6px 10px;
+  }
+
+  #board-controls .button-group {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 340px) {
+  #board-controls .control-button {
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+
+  #board-controls .button-group {
+    gap: 4px;
+  }
 }
 
 #timer {

@@ -1,6 +1,5 @@
 :root {
-  /* Every cell is a square of the same size: width and height both use --cell-size. */
-  --cell-size: min(25vw, 80px);
+  --page-padding: 16px;
   --cell-gap: 3px;
   --board-padding: 6px;
   --hint-size: 30px;
@@ -12,7 +11,7 @@ body {
   display: grid;
   place-items: center;
   margin: 0;
-  padding: 16px;
+  padding: var(--page-padding);
   background: #f4f1ea;
   color: #222;
 }
@@ -27,6 +26,18 @@ main {
 }
 
 #board {
+  /* Every cell is a square of the same size: width and height both use --cell-size.
+     A cell is at most 80px and shrinks on a narrow screen, so the board always fits between
+     the page padding and the player never has to zoom out. */
+  --cell-size: min(
+    80px,
+    calc(
+      (
+          100vw - 2 * var(--page-padding) - 2 * var(--board-padding) -
+            (var(--board-size) - 1) * var(--cell-gap)
+        ) / var(--board-size)
+    )
+  );
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--board-size), var(--cell-size));
