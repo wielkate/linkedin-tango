@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { configDefaults, defineConfig } from "vitest/config";
 
 // Vite reads this file whenever you run `npm run dev`, `npm run build` or `npm run preview`.
 //
@@ -8,6 +8,40 @@ import { defineConfig } from "vite";
 // and fail to load. With a relative base, the same dist/ folder works under any path.
 //
 // Every other setting uses Vite's defaults (dev server on port 5173, build output in dist/).
+//
+// Vitest (`npm test`) reads the `test` block. Coverage counts every file in src/ except the ones
+// that need a browser (DOM classes, sound, animation), the entry point, generated data and the
+// tests themselves. `npm run test:coverage` fails when coverage drops below 90%.
 export default defineConfig({
   base: "./",
+  test: {
+    exclude: [...configDefaults.exclude, "e2e/**"],
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.ts"],
+      exclude: [
+        "src/**/*.test.ts",
+        "src/test-support/**",
+        "src/data/**",
+        "src/main.ts",
+        "src/board-menu/board-menu.ts",
+        "src/board-menu/menu-drawer.ts",
+        "src/effects/**",
+        "src/hints/hint-note-view.ts",
+        "src/ui/board-view.ts",
+        "src/ui/difficulty-picker.ts",
+        "src/ui/draw-attention.ts",
+        "src/ui/game-page.ts",
+        "src/ui/info-dialog.ts",
+        "src/ui/required-element.ts",
+        "src/ui/timer-display.ts",
+      ],
+      thresholds: {
+        lines: 90,
+        functions: 90,
+        statements: 90,
+        branches: 90,
+      },
+    },
+  },
 });
