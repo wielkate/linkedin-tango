@@ -99,20 +99,13 @@ main {
    The selectors start with body so they win over the rules in the other style files. */
 @media (max-width: 540px) {
   :root {
-    --hint-size: 24px;
     --cell-gap: 2px;
     --board-padding: 4px;
   }
 
   body h1 {
     font-size: 25px;
-    margin: 16px 0;
-  }
-
-  body .control-button,
-  body .difficulty-button {
-    font-size: 13px;
-    padding: 5px 11px;
+    margin: 20px 0;
   }
 
   body #info,
@@ -120,28 +113,8 @@ main {
     font-size: 16px;
   }
 
-  body #timer {
-    font-size: 14px;
-  }
-
   body #status {
     font-size: 18px;
-  }
-
-  body .edge-hint {
-    font-size: 13px;
-  }
-
-  body #difficulty {
-    margin-bottom: 22px;
-  }
-
-  body #timer-row {
-    margin-bottom: 13px;
-  }
-
-  body #board-controls {
-    margin-top: 13px;
   }
 }
 

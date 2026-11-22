@@ -25,11 +25,12 @@
 }
 
 #timer-row {
-  margin-bottom: 16px;
+  margin-bottom: 25px;
 }
 
 #board-controls {
-  margin-top: 16px;
+  margin-top: 25px;
+  margin-bottom: 50px;
 }
 
 .button-group {
