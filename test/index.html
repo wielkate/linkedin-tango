@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tango</title>
+    <meta
+      name="description"
+      content="Cat &amp; Dog Tango: a free browser puzzle with 11 222 boards in three difficulty levels. Fill the grid with cats and dogs."
+    />
+    <meta name="theme-color" content="#f4f1ea" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Cat &amp; Dog Tango" />
+    <meta
+      property="og:description"
+      content="A free browser puzzle with 11 222 boards in three difficulty levels. Fill the grid with cats and dogs."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <script type="module" crossorigin src="./assets/index-BfH3fSnh.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-VD2FI6Ky.css">
+  </head>
+  <body>
+    <main>
+      <button
+        type="button"
+        id="menu-button"
+        class="control-button"
+        aria-label="Open boards menu"
+      >
+        ☰
+      </button>
+      <h1 id="title">Tango</h1>
+      <button
+        type="button"
+        id="info"
+        class="control-button"
+        aria-label="How to play"
+      >
+        ⓘ
+      </button>
+      <div id="difficulty"></div>
+      <div id="game">
+        <div id="timer-row">
+          <span id="timer">🕒 0 sec</span>
+          <button type="button" id="pause" class="control-button">
+            ⏸ Pause
+          </button>
+        </div>
+        <div id="board-area">
+          <div id="board"></div>
+          <aside id="hint-note" aria-live="polite" hidden>
+            <h2>💡 Hint</h2>
+            <p id="hint-note-text"></p>
+          </aside>
+        </div>
+        <div id="board-controls">
+          <div class="button-group">
+            <button type="button" id="undo" class="control-button">
+              ↶ Undo
+            </button>
+            <button type="button" id="reset" class="control-button">
+              Reset
+            </button>
+          </div>
+          <div class="button-group">
+            <button type="button" id="hint" class="control-button">
+              💡 Hint
+            </button>
+            <button type="button" id="solve" class="control-button">
+              ✨ Solve
+            </button>
+          </div>
+        </div>
+      </div>
+      <p id="status"></p>
+      <button type="button" id="next" class="control-button" hidden>
+        Next board →
+      </button>
+      <div id="menu-backdrop" hidden></div>
+      <aside id="menu-drawer" aria-label="All boards" inert>
+        <button type="button" id="menu-close" aria-label="Close boards menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 5L19 19M19 5L5 19" fill="none" />
+          </svg>
+        </button>
+        <div id="menu-content"></div>
+      </aside>
+      <dialog id="info-dialog">
+        <h2>How to play</h2>
+        <ul>
+          <li>
+            Fill every cell with 🐱 or 🐶. Click a cell to cycle: empty → 🐱 →
+            🐶 → empty.
+          </li>
+          <li>
+            No more than 2 identical symbols may be next to each other, in a row
+            or a column.
+          </li>
+          <li>Every row and column has exactly 3 🐱 and 3 🐶.</li>
+          <li>
+            <b>=</b> between two cells means they hold the same symbol;
+            <b>×</b> means different.
+          </li>
+          <li>
+            Grey cells are given and cannot be changed. Cells that break a rule
+            turn red.
+          </li>
+          <li>
+            The 💡 button fills in one cell that the rules settle and explains
+            why, in a note beside the board. Undo takes back your last move.
+          </li>
+        </ul>
+        <form method="dialog">
+          <button class="control-button">Got it</button>
+        </form>
+      </dialog>
+    </main>
+  </body>
+</html>
