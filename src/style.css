@@ -100,6 +100,8 @@ main {
 @media (max-width: 540px) {
   :root {
     --hint-size: 24px;
+    --cell-gap: 2px;
+    --board-padding: 4px;
   }
 
   body h1 {
