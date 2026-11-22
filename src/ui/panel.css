@@ -44,7 +44,8 @@
   display: contents;
 }
 
-#game .control-button {
+#game .control-button,
+#game .difficulty-button {
   padding: 8px 0;
   white-space: nowrap;
 }

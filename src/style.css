@@ -108,13 +108,9 @@ main {
     margin: 20px 0;
   }
 
-  body #game .control-button {
+  body #game .control-button,
+  body #game .difficulty-button {
     font-size: 15px;
-  }
-
-  body .difficulty-button {
-    font-size: 14px;
-    padding: 6px 14px;
   }
 
   body #info,
