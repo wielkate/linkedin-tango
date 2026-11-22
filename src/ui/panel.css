@@ -44,6 +44,11 @@
   display: contents;
 }
 
+/* The Next board button is as wide as the board. */
+#game #next {
+  width: 100%;
+}
+
 #game .control-button,
 #game .difficulty-button {
   padding: 8px 0;
