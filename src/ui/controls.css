@@ -1,7 +1,12 @@
+/* Each difficulty button is as wide as one of the four columns of the rows below it. */
 #difficulty {
   display: flex;
   justify-content: center;
   gap: 8px;
+}
+
+#difficulty .difficulty-button {
+  flex: 0 0 calc((100% - 3 * 8px) / 4);
 }
 
 .difficulty-button,

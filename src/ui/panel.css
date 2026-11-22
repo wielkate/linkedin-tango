@@ -9,30 +9,55 @@
   margin-bottom: 28px;
 }
 
-/* The board decides the width: the rows above and below stretch to its edges. */
+/* The board decides the width: the rows above and below stretch to its edges
+   and wrap or shrink their content instead of making the page wider. */
 #game {
-  width: max-content;
+  width: min-content;
   margin: 0 auto;
 }
 
+/* Both button rows use the same four columns, so Pause is exactly as wide as Solve and the
+   buttons share the board width: as big as possible and never wider than the board. */
 #timer-row,
 #board-controls {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
+  gap: 8px;
 }
 
 #timer-row {
-  margin-bottom: 16px;
+  margin-bottom: 25px;
 }
 
 #board-controls {
-  margin-top: 16px;
+  margin-top: 25px;
+  margin-bottom: 50px;
 }
 
-.button-group {
-  display: flex;
-  gap: 8px;
+#timer {
+  grid-column: 1 / 4;
+  text-align: left;
+}
+
+#board-controls .button-group {
+  display: contents;
+}
+
+/* The Next board button is as wide as two of the four button columns, so half the board. */
+#game #next {
+  width: calc((100% - 8px) / 2);
+}
+
+#game #next:not([hidden]) {
+  display: block;
+  margin: 0 auto;
+}
+
+#game .control-button,
+#game .difficulty-button {
+  padding: 8px 0;
+  white-space: nowrap;
 }
 
 #timer {
