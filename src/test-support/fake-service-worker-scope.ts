@@ -179,7 +179,9 @@ export class FakeServiceWorkerScope {
     if (this.isOffline) {
       throw new TypeError("Failed to fetch");
     }
-    const headers = this.isServerVaryingByOrigin ? { vary: "Origin" } : {};
+    const headers: Record<string, string> = this.isServerVaryingByOrigin
+      ? { vary: "Origin" }
+      : {};
     return new Response(`network:${request.url}`, { headers });
   }
 }
