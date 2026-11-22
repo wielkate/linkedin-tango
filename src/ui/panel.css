@@ -44,9 +44,14 @@
   display: contents;
 }
 
-/* The Next board button is as wide as the board. */
+/* The Next board button is as wide as two of the four button columns, so half the board. */
 #game #next {
-  width: 100%;
+  width: calc((100% - 8px) / 2);
+}
+
+#game #next:not([hidden]) {
+  display: block;
+  margin: 0 auto;
 }
 
 #game .control-button,
