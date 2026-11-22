@@ -142,3 +142,10 @@ main {
     margin-top: 13px;
   }
 }
+
+/* On the narrowest phones the four buttons below the board would be wider than the board. */
+@media (max-width: 340px) {
+  body #board-controls .control-button {
+    padding: 5px 8px;
+  }
+}
