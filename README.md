@@ -255,4 +255,4 @@ file, JSON arrays with one element per line, and a linear git history.
 1. ~~Generate all 11 222 valid boards and store them as static data~~ (done)
 2. ~~Solver + puzzle generator with unique-solution check~~ (done, see `scripts/generate-puzzles.mjs`)
 3. ~~Progress tracking (`localStorage`) and timer~~ (done)
-4. GitHub Pages deployment via GitHub Actions
+4. ~~GitHub Pages deployment via GitHub Actions~~ (done, see `.github/workflows/deploy.yml`)
