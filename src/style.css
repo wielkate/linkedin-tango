@@ -108,11 +108,22 @@ main {
     margin: 20px 0;
   }
 
-  /* The buttons must stay narrower than the board, otherwise the page scrolls sideways. */
-  body .control-button,
+  /* The rows above and below the board are as wide as the board, and the buttons share
+     that width, so they are as big as possible without being wider than the board. */
+  body #board-controls .button-group {
+    flex: 1;
+  }
+
+  body #board-controls .control-button {
+    flex: 1;
+    font-size: 15px;
+    padding: 8px 0;
+    white-space: nowrap;
+  }
+
   body .difficulty-button {
-    font-size: 13px;
-    padding: 5px 11px;
+    font-size: 14px;
+    padding: 6px 14px;
   }
 
   body #info,
@@ -122,12 +133,5 @@ main {
 
   body #status {
     font-size: 18px;
-  }
-}
-
-/* On the narrowest phones the four buttons below the board would be wider than the board. */
-@media (max-width: 340px) {
-  body #board-controls .control-button {
-    padding: 5px 8px;
   }
 }

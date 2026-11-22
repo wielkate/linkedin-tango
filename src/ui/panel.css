@@ -9,9 +9,10 @@
   margin-bottom: 28px;
 }
 
-/* The board decides the width: the rows above and below stretch to its edges. */
+/* The board decides the width: the rows above and below stretch to its edges
+   and wrap or shrink their content instead of making the page wider. */
 #game {
-  width: max-content;
+  width: min-content;
   margin: 0 auto;
 }
 
