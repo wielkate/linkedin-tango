@@ -108,17 +108,8 @@ main {
     margin: 20px 0;
   }
 
-  /* The rows above and below the board are as wide as the board, and the buttons share
-     that width, so they are as big as possible without being wider than the board. */
-  body #board-controls .button-group {
-    flex: 1;
-  }
-
-  body #board-controls .control-button {
-    flex: 1;
+  body #game .control-button {
     font-size: 15px;
-    padding: 8px 0;
-    white-space: nowrap;
   }
 
   body .difficulty-button {

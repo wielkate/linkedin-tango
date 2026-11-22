@@ -16,12 +16,13 @@
   margin: 0 auto;
 }
 
+/* Both button rows use the same four columns, so Pause is exactly as wide as Solve and the
+   buttons share the board width: as big as possible and never wider than the board. */
 #timer-row,
 #board-controls {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
-  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -34,9 +35,18 @@
   margin-bottom: 50px;
 }
 
-.button-group {
-  display: flex;
-  gap: 8px;
+#timer {
+  grid-column: 1 / 4;
+  text-align: left;
+}
+
+#board-controls .button-group {
+  display: contents;
+}
+
+#game .control-button {
+  padding: 8px 0;
+  white-space: nowrap;
 }
 
 #timer {
