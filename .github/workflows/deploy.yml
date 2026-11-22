@@ -1,46 +1,41 @@
-name: Deploy to GitHub Pages
+name: Deploy master build
 
-# Publishes the built game (dist/) to GitHub Pages whenever master changes.
-# One-time setup in the repository: Settings > Pages > Build and deployment > Source: GitHub Actions.
+# Publishes the built game from master to https://wielkate.github.io/linkedin-tango/.
+#
+# Both this workflow and deploy-test.yml write to the gh-pages branch: this one to its root,
+# the other one to its test/ folder. keep_files stops each of them from deleting the other's files.
+# One-time setup in the repository: Settings > Pages > Build and deployment >
+# Source: Deploy from a branch > gh-pages / (root).
 on:
   push:
     branches: [master]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# Let a running deployment finish, but skip older queued ones in favour of the newest.
+# Both deploy workflows share this group, so two of them never push to gh-pages at the same time.
 concurrency:
-  group: pages
+  group: gh-pages-deploy
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build the game
+  deploy:
+    name: Build master and publish it
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: master
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - run: npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: peaceiris/actions-gh-pages@v4
         with:
-          path: dist
-
-  deploy:
-    name: Publish to GitHub Pages
-    needs: [build]
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: dist
+          publish_branch: gh-pages
+          keep_files: true
