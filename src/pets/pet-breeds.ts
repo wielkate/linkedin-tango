@@ -119,6 +119,24 @@ export const CAT_BREEDS: PetBreed[] = [
     },
     markings: drawWhiteBlaze("#ffffff"),
   },
+  {
+    name: "Scottish Fold",
+    species: "cat",
+    earShape: "folded",
+    earScale: 1,
+    palette: {
+      fur: "#9ba1aa",
+      earOuter: "#8a9099",
+      earInner: "#c9a3a8",
+      muzzle: "#d9dde2",
+      nose: "#d49aa0",
+      pawColor: "#9ba1aa",
+      padColor: "#d49aa0",
+      eyeColor: "#e8a33a",
+      whiskerColor: DARK_OUTLINE,
+    },
+    markings: drawTabbyStripes("#6f757d"),
+  },
 ];
 
 export const DOG_BREEDS: PetBreed[] = [

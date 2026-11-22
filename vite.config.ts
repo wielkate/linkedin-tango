@@ -32,6 +32,8 @@ export default defineConfig({
         "src/board-menu/board-menu.ts",
         "src/board-menu/menu-drawer.ts",
         "src/effects/**",
+        "src/pets/paw-print-element.ts",
+        "src/pets/paw-print-walker.ts",
         "src/pets/pet-element.ts",
         "src/pets/pet-peeker.ts",
         "src/offline/register-service-worker.ts",

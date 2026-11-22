@@ -22,6 +22,7 @@ export function drawPetHead(breed: PetBreed): string {
     drawEarsBehindHead(breed),
     drawHeadShape(breed),
     drawFloppyEars(breed),
+    drawFoldedEars(breed),
     breed.markings,
     drawMuzzle(breed),
     drawEyes(breed),
@@ -83,9 +84,10 @@ function drawEarsBehindHead(breed: PetBreed): string {
 
 function drawHeadShape(breed: PetBreed): string {
   const headIsDog = breed.species === "dog";
-  const centerY = headIsDog ? 82 : 86;
-  const radiusX = headIsDog ? 58 : 70;
-  const radiusY = headIsDog ? 54 : 56;
+  const headIsRound = breed.earShape === "folded";
+  const centerY = headIsDog ? 82 : headIsRound ? 88 : 86;
+  const radiusX = headIsDog ? 58 : headIsRound ? 66 : 70;
+  const radiusY = headIsDog ? 54 : headIsRound ? 60 : 56;
 
   return `<ellipse cx="100" cy="${centerY}" rx="${radiusX}" ry="${radiusY}" fill="${breed.palette.fur}"/>`;
 }
@@ -104,6 +106,19 @@ function drawFloppyEars(breed: PetBreed): string {
     `<ellipse cx="40" cy="${centerY}" rx="${radiusX}" ry="${radiusY}" transform="rotate(14 40 ${centerY})" fill="${earOuter}"/>`,
     `<ellipse cx="160" cy="${centerY}" rx="${radiusX}" ry="${radiusY}" transform="rotate(-14 160 ${centerY})" fill="${earOuter}"/>`,
   ].join("");
+}
+
+// Small ears folded forward and down onto the round head, like a Scottish Fold's.
+function drawFoldedEars(breed: PetBreed): string {
+  if (breed.earShape !== "folded") {
+    return "";
+  }
+
+  const { earOuter, earInner } = breed.palette;
+  const foldedEar = `<path d="M42 50 Q46 26 80 30 Q84 34 80 40 Q60 42 52 64 Q40 62 42 50 Z" fill="${earOuter}"/>
+    <path d="M50 50 Q56 38 74 38 Q62 44 56 56 Z" fill="${earInner}" opacity="0.7"/>`;
+
+  return `${foldedEar}<g transform="translate(200 0) scale(-1 1)">${foldedEar}</g>`;
 }
 
 function drawMuzzle(breed: PetBreed): string {

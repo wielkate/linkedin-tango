@@ -1,6 +1,6 @@
 export type PetSpecies = "cat" | "dog";
 
-export type EarShape = "pointed" | "erect" | "floppy";
+export type EarShape = "pointed" | "erect" | "floppy" | "folded";
 
 export interface PetPalette {
   fur: string;

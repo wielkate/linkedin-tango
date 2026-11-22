@@ -39,6 +39,16 @@ describe("drawPetHead", () => {
     expect(drawPetHead(DOG_BREEDS[0])).not.toContain("M76 106 L36 98");
   });
 
+  it("gives the Scottish Fold small folded ears and grey fur", () => {
+    const scottishFold = CAT_BREEDS.find(
+      (breed) => breed.name === "Scottish Fold",
+    );
+
+    expect(scottishFold?.earShape).toBe("folded");
+    expect(scottishFold && drawPetHead(scottishFold)).toContain("M42 50 Q46 26");
+    expect(scottishFold?.palette.fur).toBe("#9ba1aa");
+  });
+
   it("makes a pug's floppy ears shorter than a beagle's", () => {
     const beagle = DOG_BREEDS.find((breed) => breed.name === "Beagle");
     const pug = DOG_BREEDS.find((breed) => breed.name === "Pug");
