@@ -20,7 +20,16 @@ export default tseslint.config(
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ["scripts/**/*.mjs", "e2e/**/*.ts", "*.config.{js,ts,mjs}"],
+    files: ["src/offline/service-worker.template.js"],
+    languageOptions: { globals: globals.serviceworker },
+  },
+  {
+    files: [
+      "scripts/**/*.mjs",
+      "e2e/**/*.ts",
+      "vite-plugins/**/*.ts",
+      "*.config.{js,ts,mjs}",
+    ],
     languageOptions: { globals: globals.node },
   },
   eslintConfigPrettier,

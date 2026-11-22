@@ -1,4 +1,5 @@
 import { configDefaults, defineConfig } from "vitest/config";
+import { offlinePlugin } from "./vite-plugins/offline-plugin";
 
 // Vite reads this file whenever you run `npm run dev`, `npm run build` or `npm run preview`.
 //
@@ -7,6 +8,9 @@ import { configDefaults, defineConfig } from "vitest/config";
 // https://<user>.github.io/<repo-name>/, so absolute URLs would point to the wrong place
 // and fail to load. With a relative base, the same dist/ folder works under any path.
 //
+// `offlinePlugin()` writes dist/service-worker.js after every build, so the game also works
+// without a network once it has been opened once (see "Offline play" in the README).
+//
 // Every other setting uses Vite's defaults (dev server on port 5173, build output in dist/).
 //
 // Vitest (`npm test`) reads the `test` block. Coverage counts every file in src/ except the ones
@@ -14,6 +18,7 @@ import { configDefaults, defineConfig } from "vitest/config";
 // tests themselves. `npm run test:coverage` fails when coverage drops below 90%.
 export default defineConfig({
   base: "./",
+  plugins: [offlinePlugin()],
   test: {
     exclude: [...configDefaults.exclude, "e2e/**"],
     coverage: {
@@ -27,6 +32,7 @@ export default defineConfig({
         "src/board-menu/board-menu.ts",
         "src/board-menu/menu-drawer.ts",
         "src/effects/**",
+        "src/offline/register-service-worker.ts",
         "src/hints/hint-note-view.ts",
         "src/ui/board-view.ts",
         "src/ui/difficulty-picker.ts",
