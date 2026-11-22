@@ -83,7 +83,9 @@ function planCrossing(
     ? viewport.heightPixels
     : viewport.widthPixels;
   const startAlong = startsAtFirstSide ? -sizePixels : lengthAlong + sizePixels;
-  const targetAlong = startsAtFirstSide ? lengthAlong + sizePixels : -sizePixels;
+  const targetAlong = startsAtFirstSide
+    ? lengthAlong + sizePixels
+    : -sizePixels;
   const startAcross = pickPositionAcross(random, lengthAcross);
   const targetAcross = pickPositionAcross(random, lengthAcross);
 
@@ -141,9 +143,13 @@ function planPrints(
     return {
       // The sideways direction is the walking direction turned a quarter turn.
       xPixels:
-        start.xPixels + directionX * distanceAlongWalk - directionY * sideOffsetPixels,
+        start.xPixels +
+        directionX * distanceAlongWalk -
+        directionY * sideOffsetPixels,
       yPixels:
-        start.yPixels + directionY * distanceAlongWalk + directionX * sideOffsetPixels,
+        start.yPixels +
+        directionY * distanceAlongWalk +
+        directionX * sideOffsetPixels,
       rotationDegrees: walkAngleDegrees + 90,
       appearAfterMilliseconds: index * MILLISECONDS_BETWEEN_PRINTS,
     };

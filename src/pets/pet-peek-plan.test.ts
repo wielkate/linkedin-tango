@@ -26,7 +26,9 @@ function planManyPeeks(viewport: typeof DESKTOP_VIEWPORT) {
 
 describe("planPeek", () => {
   it("visits every edge of the screen", () => {
-    const edges = new Set(planManyPeeks(DESKTOP_VIEWPORT).map((plan) => plan.edge));
+    const edges = new Set(
+      planManyPeeks(DESKTOP_VIEWPORT).map((plan) => plan.edge),
+    );
 
     expect([...edges].sort()).toEqual([...SCREEN_EDGES].sort());
   });
@@ -64,7 +66,9 @@ describe("planPeek", () => {
 
   it("keeps animals under 55% of the smaller side of a phone screen", () => {
     for (const plan of planManyPeeks(PHONE_VIEWPORT)) {
-      expect(plan.sizePixels).toBeLessThanOrEqual(PHONE_VIEWPORT.widthPixels * 0.55);
+      expect(plan.sizePixels).toBeLessThanOrEqual(
+        PHONE_VIEWPORT.widthPixels * 0.55,
+      );
     }
   });
 
@@ -101,8 +105,16 @@ describe("planPeek", () => {
   });
 
   it("plans the same visit for the same random numbers", () => {
-    const firstPlan = planPeek(createSeededRandom(3), DESKTOP_VIEWPORT, PET_BREEDS);
-    const secondPlan = planPeek(createSeededRandom(3), DESKTOP_VIEWPORT, PET_BREEDS);
+    const firstPlan = planPeek(
+      createSeededRandom(3),
+      DESKTOP_VIEWPORT,
+      PET_BREEDS,
+    );
+    const secondPlan = planPeek(
+      createSeededRandom(3),
+      DESKTOP_VIEWPORT,
+      PET_BREEDS,
+    );
 
     expect(firstPlan).toEqual(secondPlan);
   });

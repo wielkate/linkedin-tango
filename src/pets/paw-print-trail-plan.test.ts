@@ -35,16 +35,21 @@ describe("planPawPrintTrail", () => {
     for (const trail of planManyTrails()) {
       const delays = trail.prints.map((print) => print.appearAfterMilliseconds);
 
-      expect(delays).toEqual([...delays].sort((first, second) => first - second));
+      expect(delays).toEqual(
+        [...delays].sort((first, second) => first - second),
+      );
       expect(new Set(delays).size).toBe(delays.length);
     }
   });
 
   it("ends when the last print has faded away", () => {
     for (const trail of planManyTrails()) {
-      const lastDelay = trail.prints[trail.prints.length - 1].appearAfterMilliseconds;
+      const lastDelay =
+        trail.prints[trail.prints.length - 1].appearAfterMilliseconds;
 
-      expect(trail.totalMilliseconds).toBe(lastDelay + trail.printLifetimeMilliseconds);
+      expect(trail.totalMilliseconds).toBe(
+        lastDelay + trail.printLifetimeMilliseconds,
+      );
     }
   });
 
@@ -64,7 +69,9 @@ describe("planPawPrintTrail", () => {
     const lastPrint = trail.prints[trail.prints.length - 1];
 
     expect(lastPrint.xPixels).toBeGreaterThan(nextToLastPrint.xPixels);
-    expect(lastPrint.rotationDegrees).toBeCloseTo(trail.prints[0].rotationDegrees);
+    expect(lastPrint.rotationDegrees).toBeCloseTo(
+      trail.prints[0].rotationDegrees,
+    );
   });
 
   it("starts outside the screen, so the animal walks in from the side", () => {

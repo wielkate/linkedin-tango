@@ -7,8 +7,7 @@ const SVG_OPENING_TAG =
 // One paw print, with the toes at the top of the picture. The page turns it to point where the animal walks.
 // A cat leaves round toes and a small pad. A dog leaves longer toes, claw dents and a wider pad.
 export function drawPawPrint(species: PetSpecies): string {
-  const printParts =
-    species === "cat" ? drawCatPawPrint() : drawDogPawPrint();
+  const printParts = species === "cat" ? drawCatPawPrint() : drawDogPawPrint();
 
   return `${SVG_OPENING_TAG}<g fill="${PAW_PRINT_COLOR}">${printParts}</g></svg>`;
 }

@@ -29,8 +29,12 @@ describe("drawPetHead", () => {
   );
 
   it("draws a cat with slit pupils and a dog with round pupils", () => {
-    expect(drawPetHead(CAT_BREEDS[0])).toContain("<ellipse cx=\"70\" cy=\"80\" rx=\"3.5\"");
-    expect(drawPetHead(DOG_BREEDS[0])).toContain("<circle cx=\"74\" cy=\"76\" r=\"5.5\"");
+    expect(drawPetHead(CAT_BREEDS[0])).toContain(
+      '<ellipse cx="70" cy="80" rx="3.5"',
+    );
+    expect(drawPetHead(DOG_BREEDS[0])).toContain(
+      '<circle cx="74" cy="76" r="5.5"',
+    );
   });
 
   it("gives a dog a tongue and a cat whiskers", () => {
@@ -45,7 +49,9 @@ describe("drawPetHead", () => {
     );
 
     expect(scottishFold?.earShape).toBe("folded");
-    expect(scottishFold && drawPetHead(scottishFold)).toContain("M42 50 Q46 26");
+    expect(scottishFold && drawPetHead(scottishFold)).toContain(
+      "M42 50 Q46 26",
+    );
     expect(scottishFold?.palette.fur).toBe("#9ba1aa");
   });
 

@@ -1,9 +1,6 @@
 import { createPawPrintTrailElement } from "./paw-print-element";
 import { planPawPrintTrail } from "./paw-print-trail-plan";
-import {
-  pickBetween,
-  type RandomNumberGenerator,
-} from "./pet-peek-plan";
+import { pickBetween, type RandomNumberGenerator } from "./pet-peek-plan";
 
 const FIRST_WALK_DELAY_MILLISECONDS: [number, number] = [6000, 14000];
 const DELAY_BETWEEN_WALKS_MILLISECONDS: [number, number] = [20000, 45000];

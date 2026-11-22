@@ -80,8 +80,7 @@ export function planPeek(
   viewport: Viewport,
   breeds: readonly PetBreed[],
 ): PeekPlan {
-  const appearance: PetAppearance =
-    random() < PAW_ONLY_CHANCE ? "paw" : "head";
+  const appearance: PetAppearance = random() < PAW_ONLY_CHANCE ? "paw" : "head";
   const [minimumShown, maximumShown] =
     SHOWN_FRACTION_RANGE_BY_APPEARANCE[appearance];
 
@@ -111,9 +110,7 @@ function pickSizePixels(
   );
   const smallestSizePixels = Math.min(MIN_SIZE_PIXELS, largestSizePixels);
 
-  return Math.round(
-    pickBetween(random, smallestSizePixels, largestSizePixels),
-  );
+  return Math.round(pickBetween(random, smallestSizePixels, largestSizePixels));
 }
 
 function planLookTargets(random: RandomNumberGenerator): LookTarget[] {

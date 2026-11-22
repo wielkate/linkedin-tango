@@ -22,7 +22,10 @@ export function createPawPrintTrailElement(trail: PawPrintTrail): HTMLElement {
   return trailElement;
 }
 
-function createPrintElement(print: PawPrint, printPicture: string): HTMLElement {
+function createPrintElement(
+  print: PawPrint,
+  printPicture: string,
+): HTMLElement {
   const printElement = document.createElement("div");
 
   printElement.className = "paw-print";

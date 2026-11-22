@@ -152,15 +152,13 @@
   }
   8% {
     opacity: 0.55;
-    transform: translate(-50%, -50%) rotate(var(--paw-print-rotation))
-      scale(1);
+    transform: translate(-50%, -50%) rotate(var(--paw-print-rotation)) scale(1);
   }
   65% {
     opacity: 0.55;
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(var(--paw-print-rotation))
-      scale(1);
+    transform: translate(-50%, -50%) rotate(var(--paw-print-rotation)) scale(1);
   }
 }
