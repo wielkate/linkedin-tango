@@ -35,7 +35,8 @@ main {
       (
           100vw - 2 * var(--page-padding) - 2 * var(--board-padding) -
             (var(--board-size) - 1) * var(--cell-gap)
-        ) / var(--board-size)
+        ) /
+        var(--board-size)
     )
   );
   position: relative;
@@ -91,4 +92,53 @@ main {
 #status {
   font-size: 22px;
   min-height: 1.5em;
+}
+
+/* On a phone the page used to be zoomed out to about 80% because the board was too wide.
+   Now the board fits, so the text and buttons are made 80% of their size to look the same.
+   The selectors start with body so they win over the rules in the other style files. */
+@media (max-width: 540px) {
+  :root {
+    --hint-size: 24px;
+  }
+
+  body h1 {
+    font-size: 25px;
+    margin: 16px 0;
+  }
+
+  body .control-button,
+  body .difficulty-button {
+    font-size: 13px;
+    padding: 5px 11px;
+  }
+
+  body #info,
+  body #menu-button {
+    font-size: 16px;
+  }
+
+  body #timer {
+    font-size: 14px;
+  }
+
+  body #status {
+    font-size: 18px;
+  }
+
+  body .edge-hint {
+    font-size: 13px;
+  }
+
+  body #difficulty {
+    margin-bottom: 22px;
+  }
+
+  body #timer-row {
+    margin-bottom: 13px;
+  }
+
+  body #board-controls {
+    margin-top: 13px;
+  }
 }
