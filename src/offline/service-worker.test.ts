@@ -23,8 +23,12 @@ function createPageRequest(address: string) {
   return { method: "GET", url: address, mode: "navigate" } as const;
 }
 
-function createFileRequest(address: string, method = "GET") {
-  return { method, url: address, mode: "no-cors" } as const;
+function createFileRequest(
+  address: string,
+  method = "GET",
+  headers = new Headers(),
+) {
+  return { method, url: address, mode: "cors", headers } as const;
 }
 
 describe("service worker", () => {
@@ -70,6 +74,22 @@ describe("service worker", () => {
 
     const response = await worker.respondTo(
       createFileRequest(`${SITE}assets/app.js?cache-buster=1`),
+    );
+
+    expect(await response?.text()).toBe(`network:${SITE}assets/app.js`);
+  });
+
+  it("finds a stored file when the server said its answer varies by origin", async () => {
+    worker.isServerVaryingByOrigin = true;
+    await worker.install();
+    worker.isOffline = true;
+
+    const response = await worker.respondTo(
+      createFileRequest(
+        `${SITE}assets/app.js`,
+        "GET",
+        new Headers({ origin: "https://example.test" }),
+      ),
     );
 
     expect(await response?.text()).toBe(`network:${SITE}assets/app.js`);

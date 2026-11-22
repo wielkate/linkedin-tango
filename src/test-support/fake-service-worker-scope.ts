@@ -1,7 +1,10 @@
 type EventListener = (event: object) => void;
 type RequestLike = Pick<Request, "url">;
-type MatchTarget = RequestLike | URL;
-type ServiceWorkerRequest = Pick<Request, "method" | "url" | "mode">;
+type MatchTarget = (RequestLike & { headers?: Headers }) | URL;
+type ServiceWorkerRequest = Pick<Request, "method" | "url" | "mode"> & {
+  headers?: Headers;
+};
+type MatchOptions = { ignoreSearch?: boolean; ignoreVary?: boolean };
 
 class FakeCache {
   private readonly responsesByUrl = new Map<string, Response>();
@@ -21,9 +24,11 @@ class FakeCache {
     }
   }
 
+  // Like the browser, a stored answer that says "Vary: Origin" only fits a request with the
+  // same Origin header as the one that stored it (none), unless ignoreVary is set.
   async match(
     target: MatchTarget,
-    options: { ignoreSearch?: boolean } = {},
+    options: MatchOptions = {},
   ): Promise<Response | undefined> {
     const targetUrl = target instanceof URL ? target.href : target.url;
     const storedUrl = [...this.responsesByUrl.keys()].find(
@@ -31,7 +36,13 @@ class FakeCache {
         removeSearch(storedAddress, options.ignoreSearch) ===
         removeSearch(targetUrl, options.ignoreSearch),
     );
-    return storedUrl ? this.responsesByUrl.get(storedUrl)?.clone() : undefined;
+    const storedResponse = storedUrl
+      ? this.responsesByUrl.get(storedUrl)
+      : undefined;
+    if (!storedResponse || isBlockedByVary(storedResponse, target, options)) {
+      return undefined;
+    }
+    return storedResponse.clone();
   }
 
   get storedUrls(): string[] {
@@ -41,6 +52,17 @@ class FakeCache {
 
 function removeSearch(address: string, shouldRemove = false): string {
   return shouldRemove ? address.split("?")[0] : address;
+}
+
+function isBlockedByVary(
+  storedResponse: Response,
+  target: MatchTarget,
+  options: MatchOptions,
+): boolean {
+  const variesByOrigin = storedResponse.headers.get("vary") === "Origin";
+  const requestHasOrigin =
+    !(target instanceof URL) && Boolean(target.headers?.get("origin"));
+  return variesByOrigin && requestHasOrigin && !options.ignoreVary;
 }
 
 class FakeCacheStorage {
@@ -76,6 +98,7 @@ class FakeCacheStorage {
 export class FakeServiceWorkerScope {
   readonly fetchedUrls: string[] = [];
   isOffline = false;
+  isServerVaryingByOrigin = false;
   claimCount = 0;
 
   private readonly cacheStorage = new FakeCacheStorage((request) =>
@@ -156,6 +179,7 @@ export class FakeServiceWorkerScope {
     if (this.isOffline) {
       throw new TypeError("Failed to fetch");
     }
-    return new Response(`network:${request.url}`);
+    const headers = this.isServerVaryingByOrigin ? { vary: "Origin" } : {};
+    return new Response(`network:${request.url}`, { headers });
   }
 }

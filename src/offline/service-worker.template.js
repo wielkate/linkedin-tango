@@ -12,6 +12,11 @@ const CACHE_VERSION = "__CACHE_VERSION__";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 const PRECACHE_PATHS = JSON.parse("__PRECACHE_PATHS__");
 
+// The page asks for its scripts with an Origin header and the worker stores them without one.
+// A server that answers "Vary: Origin" (vite preview does) would then never match, so the
+// lookup ignores Vary. The stored files are the game's own, so one copy fits every request.
+const STORED_FILE_LOOKUP = { ignoreSearch: true, ignoreVary: true };
+
 self.addEventListener("install", (event) => {
   event.waitUntil(storeEveryGameFile());
 });
@@ -53,7 +58,7 @@ function isGameFileRequest(request) {
 
 async function respondOfflineFirst(request) {
   const cache = await caches.open(CACHE_NAME);
-  const storedResponse = await cache.match(request, { ignoreSearch: true });
+  const storedResponse = await cache.match(request, STORED_FILE_LOOKUP);
   if (storedResponse) {
     return storedResponse;
   }
@@ -73,5 +78,5 @@ async function findStoredPageFor(request, cache) {
   if (!isPageRequest) {
     return undefined;
   }
-  return cache.match(new URL("./", self.location), { ignoreSearch: true });
+  return cache.match(new URL("./", self.location), STORED_FILE_LOOKUP);
 }
