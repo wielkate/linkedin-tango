@@ -12,10 +12,6 @@ export function getCells(page: Page): Locator {
   return page.locator("#board .cell");
 }
 
-export function getCell(page: Page, row: number, column: number): Locator {
-  return getCells(page).nth(row * 6 + column);
-}
-
 // The first cell the player can change, because the given cells are locked.
 export function getFirstFreeCell(page: Page): Locator {
   return getCells(page).locator(":scope:not(.locked)").first();

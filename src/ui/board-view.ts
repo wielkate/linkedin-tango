@@ -2,12 +2,13 @@ import "./error-highlight.css";
 import type { Board } from "../game/board";
 import { BOARD_SIZE } from "../game/board-constants";
 import {
+  getAllCellPositions,
   toCellKey,
   type CellKey,
   type CellPosition,
 } from "../game/cell-position";
 import type { EdgeHint, HintType } from "../game/edge-hint";
-import { SYMBOL_EMOJIS, type CellValue } from "../game/symbols";
+import { SYMBOL_EMOJIS } from "../game/symbols";
 
 export interface BoardViewModel {
   board: Board;
@@ -33,19 +34,14 @@ export class BoardView {
 
   render(viewModel: BoardViewModel): void {
     this.boardElement.style.setProperty("--board-size", String(BOARD_SIZE));
-    this.boardElement.replaceChildren();
-
-    for (let row = 0; row < BOARD_SIZE; row++) {
-      for (let column = 0; column < BOARD_SIZE; column++) {
-        this.boardElement.appendChild(
-          this.createCellElement({ row, column }, viewModel),
-        );
-      }
-    }
-
-    for (const edgeHint of viewModel.edgeHints) {
-      this.boardElement.appendChild(this.createEdgeHintElement(edgeHint));
-    }
+    this.boardElement.replaceChildren(
+      ...getAllCellPositions().map((position) =>
+        this.createCellElement(position, viewModel),
+      ),
+      ...viewModel.edgeHints.map((edgeHint) =>
+        this.createEdgeHintElement(edgeHint),
+      ),
+    );
   }
 
   setBlurred(isBlurred: boolean): void {
@@ -58,13 +54,16 @@ export class BoardView {
   ): HTMLButtonElement {
     const cellKey = toCellKey(position);
     const isLocked = viewModel.lockedCellKeys.has(cellKey);
-    const isBreakingRules = viewModel.cellKeysBreakingRules.has(cellKey);
+    const value = viewModel.board.getValue(position);
 
     const cellElement = document.createElement("button");
     cellElement.type = "button";
     cellElement.className = "cell";
     cellElement.classList.toggle("locked", isLocked);
-    cellElement.classList.toggle("error", isBreakingRules);
+    cellElement.classList.toggle(
+      "error",
+      viewModel.cellKeysBreakingRules.has(cellKey),
+    );
     cellElement.classList.toggle(
       "hint-target",
       cellKey === viewModel.hintTargetCellKey,
@@ -73,7 +72,7 @@ export class BoardView {
       "hint-related",
       viewModel.hintRelatedCellKeys.has(cellKey),
     );
-    cellElement.textContent = this.getEmoji(viewModel.board.getValue(position));
+    cellElement.textContent = value === null ? "" : SYMBOL_EMOJIS[value];
     cellElement.addEventListener("click", () => this.onCellClick(position));
 
     if (isLocked) {
@@ -83,17 +82,7 @@ export class BoardView {
     return cellElement;
   }
 
-  private getEmoji(value: CellValue): string {
-    if (value === null) {
-      return "";
-    }
-
-    return SYMBOL_EMOJIS[value];
-  }
-
-  // A hint is centred on the middle of the edge shared by its two cells:
-  // halfway between the cells along one axis and at the cells' centre along the other.
-  // That is never a cell centre and never a corner where four cells meet.
+  // A hint is centred in the middle of the edge shared by its two cells:
   private createEdgeHintElement(edgeHint: EdgeHint): HTMLDivElement {
     const hintElement = document.createElement("div");
     hintElement.className = "edge-hint";
@@ -109,8 +98,8 @@ export class BoardView {
     return hintElement;
   }
 
-  // Distance from the board's top-left padding edge to the centre of the position
-  // halfway between two cell indexes (equal indexes give the cell's own centre).
+  // Distance from the board's top-left padding edge to the center of the position
+  // halfway between two cell indexes (equal indexes give the cell's own center).
   private calculateCenterOffset(
     firstIndex: number,
     secondIndex: number,

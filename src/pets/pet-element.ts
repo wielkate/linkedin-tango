@@ -5,7 +5,6 @@ import { ROTATION_DEGREES_BY_EDGE, type PeekPlan } from "./pet-peek-plan";
 // The position, size and rotation come from CSS variables, and pets.css does the rest.
 export function createPetElement(plan: PeekPlan): HTMLElement {
   const element = document.createElement("div");
-  const isPaw = plan.appearance === "paw";
 
   element.className = `pet pet--${plan.edge} pet--${plan.appearance}`;
   element.setAttribute("aria-hidden", "true");
@@ -17,9 +16,10 @@ export function createPetElement(plan: PeekPlan): HTMLElement {
     "--pet-rotation",
     `${ROTATION_DEGREES_BY_EDGE[plan.edge]}deg`,
   );
-  element.innerHTML = isPaw
-    ? drawReachingPaw(plan.breed)
-    : drawPetHead(plan.breed);
+  element.innerHTML =
+    plan.appearance === "paw"
+      ? drawReachingPaw(plan.breed)
+      : drawPetHead(plan.breed);
 
   return element;
 }

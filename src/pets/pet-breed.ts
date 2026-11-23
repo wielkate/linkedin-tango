@@ -8,7 +8,7 @@ export interface PetPalette {
   earInner: string;
   muzzle: string;
   nose: string;
-  // The colour of the paws and of the arm that reaches into the screen.
+  // The color of the paws and of the arm that reaches into the screen.
   pawColor: string;
   // The soft pads under the paw.
   padColor: string;

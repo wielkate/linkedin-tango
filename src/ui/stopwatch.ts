@@ -1,8 +1,6 @@
 const MILLISECONDS_PER_SECOND = 1000;
 
-// Counts the time that passed while running. It can be paused and resumed, and is
-// frozen for good by stop(). Reading the time costs nothing, the caller decides how
-// often to refresh the display.
+// Counts the time that passed while running. It can be paused and resumed
 export class Stopwatch {
   private accumulatedMilliseconds = 0;
   private runningSinceMilliseconds: number | null = Date.now();

@@ -9,11 +9,6 @@ import { EdgeHint, type HintType } from "./edge-hint";
 import type { Puzzle } from "./puzzle";
 import type { Solution } from "./solution";
 
-// src/data holds every valid board (boards.json) and one puzzle per board and difficulty
-// (easy.json, medium.json, hard.json), all made by scripts/generate-puzzles.mjs.
-// A puzzle is stored as "cells|edges"; the script's header explains the numbering.
-// Rows and columns are counted from 0, starting at the top-left cell.
-// Cell values are 0 for 🐱 and 1 for 🐶.
 const HORIZONTAL_EDGE_COUNT = BOARD_SIZE * (BOARD_SIZE - 1);
 
 // Decodes the stored puzzles and picks the next board to play.
@@ -47,8 +42,6 @@ export class PuzzleLibrary {
     };
   }
 
-  // A random board the player has not solved on this difficulty yet,
-  // or any random board once every one of them is solved.
   pickBoardId(solvedBoardIds: Set<number>): number {
     const allBoardIds = this.listAllBoardIds();
     const unsolvedBoardIds = allBoardIds.filter(

@@ -62,9 +62,7 @@ function doesPropagationLeadToContradiction(
   trialBoard: Board,
   edgeHints: EdgeHint[],
 ): boolean {
-  let isStable = false;
-
-  while (!isStable) {
+  while (true) {
     const isAnyRuleBroken =
       findCellsBreakingRules(trialBoard, edgeHints).size > 0;
 
@@ -78,34 +76,23 @@ function doesPropagationLeadToContradiction(
       return true;
     }
 
-    applyDeductions(trialBoard, deductions);
-    isStable = deductions.length === 0;
-  }
+    if (deductions.length === 0) {
+      return false;
+    }
 
-  return false;
+    for (const deduction of deductions) {
+      trialBoard.setValue(deduction.position, deduction.symbol);
+    }
+  }
 }
 
 function areDeductionsConflicting(deductions: Deduction[]): boolean {
   const symbolsByCellKey = new Map<CellKey, PlayerSymbol>();
 
-  for (const deduction of deductions) {
+  return deductions.some((deduction) => {
     const cellKey = toCellKey(deduction.position);
     const earlierSymbol = symbolsByCellKey.get(cellKey);
-    const isContradictingEarlierDeduction =
-      earlierSymbol !== undefined && earlierSymbol !== deduction.symbol;
-
-    if (isContradictingEarlierDeduction) {
-      return true;
-    }
-
     symbolsByCellKey.set(cellKey, deduction.symbol);
-  }
-
-  return false;
-}
-
-function applyDeductions(board: Board, deductions: Deduction[]): void {
-  for (const deduction of deductions) {
-    board.setValue(deduction.position, deduction.symbol);
-  }
+    return earlierSymbol !== undefined && earlierSymbol !== deduction.symbol;
+  });
 }

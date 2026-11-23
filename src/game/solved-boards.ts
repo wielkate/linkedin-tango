@@ -1,55 +1,44 @@
-import { DIFFICULTIES, type Difficulty } from "./difficulty";
+import type { Difficulty } from "./difficulty";
+
+type SolveSecondsByDifficulty = Record<Difficulty, Record<number, number>>;
 
 const STORAGE_KEY = "tango-solve-seconds";
 
-// The boards the player has solved, per difficulty, with the best time each was solved in,
-// kept in localStorage between visits.
-// localStorage can be unavailable (private window, blocked site data), so every access is guarded.
+function readSavedRecords(): Partial<SolveSecondsByDifficulty> {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}") ?? {};
+  } catch {
+    // Unreadable saved progress is treated as no progress.
+    return {};
+  }
+}
+
+// The boards the player has solved, per difficulty, with the best time
+// localStorage can be unavailable (private window, blocked site data)
 export class SolvedBoards {
   private constructor(
-    private readonly solveSecondsByDifficulty: Record<
-      Difficulty,
-      Map<number, number>
-    >,
+    private readonly solveSecondsByDifficulty: SolveSecondsByDifficulty,
   ) {}
 
   static loadFromStorage(): SolvedBoards {
-    const solveSecondsByDifficulty: Record<Difficulty, Map<number, number>> = {
-      easy: new Map(),
-      medium: new Map(),
-      hard: new Map(),
-    };
+    const savedRecords = readSavedRecords();
 
-    try {
-      const savedText = localStorage.getItem(STORAGE_KEY);
-      const savedRecords: unknown =
-        savedText === null ? {} : JSON.parse(savedText);
-
-      for (const difficulty of DIFFICULTIES) {
-        const savedRecord =
-          (savedRecords as Record<string, unknown>)[difficulty] ?? {};
-
-        for (const [boardIdText, seconds] of Object.entries(savedRecord)) {
-          solveSecondsByDifficulty[difficulty].set(
-            Number(boardIdText),
-            seconds as number,
-          );
-        }
-      }
-    } catch {
-      // Unreadable saved progress is treated as no progress.
-    }
-
-    return new SolvedBoards(solveSecondsByDifficulty);
+    return new SolvedBoards({
+      easy: { ...savedRecords.easy },
+      medium: { ...savedRecords.medium },
+      hard: { ...savedRecords.hard },
+    });
   }
 
   getBoardIds(difficulty: Difficulty): Set<number> {
-    return new Set(this.solveSecondsByDifficulty[difficulty].keys());
+    return new Set(
+      Object.keys(this.solveSecondsByDifficulty[difficulty]).map(Number),
+    );
   }
 
-  // The best time the board was solved in, or null when it was never solved.
+  // The best time the board was solved in, or null
   getSolveSeconds(difficulty: Difficulty, boardId: number): number | null {
-    return this.solveSecondsByDifficulty[difficulty].get(boardId) ?? null;
+    return this.solveSecondsByDifficulty[difficulty][boardId] ?? null;
   }
 
   markSolved(
@@ -57,26 +46,21 @@ export class SolvedBoards {
     boardId: number,
     solveSeconds: number,
   ): void {
-    const bestSeconds = this.solveSecondsByDifficulty[difficulty].get(boardId);
-    const isNewBestTime =
-      bestSeconds === undefined || solveSeconds < bestSeconds;
+    const bestSeconds = this.getSolveSeconds(difficulty, boardId);
+    const isNewBestTime = bestSeconds === null || solveSeconds < bestSeconds;
 
     if (isNewBestTime) {
-      this.solveSecondsByDifficulty[difficulty].set(boardId, solveSeconds);
+      this.solveSecondsByDifficulty[difficulty][boardId] = solveSeconds;
       this.saveToStorage();
     }
   }
 
   private saveToStorage(): void {
-    const savedRecords = Object.fromEntries(
-      DIFFICULTIES.map((difficulty) => [
-        difficulty,
-        Object.fromEntries(this.solveSecondsByDifficulty[difficulty]),
-      ]),
-    );
-
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRecords));
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(this.solveSecondsByDifficulty),
+      );
     } catch {
       // Progress just won't survive a reload.
     }

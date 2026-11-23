@@ -22,7 +22,6 @@ interface ConfettiPiece {
 }
 
 // A short burst of falling confetti drawn on a full-screen canvas that ignores the mouse.
-// The canvas exists only while the animation runs.
 export class Confetti {
   private canvas: HTMLCanvasElement | null = null;
 

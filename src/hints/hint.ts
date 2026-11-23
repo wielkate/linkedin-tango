@@ -15,14 +15,12 @@ import { findLookaheadDeductions } from "./hint-lookahead";
 export interface Hint {
   position: CellPosition;
   correctValue: PlayerSymbol;
-  // Why the cell holds this symbol, as a sentence for the player.
+  // Why the cell holds this symbol
   explanation: string;
-  // The cells the explanation refers to, so the board can point at them.
   relatedPositions: CellPosition[];
 }
 
-// Finds a cell that the rules settle, easiest rule first, and says which rule it is.
-// Returns null when every cell already matches the solution.
+// Finds a cell that the rules settle, easiest rule first
 export function findHint(board: Board, puzzle: Puzzle): Hint | null {
   const cellPositionsToFix = findPositionsDifferingFromSolution(
     board,

@@ -5,21 +5,19 @@ import type { EdgeHint } from "./edge-hint";
 import { getAllLines, getLineWindows, type Line } from "./line";
 import { ALL_SYMBOLS } from "./symbols";
 
-// The rules of a puzzle are the ones every puzzle has plus its own edge hints.
+// Common rules + own hints.
 // Only filled cells are checked, so an unfinished board can be valid so far.
 export function findCellsBreakingRules(
   board: Board,
   edgeHints: EdgeHint[],
 ): Set<CellKey> {
-  const cellKeys: CellKey[] = [];
-
-  for (const line of getAllLines()) {
-    cellKeys.push(...findCellsWithTooManyOfOneSymbol(board, line));
-    cellKeys.push(...findCellsInTooLongStreak(board, line));
-  }
-  cellKeys.push(...findCellsBreakingEdgeHints(board, edgeHints));
-
-  return new Set(cellKeys);
+  return new Set([
+    ...getAllLines().flatMap((line) => [
+      ...findCellsWithTooManyOfOneSymbol(board, line),
+      ...findCellsInTooLongStreak(board, line),
+    ]),
+    ...findCellsBreakingEdgeHints(board, edgeHints),
+  ]);
 }
 
 export function isSolved(board: Board, edgeHints: EdgeHint[]): boolean {
@@ -30,32 +28,19 @@ export function isSolved(board: Board, edgeHints: EdgeHint[]): boolean {
 }
 
 function findCellsWithTooManyOfOneSymbol(board: Board, line: Line): CellKey[] {
-  const cellKeys: CellKey[] = [];
-
-  for (const symbol of ALL_SYMBOLS) {
+  return ALL_SYMBOLS.flatMap((symbol) => {
     const positionsWithSymbol = line.positions.filter(
       (position) => board.getValue(position) === symbol,
     );
     const hasTooManySymbols = positionsWithSymbol.length > SYMBOLS_PER_LINE;
-
-    if (hasTooManySymbols) {
-      cellKeys.push(...positionsWithSymbol.map(toCellKey));
-    }
-  }
-
-  return cellKeys;
+    return hasTooManySymbols ? positionsWithSymbol.map(toCellKey) : [];
+  });
 }
 
 function findCellsInTooLongStreak(board: Board, line: Line): CellKey[] {
-  const cellKeys: CellKey[] = [];
-
-  for (const windowPositions of getLineWindows(line, FORBIDDEN_STREAK_LENGTH)) {
-    if (areFilledAndIdentical(board, windowPositions)) {
-      cellKeys.push(...windowPositions.map(toCellKey));
-    }
-  }
-
-  return cellKeys;
+  return getLineWindows(line, FORBIDDEN_STREAK_LENGTH)
+    .filter((windowPositions) => areFilledAndIdentical(board, windowPositions))
+    .flatMap((windowPositions) => windowPositions.map(toCellKey));
 }
 
 function areFilledAndIdentical(
@@ -74,13 +59,10 @@ function findCellsBreakingEdgeHints(
   board: Board,
   edgeHints: EdgeHint[],
 ): CellKey[] {
-  const cellKeys: CellKey[] = [];
-
-  for (const edgeHint of edgeHints) {
-    if (edgeHint.isBrokenOn(board)) {
-      cellKeys.push(toCellKey(edgeHint.first), toCellKey(edgeHint.second));
-    }
-  }
-
-  return cellKeys;
+  return edgeHints
+    .filter((edgeHint) => edgeHint.isBrokenOn(board))
+    .flatMap((edgeHint) => [
+      toCellKey(edgeHint.first),
+      toCellKey(edgeHint.second),
+    ]);
 }

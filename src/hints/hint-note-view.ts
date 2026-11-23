@@ -9,7 +9,6 @@ export class HintNoteView {
 
   render(shownHint: Hint | null): void {
     this.noteElement.hidden = shownHint === null;
-    this.textElement.textContent =
-      shownHint === null ? "" : shownHint.explanation;
+    this.textElement.textContent = shownHint?.explanation ?? "";
   }
 }

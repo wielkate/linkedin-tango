@@ -4,9 +4,7 @@ import { SYMBOL_EMOJIS } from "../game/symbols";
 import type { Deduction } from "./deduction";
 
 export interface DeductionExplanation {
-  // The sentence shown next to the board, in plain words.
   explanation: string;
-  // The cells that the sentence talks about, so the board can point at them.
   relatedPositions: CellPosition[];
 }
 

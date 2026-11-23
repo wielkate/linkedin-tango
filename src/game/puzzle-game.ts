@@ -13,7 +13,7 @@ export class PuzzleGame {
   private readonly board: Board;
   private readonly lockedCellKeys: Set<CellKey>;
   private readonly changeHistory = new ChangeHistory();
-  // The hint whose explanation is shown beside the board; any other action clears it.
+  // Hint whose explanation; any other action clears it.
   private activeHint: Hint | null = null;
 
   constructor(readonly puzzle: Puzzle) {

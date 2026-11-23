@@ -1,4 +1,4 @@
-// Generates every valid board and, for each board, one puzzle per difficulty.
+// Generates every valid board in three difficulties
 // Run with: node scripts/generate-puzzles.mjs
 // Output (src/data/): boards.json plus easy.json, medium.json and hard.json.
 //
@@ -6,20 +6,15 @@
 // Valid board: every row and column has three cats and three dogs, and no three identical
 // symbols are next to each other in a row or a column.
 //
-// Puzzle: a list of given cells and edge hints that leave exactly one valid board.
 // The puzzle of board N sits on line N + 1 of each difficulty file, as "cells|edges".
 // A cell is its index (row * 6 + column). An edge hint is the index of the edge between two
-// neighbouring cells; its type (same or different) is read from the board itself:
+// neighboring cells; same/different is read from the board itself:
 //   0..29   horizontal edge between (row, column) and (row, column + 1): row * 5 + column
 //   30..59  vertical edge between (row, column) and (row + 1, column): 30 + row * 6 + column
 //
-// Example: board 1 and its easy puzzle (pictures in the example/ folder).
-//
-//   boards.json, line 2:  "110100110100001011110100001011001011"
-//   split into rows of 6: 110100 / 110100 / 001011 / 110100 / 001011 / 001011
-//                         (0 = cat 🐱, 1 = dog 🐶)
-//
-//   easy.json, line 2:    "1,4,19,21,22,33,35|11,13,14,19,29,32,33,43,52,53,58"
+//   See example/
+//   boards.json, line 2:  "110100 110100 001011 110100 001011 001011"
+//   easy.json, line 2:    "1,4,19,21,22,33,35 | 11,13,14,19,29,32,33,43,52,53,58"
 //   given cells (before the "|"):
 //     1  -> row 0, column 1 -> board symbol 1 -> 🐶 shown from the start
 //     4  -> row 0, column 4 -> board symbol 0 -> 🐱
@@ -29,11 +24,6 @@
 //           Both hold 1 in the board, so the hint is "same" (=).
 //     52 -> vertical edge, cell 52 - 30 = 22 = (3,4) and the cell below it (4,4).
 //           The board holds 0 and 1 there, so the hint is "different" (x).
-//   The game fills in only the given cells and shows the hints; the player finds the rest.
-//
-// Every puzzle can be solved from its clues by the steps the hint button explains (see
-// deduction-solver.mjs), so a hint never has to fall back to "needs a longer chain of
-// reasoning". Easy puzzles need nothing but the simple rules, with no trying out of symbols.
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { ClueIndex } from "./clue-index.mjs";
@@ -43,397 +33,251 @@ import {
   isSolvableAtLevel,
   SOLVING_LEVELS,
 } from "./deduction-solver.mjs";
-import { formatAsJsonWithOneElementPerLine } from "./format-json.mjs";
+import {
+  BOARD_SIZE,
+  CELL_COUNT,
+  SYMBOLS_PER_LINE,
+} from "../src/game/board-constants.ts";
 
-const BOARD_SIZE = 6;
-const CELL_COUNT = BOARD_SIZE * BOARD_SIZE;
-const SYMBOLS_PER_LINE = BOARD_SIZE / 2;
-const MAX_ADJACENT_IDENTICAL = 2;
 const OUTPUT_DIRECTORY = new URL("../src/data/", import.meta.url);
 
-// Easy keeps the most clues, hard removes clues until none can go.
-// A target of 0 means "remove as many clues as possible".
-// Easy puzzles that need more clues than the target to be solvable by the simple rules
-// get the extra clues added.
-const TARGET_CLUE_COUNT_PER_DIFFICULTY = { easy: 18, medium: 13, hard: 0 };
-
-// The hardest reasoning a puzzle of the difficulty may need, as the hint button explains it.
-const REQUIRED_SOLVING_LEVEL_PER_DIFFICULTY = {
-  easy: SOLVING_LEVELS.simpleRules,
-  medium: SOLVING_LEVELS.lookahead,
-  hard: SOLVING_LEVELS.lookahead,
+// Clues to keep (0 = as few as possible) and the hardest reasoning the hint may need.
+const DIFFICULTIES = {
+  easy: { targetClueCount: 18, requiredLevel: SOLVING_LEVELS.simpleRules },
+  medium: { targetClueCount: 13, requiredLevel: SOLVING_LEVELS.lookahead },
+  hard: { targetClueCount: 0, requiredLevel: SOLVING_LEVELS.lookahead },
 };
 
-function createValidRows() {
-  const validRows = [];
+const CELLS = [...Array(CELL_COUNT).keys()]; // [0, 1... 35]
 
-  for (let rowBits = 0; rowBits < 2 ** BOARD_SIZE; rowBits++) {
-    const row = [];
-    for (let column = 0; column < BOARD_SIZE; column++) {
-      row.push((rowBits >> column) & 1);
-    }
+// Pairs of neighbouring cells: horizontal edges first, then vertical ones.
+// Horizontal: [0,1] [1,2] [2,3] [3,4] [4,5] ...
+// Vertical: [0,6] [1,7] [2,8] ... [5,11] ...
+const EDGES = [
+  ...CELLS.filter((cell) => cell % BOARD_SIZE < BOARD_SIZE - 1).map((cell) => [
+    cell,
+    cell + 1,
+  ]),
+  ...CELLS.filter((cell) => cell < CELL_COUNT - BOARD_SIZE).map((cell) => [
+    cell,
+    cell + BOARD_SIZE,
+  ]),
+];
 
-    const dogCount = row.reduce((total, value) => total + value, 0);
-    if (dogCount === SYMBOLS_PER_LINE && !hasTooLongStreak(row)) {
-      validRows.push(row);
-    }
-  }
-
-  return validRows;
+// Valid when no symbol appears more than 3 times and none appears 3 times in a row.
+// For a complete line this means exactly three of each.
+function isLineValid(line) {
+  const dogsCount = line.filter((value) => value === 1).length;
+  const hasStreak = line.some(
+    (value, i) => i >= 2 && value === line[i - 1] && value === line[i - 2],
+  );
+  return (
+    dogsCount <= SYMBOLS_PER_LINE &&
+    line.length - dogsCount <= SYMBOLS_PER_LINE &&
+    !hasStreak
+  );
 }
 
-function hasTooLongStreak(line) {
-  const streakLength = MAX_ADJACENT_IDENTICAL + 1;
+function createAllBoards() {
+  const validRows = Array.from({ length: 2 ** BOARD_SIZE }, (_, bits) =>
+    Array.from({ length: BOARD_SIZE }, (_, column) => (bits >> column) & 1),
+  ).filter(isLineValid);
 
-  for (let start = 0; start + streakLength <= line.length; start++) {
-    const streak = line.slice(start, start + streakLength);
-    if (streak.every((value) => value === streak[0])) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function createAllBoards(validRows) {
   const boards = [];
-  collectBoards(validRows, [], boards);
+  const addRows = (rows) => {
+    if (rows.length === BOARD_SIZE) {
+      boards.push(rows.flat());
+      return;
+    }
+    for (const row of validRows) {
+      const next = [...rows, row];
+      if (
+        CELLS.slice(0, BOARD_SIZE).every((column) =>
+          isLineValid(next.map((r) => r[column])),
+        )
+      ) {
+        addRows(next);
+      }
+    }
+  };
+  addRows([]);
+
   return boards;
 }
 
-function collectBoards(validRows, rowsSoFar, boards) {
-  if (rowsSoFar.length === BOARD_SIZE) {
-    boards.push(rowsSoFar.flat());
-    return;
-  }
-
-  for (const row of validRows) {
-    const candidateRows = [...rowsSoFar, row];
-    if (areColumnsStillValid(candidateRows)) {
-      collectBoards(validRows, candidateRows, boards);
-    }
-  }
-}
-
-function areColumnsStillValid(rows) {
-  for (let column = 0; column < BOARD_SIZE; column++) {
-    const columnValues = rows.map((row) => row[column]);
-    const dogCount = columnValues.reduce((total, value) => total + value, 0);
-    const catCount = columnValues.length - dogCount;
-    const hasTooManyOfOneSymbol =
-      dogCount > SYMBOLS_PER_LINE || catCount > SYMBOLS_PER_LINE;
-
-    if (hasTooManyOfOneSymbol || hasTooLongStreak(columnValues)) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function listEdges() {
-  const edges = [];
-
-  for (let row = 0; row < BOARD_SIZE; row++) {
-    for (let column = 0; column < BOARD_SIZE - 1; column++) {
-      const firstCell = row * BOARD_SIZE + column;
-      edges.push([firstCell, firstCell + 1]);
-    }
-  }
-
-  for (let row = 0; row < BOARD_SIZE - 1; row++) {
-    for (let column = 0; column < BOARD_SIZE; column++) {
-      const firstCell = row * BOARD_SIZE + column;
-      edges.push([firstCell, firstCell + BOARD_SIZE]);
-    }
-  }
-
-  return edges;
-}
-
 // Small deterministic random generator, so the output is the same on every run.
-function createRandomGenerator(seed) {
+function createRandom(seed) {
   let state = seed >>> 0;
-
   return () => {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
     return state / 2 ** 32;
   };
 }
 
-function shuffle(items, nextRandom) {
-  const shuffled = [...items];
-
-  for (let index = shuffled.length - 1; index > 0; index--) {
-    const swapIndex = Math.floor(nextRandom() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [
-      shuffled[swapIndex],
-      shuffled[index],
-    ];
+function shuffle(items, random) {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
   }
-
-  return shuffled;
+  return result;
 }
 
-// The clues of a puzzle: the given cells and the edges that carry a hint.
-function createAllClues(edges) {
-  return {
-    givenCells: new Set(Array.from({ length: CELL_COUNT }, (_, cell) => cell)),
-    hintEdges: new Set(edges.keys()),
-  };
-}
-
-function copyClues(clues) {
-  return {
-    givenCells: new Set(clues.givenCells),
-    hintEdges: new Set(clues.hintEdges),
-  };
-}
-
+// A clue is { set: "givenCells" | "hintEdges", id }.
 function listClues(clues) {
-  return [
-    ...[...clues.givenCells].map((cell) => ({ kind: "cell", id: cell })),
-    ...[...clues.hintEdges].map((edge) => ({ kind: "edge", id: edge })),
-  ];
-}
-
-function getClueSet(clues, clue) {
-  return clue.kind === "cell" ? clues.givenCells : clues.hintEdges;
-}
-
-function createClueBitsets(board, clues, clueIndex, edges) {
-  return [
-    ...[...clues.givenCells].map(
-      (cell) => clueIndex.cellBitsets[cell * 2 + board[cell]],
-    ),
-    ...[...clues.hintEdges].map((edge) => {
-      const [firstCell, secondCell] = edges[edge];
-      const isSame = board[firstCell] === board[secondCell] ? 1 : 0;
-      return clueIndex.edgeBitsets[edge * 2 + isSame];
-    }),
-  ];
-}
-
-function hasExactlyOneSolution(board, clues, clueIndex, edges) {
-  const clueBitsets = createClueBitsets(board, clues, clueIndex, edges);
-  return clueIndex.countMatchingBoards(clueBitsets, 2) === 1;
-}
-
-function isSolvableAtRequiredLevel(board, clues, requiredSolvingLevel, edges) {
-  const solvingLevel = findSolvingLevel(
-    board,
-    clues.givenCells,
-    clues.hintEdges,
-    edges,
+  return Object.entries(clues).flatMap(([set, ids]) =>
+    [...ids].map((id) => ({ set, id })),
   );
-  return isSolvableAtLevel(solvingLevel, requiredSolvingLevel);
 }
 
-// Takes clues away in a random order and puts a clue back when the puzzle stops being
-// acceptable without it, until the target clue count is reached.
-function removeClues(seed, targetClueCount, edges, isPuzzleAcceptable) {
-  const nextRandom = createRandomGenerator(seed);
-  const clues = createAllClues(edges);
+function withClue(clues, { set, id }) {
+  return { ...clues, [set]: new Set([...clues[set], id]) };
+}
 
-  for (const clue of shuffle(listClues(clues), nextRandom)) {
-    const clueSet = getClueSet(clues, clue);
-    const hasReachedTarget =
-      countUsefulClues(clues.givenCells, clues.hintEdges, edges) <=
-      targetClueCount;
+// A hint between two given cells would tell nothing.
+const isUselessEdge = (givenCells, edge) =>
+  EDGES[edge].every((cell) => givenCells.has(cell));
 
-    if (hasReachedTarget) {
+function listUsefulEdges({ givenCells, hintEdges }) {
+  return [...hintEdges].filter((edge) => !isUselessEdge(givenCells, edge));
+}
+
+function countUsefulClues(clues) {
+  return clues.givenCells.size + listUsefulEdges(clues).length;
+}
+
+function hasExactlyOneSolution(board, clues, clueIndex) {
+  const cellBitsets = [...clues.givenCells].map(
+    (cell) => clueIndex.cellBitsets[cell * 2 + board[cell]],
+  );
+  const edgeBitsets = [...clues.hintEdges].map((edge) => {
+    const [first, second] = EDGES[edge];
+    return clueIndex.edgeBitsets[
+      edge * 2 + Number(board[first] === board[second])
+    ];
+  });
+  return (
+    clueIndex.countMatchingBoards([...cellBitsets, ...edgeBitsets], 2) === 1
+  );
+}
+
+// Starts with every clue, takes them away in random order and puts one back when the
+// puzzle stops being acceptable without it, until the target clue count is reached.
+function removeClues(seed, targetClueCount, isAcceptable) {
+  const random = createRandom(seed);
+  const clues = {
+    givenCells: new Set(CELLS),
+    hintEdges: new Set(EDGES.keys()),
+  };
+
+  for (const { set, id } of shuffle(listClues(clues), random)) {
+    if (countUsefulClues(clues) <= targetClueCount) {
       break;
     }
 
-    clueSet.delete(clue.id);
-
-    if (!isPuzzleAcceptable(clues)) {
-      clueSet.add(clue.id);
+    clues[set].delete(id);
+    if (!isAcceptable(clues)) {
+      clues[set].add(id);
     }
   }
 
   return clues;
 }
 
-// Every clue that the puzzle does not have yet and that tells something new:
-// a hint between two given cells would tell nothing.
-function listMissingClues(clues, edges) {
-  const missingCells = Array.from({ length: CELL_COUNT }, (_, cell) => cell)
-    .filter((cell) => !clues.givenCells.has(cell))
-    .map((cell) => ({ kind: "cell", id: cell }));
-  const missingEdges = [...edges.keys()]
-    .filter((edge) => !clues.hintEdges.has(edge))
-    .filter((edge) => !isHintBetweenGivenCells(clues.givenCells, edge, edges))
-    .map((edge) => ({ kind: "edge", id: edge }));
+// Adds the clue that leaves the fewest cells to the simple rules, until they solve it all.
+// Candidates are shuffled, so the clue that wins a tie is the same on every run.
+function addCluesUntilSolvableBySimpleRules(board, startClues, seed) {
+  const random = createRandom(seed);
+  const countCellsLeft = ({ givenCells, hintEdges }) =>
+    countCellsLeftBySimpleRules(board, givenCells, hintEdges, EDGES);
+  let clues = startClues;
 
-  return [...missingCells, ...missingEdges];
-}
+  while (countCellsLeft(clues) > 0) {
+    const missingCells = CELLS.filter(
+      (cell) => !clues.givenCells.has(cell),
+    ).map((id) => ({ set: "givenCells", id }));
+    const missingEdges = [...EDGES.keys()]
+      .filter((edge) => !clues.hintEdges.has(edge))
+      .filter((edge) => !isUselessEdge(clues.givenCells, edge))
+      .map((id) => ({ set: "hintEdges", id }));
 
-function addClue(clues, clue) {
-  getClueSet(clues, clue).add(clue.id);
-}
-
-function countCellsLeftBySimpleRulesWithClue(board, clues, clue, edges) {
-  const cluesWithClue = copyClues(clues);
-  addClue(cluesWithClue, clue);
-
-  return countCellsLeftBySimpleRules(
-    board,
-    cluesWithClue.givenCells,
-    cluesWithClue.hintEdges,
-    edges,
-  );
-}
-
-// The first of the candidates that leaves the fewest cells to the player.
-function findClueHelpingSimpleRulesMost(board, clues, candidateClues, edges) {
-  let bestClue = candidateClues[0];
-  let fewestCellsLeft = Infinity;
-
-  for (const candidateClue of candidateClues) {
-    const cellsLeft = countCellsLeftBySimpleRulesWithClue(
-      board,
-      clues,
-      candidateClue,
-      edges,
-    );
-
-    if (cellsLeft < fewestCellsLeft) {
-      bestClue = candidateClue;
-      fewestCellsLeft = cellsLeft;
+    let best = { cellsLeft: Infinity };
+    for (const clue of shuffle([...missingCells, ...missingEdges], random)) {
+      const cellsLeft = countCellsLeft(withClue(clues, clue));
+      if (cellsLeft < best.cellsLeft) {
+        best = { clue, cellsLeft };
+      }
     }
-  }
-
-  return bestClue;
-}
-
-// Adds the clue that helps the simple rules most, until they solve the whole puzzle.
-// The candidates are shuffled, so the clue that wins a tie is the same on every run.
-function addCluesUntilSolvableBySimpleRules(board, puzzleClues, seed, edges) {
-  const nextRandom = createRandomGenerator(seed);
-  const clues = copyClues(puzzleClues);
-
-  const areCellsLeft = () =>
-    countCellsLeftBySimpleRules(
-      board,
-      clues.givenCells,
-      clues.hintEdges,
-      edges,
-    ) > 0;
-
-  while (areCellsLeft()) {
-    const candidateClues = shuffle(listMissingClues(clues, edges), nextRandom);
-    addClue(
-      clues,
-      findClueHelpingSimpleRulesMost(board, clues, candidateClues, edges),
-    );
+    clues = withClue(clues, best.clue);
   }
 
   return clues;
 }
 
-// First removes clues while the solution stays unique. When the hint button cannot
-// explain how to solve the result, the puzzle is repaired: easy puzzles get clues added
-// until the simple rules suffice, medium and hard puzzles are made again with clues
-// kept whenever removing them would leave a puzzle the hint cannot explain.
-function createPuzzle(board, boardIndex, difficultySettings, clueIndex, edges) {
-  const { difficultySeed, targetClueCount, requiredSolvingLevel } =
-    difficultySettings;
-  const seed = boardIndex * 7919 + difficultySeed;
-  const isExplainable = (clues) =>
-    isSolvableAtRequiredLevel(board, clues, requiredSolvingLevel, edges);
+// Removes clues while the solution stays unique. If the hint button cannot explain the
+// result, the puzzle is repaired: easy gets clues added, medium and hard are made again
+// keeping every clue whose removal would make the puzzle unexplainable.
+function createPuzzle(board, boardIndex, difficultyIndex, settings, clueIndex) {
+  const { targetClueCount, requiredLevel } = settings;
+  const seed = boardIndex * 7919 + difficultyIndex + 1;
+  const isExplainable = ({ givenCells, hintEdges }) =>
+    isSolvableAtLevel(
+      findSolvingLevel(board, givenCells, hintEdges, EDGES),
+      requiredLevel,
+    );
 
-  const uniqueClues = removeClues(seed, targetClueCount, edges, (clues) =>
-    hasExactlyOneSolution(board, clues, clueIndex, edges),
+  const uniqueClues = removeClues(seed, targetClueCount, (clues) =>
+    hasExactlyOneSolution(board, clues, clueIndex),
   );
-
   if (isExplainable(uniqueClues)) {
     return { clues: uniqueClues, wasRepaired: false };
   }
 
-  const needsSimpleRulesOnly =
-    requiredSolvingLevel === SOLVING_LEVELS.simpleRules;
-  const repairedClues = needsSimpleRulesOnly
-    ? addCluesUntilSolvableBySimpleRules(board, uniqueClues, seed, edges)
-    : removeClues(seed, targetClueCount, edges, isExplainable);
-
-  return { clues: repairedClues, wasRepaired: true };
+  const clues =
+    requiredLevel === SOLVING_LEVELS.simpleRules
+      ? addCluesUntilSolvableBySimpleRules(board, uniqueClues, seed)
+      : removeClues(seed, targetClueCount, isExplainable);
+  return { clues, wasRepaired: true };
 }
 
-function isHintBetweenGivenCells(givenCells, edge, edges) {
-  const [firstCell, secondCell] = edges[edge];
-  return givenCells.has(firstCell) && givenCells.has(secondCell);
+function encodePuzzle(clues) {
+  const byNumber = (a, b) => a - b;
+  const cells = [...clues.givenCells].sort(byNumber);
+  const edges = listUsefulEdges(clues).sort(byNumber);
+  return `${cells.join(",")}|${edges.join(",")}`;
 }
 
-function removeHintsBetweenGivenCells(givenCells, hintEdges, edges) {
-  return [...hintEdges].filter(
-    (edge) => !isHintBetweenGivenCells(givenCells, edge, edges),
-  );
-}
-
-function countUsefulClues(givenCells, hintEdges, edges) {
-  return (
-    givenCells.size +
-    removeHintsBetweenGivenCells(givenCells, hintEdges, edges).length
-  );
-}
-
-function encodePuzzle(clues, edges) {
-  const hintEdges = removeHintsBetweenGivenCells(
-    clues.givenCells,
-    clues.hintEdges,
-    edges,
-  );
-  const sortedCells = [...clues.givenCells].sort(
-    (first, second) => first - second,
-  );
-  const sortedEdges = [...hintEdges].sort((first, second) => first - second);
-  return `${sortedCells.join(",")}|${sortedEdges.join(",")}`;
+function writeJson(name, data) {
+  writeFileSync(new URL(name, OUTPUT_DIRECTORY), `${JSON.stringify(data)}\n`);
 }
 
 function main() {
-  const boards = createAllBoards(createValidRows());
+  const boards = createAllBoards();
   console.log(`Valid boards: ${boards.length}`);
 
-  const edges = listEdges();
-  const clueIndex = new ClueIndex(boards, edges);
+  const clueIndex = new ClueIndex(boards, EDGES);
   mkdirSync(OUTPUT_DIRECTORY, { recursive: true });
-
-  writeFileSync(
-    new URL("boards.json", OUTPUT_DIRECTORY),
-    formatAsJsonWithOneElementPerLine(boards.map((board) => board.join(""))),
+  writeJson(
+    "boards.json",
+    boards.map((board) => board.join("")),
   );
 
-  let difficultySeed = 1;
-  for (const difficulty of Object.keys(TARGET_CLUE_COUNT_PER_DIFFICULTY)) {
-    const difficultySettings = {
-      difficultySeed,
-      targetClueCount: TARGET_CLUE_COUNT_PER_DIFFICULTY[difficulty],
-      requiredSolvingLevel: REQUIRED_SOLVING_LEVEL_PER_DIFFICULTY[difficulty],
-    };
-    const createdPuzzles = boards.map((board, boardIndex) =>
-      createPuzzle(board, boardIndex, difficultySettings, clueIndex, edges),
-    );
-    const puzzles = createdPuzzles.map(({ clues }) =>
-      encodePuzzle(clues, edges),
-    );
+  Object.entries(DIFFICULTIES).forEach(
+    ([difficulty, settings], difficultyIndex) => {
+      const created = boards.map((board, boardIndex) =>
+        createPuzzle(board, boardIndex, difficultyIndex, settings, clueIndex),
+      );
+      writeJson(
+        `${difficulty}.json`,
+        created.map(({ clues }) => encodePuzzle(clues)),
+      );
 
-    writeFileSync(
-      new URL(`${difficulty}.json`, OUTPUT_DIRECTORY),
-      formatAsJsonWithOneElementPerLine(puzzles),
-    );
-    logCreatedPuzzles(difficulty, createdPuzzles, difficultySettings);
-    difficultySeed++;
-  }
-}
-
-function logCreatedPuzzles(difficulty, createdPuzzles, difficultySettings) {
-  const repairedCount = createdPuzzles.filter(
-    ({ wasRepaired }) => wasRepaired,
-  ).length;
-  console.log(
-    `${difficulty}: ${createdPuzzles.length} puzzles, ${repairedCount} repaired ` +
-      `to be solvable at the "${difficultySettings.requiredSolvingLevel}" level`,
+      const repaired = created.filter(({ wasRepaired }) => wasRepaired).length;
+      console.log(
+        `${difficulty}: ${created.length} puzzles, ${repaired} repaired ` +
+          `to be solvable at the "${settings.requiredLevel}" level`,
+      );
+    },
   );
 }
 

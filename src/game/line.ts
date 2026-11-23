@@ -10,61 +10,43 @@ export interface Line {
   positions: CellPosition[];
 }
 
-function createRow(row: number): Line {
-  const positions: CellPosition[] = [];
+function createRowAndColumn(index: number): Line[] {
+  const offsets = Array.from({ length: BOARD_SIZE }, (_, offset) => offset);
 
-  for (let column = 0; column < BOARD_SIZE; column++) {
-    positions.push({ row, column });
-  }
-
-  return { direction: "row", index: row, positions };
+  return [
+    {
+      direction: "row",
+      index,
+      positions: offsets.map((column) => ({ row: index, column })),
+    },
+    {
+      direction: "column",
+      index,
+      positions: offsets.map((row) => ({ row, column: index })),
+    },
+  ];
 }
 
-function createColumn(column: number): Line {
-  const positions: CellPosition[] = [];
+const ALL_LINES: Line[] = Array.from({ length: BOARD_SIZE }, (_, index) =>
+  createRowAndColumn(index),
+).flat();
 
-  for (let row = 0; row < BOARD_SIZE; row++) {
-    positions.push({ row, column });
-  }
-
-  return { direction: "column", index: column, positions };
-}
-
-function createAllLines(): Line[] {
-  const lines: Line[] = [];
-
-  for (let index = 0; index < BOARD_SIZE; index++) {
-    lines.push(createRow(index));
-    lines.push(createColumn(index));
-  }
-
-  return lines;
-}
-
-// The lines never change, so they are built once.
-const ALL_LINES: Line[] = createAllLines();
-
-// Every row and every column.
 export function getAllLines(): Line[] {
   return ALL_LINES;
 }
 
-// Every run of windowLength neighbouring cells in the line.
 export function getLineWindows(
   line: Line,
   windowLength: number,
 ): CellPosition[][] {
-  const windows: CellPosition[][] = [];
-  const lastWindowStartIndex = line.positions.length - windowLength;
+  const windowCount = line.positions.length - windowLength + 1;
 
-  for (let startIndex = 0; startIndex <= lastWindowStartIndex; startIndex++) {
-    windows.push(line.positions.slice(startIndex, startIndex + windowLength));
-  }
-
-  return windows;
+  return Array.from({ length: windowCount }, (_, startIndex) =>
+    line.positions.slice(startIndex, startIndex + windowLength),
+  );
 }
 
-// "row 3" or "column 1", counted from 1 as the player counts.
+// "row 3" or "column 1", counted from 1 as the player counts (non-programmer).
 export function describeLine(line: Line): string {
   return `${line.direction} ${line.index + 1}`;
 }

@@ -43,8 +43,10 @@ export class VisitScheduler {
   }
 
   private scheduleNextVisit(delayRange: [number, number]): void {
-    const delayMilliseconds = pickBetween(this.random, ...delayRange);
+    this.scheduleVisitAfter(pickBetween(this.random, ...delayRange));
+  }
 
+  private scheduleVisitAfter(delayMilliseconds: number): void {
     this.nextVisitTimer = window.setTimeout(
       () => void this.runVisit(),
       delayMilliseconds,
@@ -53,10 +55,7 @@ export class VisitScheduler {
 
   private async runVisit(): Promise<void> {
     if (document.hidden) {
-      this.nextVisitTimer = window.setTimeout(
-        () => void this.runVisit(),
-        RETRY_WHILE_TAB_HIDDEN_MILLISECONDS,
-      );
+      this.scheduleVisitAfter(RETRY_WHILE_TAB_HIDDEN_MILLISECONDS);
       return;
     }
 

@@ -1,4 +1,4 @@
-// For every clue (a given cell or an edge hint) a bitset says which boards satisfy it.
+// For every clue (a given cell or hint) a bitset says which boards satisfy it.
 // "How many boards fit these clues" is then an AND of a few bitsets and a bit count.
 // A cell clue has two bitsets (cat, dog), an edge clue has two (different, same).
 

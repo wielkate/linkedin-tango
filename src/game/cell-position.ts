@@ -37,10 +37,8 @@ function createAllCellPositions(): CellPosition[] {
   return positions;
 }
 
-// The positions never change, so they are built once.
 const ALL_CELL_POSITIONS: CellPosition[] = createAllCellPositions();
 
-// Every cell position, row by row from the top-left cell.
 export function getAllCellPositions(): CellPosition[] {
   return ALL_CELL_POSITIONS;
 }

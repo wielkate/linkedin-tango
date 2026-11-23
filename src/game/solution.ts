@@ -2,7 +2,6 @@ import { Board } from "./board";
 import { getAllCellPositions, type CellPosition } from "./cell-position";
 import type { PlayerSymbol } from "./symbols";
 
-// The one correct way to fill the board, stored as one string per row ('0' is 🐱 and '1' is 🐶).
 export interface Solution {
   readonly rowTexts: string[];
 }
@@ -16,7 +15,6 @@ export function getSolutionSymbol(
   ) as PlayerSymbol;
 }
 
-// Writes the solution into every cell of the board.
 export function fillBoardWithSolution(board: Board, solution: Solution): void {
   for (const position of getAllCellPositions()) {
     board.setValue(position, getSolutionSymbol(solution, position));
