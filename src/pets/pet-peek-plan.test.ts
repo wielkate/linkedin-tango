@@ -2,12 +2,21 @@ import { describe, expect, it } from "vitest";
 import { PET_BREEDS } from "./pet-breeds";
 import {
   SCREEN_EDGES,
+  calculateFreeSpaceByEdge,
   planPeek,
+  type FreeSpaceByEdge,
+  type PeekPlan,
   type RandomNumberGenerator,
 } from "./pet-peek-plan";
 
 const DESKTOP_VIEWPORT = { widthPixels: 1440, heightPixels: 900 };
 const PHONE_VIEWPORT = { widthPixels: 360, heightPixels: 640 };
+const ROOM_ON_EVERY_EDGE: FreeSpaceByEdge = {
+  top: 600,
+  right: 600,
+  bottom: 600,
+  left: 600,
+};
 
 function createSeededRandom(seed: number): RandomNumberGenerator {
   let state = seed;
@@ -17,15 +26,20 @@ function createSeededRandom(seed: number): RandomNumberGenerator {
   };
 }
 
-function planManyPeeks(viewport: typeof DESKTOP_VIEWPORT) {
+function planManyPeeks(
+  viewport: typeof DESKTOP_VIEWPORT,
+  freeSpaceByEdge: FreeSpaceByEdge = ROOM_ON_EVERY_EDGE,
+): PeekPlan[] {
   const random = createSeededRandom(7);
-  return Array.from({ length: 500 }, () =>
-    planPeek(random, viewport, PET_BREEDS),
+  const plans = Array.from({ length: 500 }, () =>
+    planPeek(random, viewport, PET_BREEDS, freeSpaceByEdge),
   );
+
+  return plans.filter((plan): plan is PeekPlan => plan !== null);
 }
 
 describe("planPeek", () => {
-  it("visits every edge of the screen", () => {
+  it("visits every edge of the screen when there is room on all of them", () => {
     const edges = new Set(
       planManyPeeks(DESKTOP_VIEWPORT).map((plan) => plan.edge),
     );
@@ -109,13 +123,98 @@ describe("planPeek", () => {
       createSeededRandom(3),
       DESKTOP_VIEWPORT,
       PET_BREEDS,
+      ROOM_ON_EVERY_EDGE,
     );
     const secondPlan = planPeek(
       createSeededRandom(3),
       DESKTOP_VIEWPORT,
       PET_BREEDS,
+      ROOM_ON_EVERY_EDGE,
     );
 
     expect(firstPlan).toEqual(secondPlan);
+  });
+});
+
+describe("planPeek with a board in the way", () => {
+  const BOARD_FILLS_THE_WIDTH: FreeSpaceByEdge = {
+    top: 200,
+    right: 10,
+    bottom: 200,
+    left: 10,
+  };
+
+  it("never uses an edge that has no room for an animal", () => {
+    const edges = new Set(
+      planManyPeeks(PHONE_VIEWPORT, BOARD_FILLS_THE_WIDTH).map(
+        (plan) => plan.edge,
+      ),
+    );
+
+    expect([...edges].sort()).toEqual(["bottom", "top"]);
+  });
+
+  it("keeps the part of the animal that shows inside the free space", () => {
+    const freeSpaceByEdge: FreeSpaceByEdge = {
+      top: 150,
+      right: 90,
+      bottom: 220,
+      left: 300,
+    };
+
+    for (const plan of planManyPeeks(DESKTOP_VIEWPORT, freeSpaceByEdge)) {
+      const shownPixels = plan.sizePixels * plan.shownFraction;
+
+      expect(shownPixels).toBeLessThanOrEqual(freeSpaceByEdge[plan.edge]);
+    }
+  });
+
+  it("plans no visit when the board leaves no room on any edge", () => {
+    const noRoom: FreeSpaceByEdge = { top: 0, right: 0, bottom: 0, left: 0 };
+
+    const plan = planPeek(
+      createSeededRandom(1),
+      PHONE_VIEWPORT,
+      PET_BREEDS,
+      noRoom,
+    );
+
+    expect(plan).toBeNull();
+  });
+});
+
+describe("calculateFreeSpaceByEdge", () => {
+  const viewport = { widthPixels: 1000, heightPixels: 800 };
+
+  it("measures the room between each edge of the screen and the board", () => {
+    const boardBounds = {
+      leftPixels: 250,
+      topPixels: 100,
+      rightPixels: 750,
+      bottomPixels: 600,
+    };
+
+    expect(calculateFreeSpaceByEdge(viewport, boardBounds)).toEqual({
+      top: 100,
+      right: 250,
+      bottom: 200,
+      left: 250,
+    });
+  });
+
+  it("never reports less than no room, when the board reaches past an edge", () => {
+    const boardBounds = {
+      leftPixels: -5,
+      topPixels: -40,
+      rightPixels: 1010,
+      bottomPixels: 900,
+    };
+
+    expect(calculateFreeSpaceByEdge(viewport, boardBounds)).toEqual({
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    });
   });
 });

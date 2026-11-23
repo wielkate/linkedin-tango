@@ -45,6 +45,8 @@ export const ROTATION_DEGREES_BY_EDGE: Record<ScreenEdge, number> = {
 const MIN_SIZE_PIXELS = 110;
 const MAX_SIZE_PIXELS = 480;
 const LARGEST_SHARE_OF_SMALLER_SIDE = 0.55;
+// The animal slides in a little further than its resting place before it settles.
+const ARRIVAL_OVERSHOOT_FACTOR = 1.1;
 const PAW_ONLY_CHANCE = 0.25;
 const SHOWN_FRACTION_RANGE_BY_APPEARANCE: Record<
   PetAppearance,
@@ -74,43 +76,96 @@ export function pickItem<Item>(
   return items[Math.floor(random() * items.length)];
 }
 
+// How much room the board leaves between itself and each edge of the screen, in pixels.
+// An animal on an edge must fit in that room, or the board would hide it.
+export type FreeSpaceByEdge = Record<ScreenEdge, number>;
+
+// Where the board is on the screen.
+export interface BoardBounds {
+  leftPixels: number;
+  topPixels: number;
+  rightPixels: number;
+  bottomPixels: number;
+}
+
+export function calculateFreeSpaceByEdge(
+  viewport: Viewport,
+  boardBounds: BoardBounds,
+): FreeSpaceByEdge {
+  return {
+    top: Math.max(0, boardBounds.topPixels),
+    right: Math.max(0, viewport.widthPixels - boardBounds.rightPixels),
+    bottom: Math.max(0, viewport.heightPixels - boardBounds.bottomPixels),
+    left: Math.max(0, boardBounds.leftPixels),
+  };
+}
+
 // Decides everything about one visit: who comes, from which edge, how big and where they look.
+// An edge is used only when the animal fits between that edge and the board, so on a phone, where
+// the board fills the width, nobody peeks in from the left or the right.
+// Returns null when no edge has enough room.
 export function planPeek(
   random: RandomNumberGenerator,
   viewport: Viewport,
   breeds: readonly PetBreed[],
-): PeekPlan {
+  freeSpaceByEdge: FreeSpaceByEdge,
+): PeekPlan | null {
   const appearance: PetAppearance = random() < PAW_ONLY_CHANCE ? "paw" : "head";
   const [minimumShown, maximumShown] =
     SHOWN_FRACTION_RANGE_BY_APPEARANCE[appearance];
+  const shownFraction = pickBetween(random, minimumShown, maximumShown);
+  const roomyEdges = SCREEN_EDGES.filter(
+    (edge) =>
+      calculateLargestSizePixels(
+        viewport,
+        freeSpaceByEdge[edge],
+        shownFraction,
+      ) >= MIN_SIZE_PIXELS,
+  );
+
+  if (roomyEdges.length === 0) {
+    return null;
+  }
+
+  const edge = pickItem(random, roomyEdges);
+  const largestSizePixels = calculateLargestSizePixels(
+    viewport,
+    freeSpaceByEdge[edge],
+    shownFraction,
+  );
 
   return {
     breed: pickItem(random, breeds),
     appearance,
-    edge: pickItem(random, SCREEN_EDGES),
-    sizePixels: pickSizePixels(random, viewport),
+    edge,
+    sizePixels: Math.round(
+      pickBetween(random, MIN_SIZE_PIXELS, largestSizePixels),
+    ),
     edgePositionFraction: random(),
-    shownFraction: pickBetween(random, minimumShown, maximumShown),
+    shownFraction,
     lookTargets: planLookTargets(random),
   };
 }
 
-// A small phone gets smaller animals, so one never covers most of the screen.
-function pickSizePixels(
-  random: RandomNumberGenerator,
+// A small phone gets smaller animals, so one never covers most of the screen,
+// and the part that shows must fit in the free space between the edge and the board.
+function calculateLargestSizePixels(
   viewport: Viewport,
+  freeSpacePixels: number,
+  shownFraction: number,
 ): number {
   const smallerSidePixels = Math.min(
     viewport.widthPixels,
     viewport.heightPixels,
   );
-  const largestSizePixels = Math.min(
+  const largestSizeThatFitsPixels =
+    freeSpacePixels / (shownFraction * ARRIVAL_OVERSHOOT_FACTOR);
+
+  return Math.min(
     MAX_SIZE_PIXELS,
     smallerSidePixels * LARGEST_SHARE_OF_SMALLER_SIDE,
+    largestSizeThatFitsPixels,
   );
-  const smallestSizePixels = Math.min(MIN_SIZE_PIXELS, largestSizePixels);
-
-  return Math.round(pickBetween(random, smallestSizePixels, largestSizePixels));
 }
 
 function planLookTargets(random: RandomNumberGenerator): LookTarget[] {
