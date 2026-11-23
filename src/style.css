@@ -38,8 +38,7 @@ body::before {
   bottom: -6vmin;
   width: min(70vmin, 520px);
   aspect-ratio: 1;
-  background: url("./ui/background-paw.svg")
-    no-repeat center / contain;
+  background: url("./ui/background-paw.svg") no-repeat center / contain;
   transform: rotate(-15deg);
   pointer-events: none;
   z-index: -1;
@@ -133,6 +132,7 @@ main {
   :root {
     --cell-gap: 2px;
     --board-padding: 4px;
+    --hint-size: 25px;
   }
 
   body h1 {
