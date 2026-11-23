@@ -9,7 +9,7 @@
 #menu-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 4;
 }
 
@@ -22,7 +22,9 @@
   box-sizing: border-box;
   padding: 20px 16px;
   overflow-y: auto;
-  background: #f4f1ea;
+  background: var(--page-background);
+  border-right: 1px solid var(--border);
+  color: var(--text-primary);
   text-align: left;
   z-index: 5;
   transform: translateX(-100%);
@@ -31,7 +33,7 @@
 
 #menu-drawer.open {
   transform: translateX(0);
-  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.6);
 }
 
 #menu-close {
@@ -39,7 +41,7 @@
   padding: 4px;
   border: 0;
   background: transparent;
-  color: #222;
+  color: var(--text-primary);
   line-height: 0;
   cursor: pointer;
 }
@@ -58,12 +60,12 @@
 
 .menu-summary p {
   margin: 0 0 6px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .menu-summary progress {
   width: 100%;
-  accent-color: #333;
+  accent-color: var(--accent);
 }
 
 .menu-toolbar {
@@ -76,7 +78,7 @@
   flex: 1;
   min-width: 0;
   padding: 6px 10px;
-  border: 2px solid #333;
+  border: 2px solid var(--border-strong);
   border-radius: 999px;
   font: inherit;
 }
@@ -89,10 +91,10 @@
 .menu-toolbar button,
 .back-button {
   padding: 6px 14px;
-  border: 2px solid #333;
+  border: 2px solid var(--border-strong);
   border-radius: 999px;
-  background: #fff;
-  color: #333;
+  background: var(--surface);
+  color: var(--text-primary);
 }
 
 .back-button {
@@ -113,15 +115,15 @@
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  border: 1px solid #333;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  color: #222;
+  color: var(--text-primary);
   font-size: 15px;
   white-space: nowrap;
   background: linear-gradient(
     to right,
-    #b7dcb2 var(--solved-share, 0%),
-    #fff var(--solved-share, 0%)
+    var(--solved-green) var(--solved-share, 0%),
+    var(--surface) var(--solved-share, 0%)
   );
 }
 
@@ -140,18 +142,18 @@
 
 .board-tile {
   padding: 0;
-  border: 1px solid #333;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background: #fff;
-  color: #222;
+  background: var(--surface);
+  color: var(--text-primary);
   font-size: 14px;
   white-space: nowrap;
 }
 
 .board-tile.solved {
-  background: #b7dcb2;
+  background: var(--solved-green);
 }
 
 .board-tile.current {
-  outline: 3px solid #333;
+  outline: 3px solid var(--accent);
 }
