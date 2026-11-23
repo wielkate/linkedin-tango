@@ -3,8 +3,8 @@ import { PET_BREEDS } from "./pet-breeds";
 import { createPetSvgFiles } from "./pet-svg-files";
 
 describe("createPetSvgFiles", () => {
-  it("makes a head, a paw and nothing else for every breed, and two paw prints", () => {
-    expect(createPetSvgFiles()).toHaveLength(PET_BREEDS.length * 2 + 2);
+  it("makes a head, a paw and nothing else for every breed", () => {
+    expect(createPetSvgFiles()).toHaveLength(PET_BREEDS.length * 2);
   });
 
   it("gives every file its own path", () => {
@@ -25,17 +25,6 @@ describe("createPetSvgFiles", () => {
       expect(file.content.startsWith("<svg width=")).toBe(true);
       expect(file.content).toContain('xmlns="http://www.w3.org/2000/svg"');
       expect(file.content.endsWith("</svg>\n")).toBe(true);
-    }
-  });
-
-  it("puts a colour in the paw prints, because no page gives them one", () => {
-    const pawPrintFiles = createPetSvgFiles().filter((file) =>
-      file.filePath.startsWith("paw-prints/"),
-    );
-
-    for (const file of pawPrintFiles) {
-      expect(file.content).not.toContain("currentColor");
-      expect(file.content).toContain("#8b7a68");
     }
   });
 

@@ -14,7 +14,7 @@ const DELAY_BETWEEN_VISITS_MILLISECONDS: [number, number] = [45000, 100000];
 const RETRY_WHILE_TAB_HIDDEN_MILLISECONDS = 2000;
 
 // Decides when the next visit happens and who comes. There is one visitor at a time:
-// the next delay starts only after the previous visitor has left, so animals and paw prints never mix.
+// the next delay starts only after the previous visitor has left, so two visitors never mix.
 export class VisitScheduler {
   private isRunning = false;
   private nextVisitTimer: number | undefined;
