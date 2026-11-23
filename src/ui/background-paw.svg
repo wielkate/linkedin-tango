@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -9 16 16" fill="#272624">
+  <ellipse cx="0" cy="2.5" rx="3.4" ry="2.8"/>
+  <ellipse cx="-4.6" cy="-1.2" rx="1.4" ry="1.9" transform="rotate(-20 -4.6 -1.2)"/>
+  <ellipse cx="-1.6" cy="-4.4" rx="1.5" ry="2" transform="rotate(-8 -1.6 -4.4)"/>
+  <ellipse cx="1.6" cy="-4.4" rx="1.5" ry="2" transform="rotate(8 1.6 -4.4)"/>
+  <ellipse cx="4.6" cy="-1.2" rx="1.4" ry="1.9" transform="rotate(20 4.6 -1.2)"/>
+</svg>

@@ -11,10 +11,10 @@
   width: 260px;
   padding: 14px 18px;
   text-align: left;
-  background: #fff6c2;
-  border: 1px solid #e3d27a;
+  background: #3a3322;
+  border: 1px solid #6b5a1f;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 #hint-note[hidden] {
@@ -45,7 +45,7 @@
 
 /* The cell the hint filled in, and the cells its explanation points at. */
 #board .cell.hint-target {
-  background: #ffe97a;
+  background: #5c4d12;
 }
 
 #board .cell.hint-related {

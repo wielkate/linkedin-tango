@@ -12,12 +12,12 @@
 
 @keyframes reveal-error-on-cell {
   from {
-    background: #fff;
+    background: var(--surface);
   }
 }
 
 @keyframes reveal-error-on-locked-cell {
   from {
-    background: #e3e0d8;
+    background: var(--surface-locked);
   }
 }

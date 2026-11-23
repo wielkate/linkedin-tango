@@ -154,6 +154,16 @@ describe("planPeek with a board in the way", () => {
     expect([...edges].sort()).toEqual(["bottom", "top"]);
   });
 
+  it("comes only from the top and the bottom on a phone, even with room at the sides", () => {
+    const edges = new Set(
+      planManyPeeks(PHONE_VIEWPORT, ROOM_ON_EVERY_EDGE).map(
+        (plan) => plan.edge,
+      ),
+    );
+
+    expect([...edges].sort()).toEqual(["bottom", "top"]);
+  });
+
   it("keeps the part of the animal that shows inside the free space", () => {
     const freeSpaceByEdge: FreeSpaceByEdge = {
       top: 150,
