@@ -34,6 +34,11 @@ export interface PeekPlan {
 
 export const SCREEN_EDGES: ScreenEdge[] = ["top", "right", "bottom", "left"];
 
+// On a phone the animals come only from the top and the bottom: a head at the side of a narrow
+// screen would sit over the board. Same width as the phone layout in style.css.
+const PHONE_MAX_WIDTH_PIXELS = 540;
+const PHONE_SCREEN_EDGES: ScreenEdge[] = ["top", "bottom"];
+
 // The edge a picture rests on is the bottom of the picture, so each edge turns the picture this far.
 export const ROTATION_DEGREES_BY_EDGE: Record<ScreenEdge, number> = {
   bottom: 0,
@@ -101,8 +106,8 @@ export function calculateFreeSpaceByEdge(
 }
 
 // Decides everything about one visit: who comes, from which edge, how big and where they look.
-// An edge is used only when the animal fits between that edge and the board, so on a phone, where
-// the board fills the width, nobody peeks in from the left or the right.
+// An edge is used only when the animal fits between that edge and the board. On a phone only the
+// top and the bottom are used, even when the board leaves room at the sides.
 // Returns null when no edge has enough room.
 export function planPeek(
   random: RandomNumberGenerator,
@@ -114,7 +119,7 @@ export function planPeek(
   const [minimumShown, maximumShown] =
     SHOWN_FRACTION_RANGE_BY_APPEARANCE[appearance];
   const shownFraction = pickBetween(random, minimumShown, maximumShown);
-  const roomyEdges = SCREEN_EDGES.filter(
+  const roomyEdges = listEdgesAnimalsMayUse(viewport).filter(
     (edge) =>
       calculateLargestSizePixels(
         viewport,
@@ -145,6 +150,12 @@ export function planPeek(
     shownFraction,
     lookTargets: planLookTargets(random),
   };
+}
+
+function listEdgesAnimalsMayUse(viewport: Viewport): ScreenEdge[] {
+  const isPhone = viewport.widthPixels <= PHONE_MAX_WIDTH_PIXELS;
+
+  return isPhone ? PHONE_SCREEN_EDGES : SCREEN_EDGES;
 }
 
 // A small phone gets smaller animals, so one never covers most of the screen,
