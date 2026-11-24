@@ -1,6 +1,6 @@
 # Tango (LinkedIn-style puzzle)
 
-A minimal browser version of the **Tango** puzzle on a 6×6 grid, with **all 11 222 valid
+Browser version of the **Tango** puzzle on a 6×6 grid, with **all possible 11 222 valid
 boards** in three difficulty levels (easy, medium, hard). Every start opens a random board.
 
 ## Rules
@@ -10,14 +10,14 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
 - Every row and column contains exactly 3 of each symbol.
 - `=` between two cells means they hold the **same** symbol; `×` means **different**.
 - The puzzle has exactly one solution.
-- The "no two identical rows/columns" rule of the original game is intentionally **not** applied.
+- The "no two identical rows/columns" rule of the original game is ignored.
 
 ## How to play
 
 **Playing**
 
 - Click a cell to cycle: empty → 🐱 → 🐶 → empty.
-- Grey cells are given and locked.
+- Gray cells are given and locked.
 - A cell that breaks a rule turns red after one second without a new move.
 - When the grid is complete and valid, confetti falls and the stopwatch stops
   ("Solved in 1 min 23 sec"). **Next board →** opens another random unsolved board.
@@ -25,22 +25,15 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
 **Buttons**
 
 - **Easy / Medium / Hard:** pick a level; easy has the most clues, hard the fewest. An easy
-  puzzle can be solved with the simple rules alone, so nothing has to be tried out; medium and
-  hard puzzles may also need the try-a-symbol step. The hint button can explain every step of
-  every puzzle.
-- **↶ Undo:** takes back the last move. **Reset:** clears the board back to the given cells.
-- **💡 Hint:** fills in one cell that the rules settle and locks it. A light-yellow note beside the board
-  (under it on a narrow screen) says why, in order of difficulty: an `=` / `×` sign next to a filled cell,
-  two identical symbols side by side, a cell between two identical symbols, or a row or column that
-  already holds its three of a kind. When none of those applies it tries a symbol and explains that it
-  leads to a broken rule. The cell is highlighted and the cells the note talks about are outlined.
+  puzzle can be solved with the simple rules alone; medium and hard puzzles may also need the try-a-symbol step.
+- **💡 Hint:** fills in one cell that the rules settle and locks it. A light-yellow note says why.
+  The cell is highlighted.
   A cell you filled wrongly is corrected first. The note disappears on your next move.
-- **✨ Solve:** fills in the whole solution and stops the stopwatch. It counts as giving up: there
-  is no confetti or sound, the board is not saved as solved (its menu tile stays unfilled) and an
-  earlier best time on that board is kept. Use **Reset** to play the board again.
+- **↶ Undo:** takes back the last move. **Reset:** clears the board back to the start.
+- **✨ Solve:** fills in the whole solution and stops the stopwatch. It counts as giving up.
+  Use **Reset** to play the board again.
 - **⏸ Pause / ▶ Resume:** freezes the stopwatch and blurs the board.
-- **ⓘ** (top-right): explains the rules, pauses the stopwatch and blurs the board while it is open
-  (also on a solved board).
+- **ⓘ** (top-right): explains the rules.
 
 **Choosing a board**
 
@@ -52,7 +45,7 @@ boards** in three difficulty levels (easy, medium, hard). Every start opens a ra
 - Solved boards are remembered per level in the browser's `localStorage`.
 - The address shows the open board, for example `#hard/123` (level and board number). Reloading the
   page, or sharing the link, opens the same board; an address that is not a real board is ignored
-  and a random board is picked. The moves you made are not saved yet, so a reload starts the board
+  and a random board is picked. The moves you made are not saved, so a reload starts the board
   from its given cells.
 
 ## Example board
@@ -71,7 +64,7 @@ decoded is explained at the top of [`scripts/generate-puzzles.mjs`](scripts/gene
 - **npm**: the package manager that comes with Node.js and installs the tools listed in
   `package.json`.
 - **TypeScript**: JavaScript with static types, so mistakes such as a misspelled property
-  are caught by the compiler before the game runs.
+  are caught by the compiler.
 - **Vite**: a development server that reloads the page when you save a file, and a build tool
   that bundles the project into static files.
 - **Vanilla DOM**: the page is built with the browser's own DOM API, with no UI framework.
@@ -83,27 +76,12 @@ decoded is explained at the top of [`scripts/generate-puzzles.mjs`](scripts/gene
 npm is installed together with Node.js. The project needs **Node 26**.
 
 - **Installer:** download Node.js 26 from <https://nodejs.org> and run it.
-- **Version manager (recommended):** [nvm](https://github.com/nvm-sh/nvm) on macOS/Linux or
-  [nvm-windows](https://github.com/coreybutler/nvm-windows) on Windows lets you switch Node
-  versions per project:
+- **Version manager (recommended):** [nvm](https://github.com/nvm-sh/nvm)
 
   ```bash
   nvm install 26
   nvm use 26
   ```
-
-Check the installation:
-
-```bash
-node --version   # must print v26.x.x
-npm --version
-```
-
-Node 26 is enforced in three places, so a wrong version is caught early:
-
-- `package.json` → `"engines": { "node": "26.x" }` declares the required version.
-- `.npmrc` → `engine-strict=true` makes `npm install` fail on any other version.
-- `.nvmrc` → tells nvm which version to use (`nvm use` without arguments).
 
 ### 2. Install the dependencies and start the game
 
@@ -116,25 +94,13 @@ Then open the address Vite prints (by default <http://localhost:5173>).
 
 ### 3. Commands
 
-| Command                 | What it does                                                                                                                                                            | When to use it                                                                        |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `npm install`           | Downloads every dependency listed in `package.json` into `node_modules/` and updates `package-lock.json` if needed.                                                     | Once after cloning, and after changing dependencies.                                  |
-| `npm ci`                | Installs exactly the versions in `package-lock.json`, deletes `node_modules/` first and never modifies the lock file.                                                   | Clean, reproducible installs (also the right choice when the lock file is read-only). |
-| `npm run dev`           | Starts the Vite development server with hot reload: the page updates whenever you save a source file. Stop it with `Ctrl+C`.                                            | While developing.                                                                     |
-| `npm run build`         | First runs `tsc --noEmit` (type-checks all code and writes no files, so type errors stop the build), then `vite build` (bundles the game into static files in `dist/`). | Before publishing, and to check that the types are correct.                           |
-| `npm run preview`       | Serves the already built `dist/` folder locally (by default <http://localhost:4173>), exactly as a static host would.                                                   | After `npm run build`, to test the production build.                                  |
-| `npm test`              | Runs every unit test once with Vitest and exits.                                                                                                                        | Before every commit and pull request.                                                 |
-| `npm run test:watch`    | Runs Vitest in watch mode: the tests that a saved file affects run again.                                                                                               | While writing code or tests.                                                          |
-| `npm run test:coverage` | Runs the tests and prints a coverage report; fails when coverage is below 90%. DOM-only files are excluded (see `vite.config.ts`).                                      | Before a pull request.                                                                |
-
-## Run in WebStorm
-
-1. Open the project folder in WebStorm.
-2. Make sure WebStorm uses Node 26: **Settings → Languages & Frameworks → Node.js → Node interpreter**.
-3. Run `npm install` once (WebStorm offers this in a banner when it opens `package.json`).
-4. Pick the **dev** run configuration in the run widget at the top right and press ▶.
-
-The **dev** configuration is shared through the repository in `.run/dev.run.xml`; it runs `npm run dev`; every saved change appears in the browser (styles update in place, code changes reload the page).
+| Command                 | What it does                                                                                                                       | When to use it                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `npm install`           | Downloads every dependency listed in `package.json` into `node_modules/` and updates `package-lock.json` if needed.                | Once after cloning, and after changing dependencies.                                  |
+| `npm ci`                | Installs exactly the versions in `package-lock.json`, deletes `node_modules/` first and never modifies the lock file.              | Clean, reproducible installs (also the right choice when the lock file is read-only). |
+| `npm run dev`           | Starts the Vite development server with hot reload: the page updates whenever you save a source file. Stop it with `Ctrl+C`.       | While developing.                                                                     |
+| `npm test`              | Runs every unit test once with Vitest and exits.                                                                                   | Before every commit and pull request.                                                 |
+| `npm run test:coverage` | Runs the tests and prints a coverage report; fails when coverage is below 90%. DOM-only files are excluded (see `vite.config.ts`). | Before a pull request.                                                                |
 
 ## Project structure
 
@@ -228,17 +194,6 @@ linkedin-tango/
 └── vite.config.ts        Vite configuration (see below)
 ```
 
-### `vite.config.ts`
-
-Vite reads this file whenever you run `npm run dev`, `npm run build` or `npm run preview`.
-Its main setting is `base: './'`, which makes every asset URL in the built `index.html`
-relative (`./assets/...`) instead of absolute (`/assets/...`).
-
-GitHub Pages serves a project site from `https://<user>.github.io/<repo-name>/`. With absolute
-URLs the browser would look for the files at `https://<user>.github.io/assets/...` and fail.
-With a relative base, the same `dist/` folder works under any path. Everything else uses
-Vite's defaults (dev server on port 5173, build output in `dist/`).
-
 ### Deployment: live game and test build
 
 Two workflows publish to the `gh-pages` branch, which GitHub Pages serves
@@ -258,42 +213,3 @@ apart because the cache name contains the site folder.
 After the game has been opened once, it opens again without a network, and it can be installed
 from the browser menu ("Install" or "Add to Home Screen"). Progress is already kept in
 `localStorage`, so solved boards and times stay as they are.
-
-- `npm run build` runs `offlinePlugin()` (in `vite-plugins/offline-plugin.ts`), which writes
-  `dist/service-worker.js` from `src/offline/service-worker.template.js`. It lists every file in
-  `dist/` and names the cache after a hash of their contents.
-- The first visit stores every file (the whole game, with all 33 666 puzzles), so the
-  first visit must be online and the second can be offline.
-- The worker answers from the stored files first and only asks the network for something that
-  was not stored. When a page is requested without a network, it opens the stored page.
-- A new release is stored next to the old one and takes over when every tab of the game is
-  closed, so a game in progress never loses its files. Refresh after closing the tabs to play
-  the new version. The old cache is deleted then.
-- The service worker only runs in the production build (`npm run build`, then `npm run preview`),
-  not in `npm run dev`.
-
-### Generated files
-
-`package-lock.json` is generated by npm. Do not edit it by hand: change `package.json` and run
-`npm install`, and the changes will be written to the lock file. Git cannot store a read-only
-flag, so the file is marked as generated in `.gitattributes` (GitHub collapses it in diffs).
-To protect your own copy, make it read-only, and make it writable again when you add a
-dependency:
-
-```bash
-chmod 444 package-lock.json   # read-only
-chmod 644 package-lock.json   # writable again
-```
-
-## Code style
-
-The rules are in [CLAUDE.md](CLAUDE.md): braces on every loop and condition, no one-line
-conditions, meaningful names, small single-purpose functions, named conditions, one class per
-file, JSON arrays with one element per line, and a linear git history.
-
-## Roadmap
-
-1. ~~Generate all 11 222 valid boards and store them as static data~~ (done)
-2. ~~Solver + puzzle generator with unique-solution check~~ (done, see `scripts/generate-puzzles.mjs`)
-3. ~~Progress tracking (`localStorage`) and timer~~ (done)
-4. ~~GitHub Pages deployment via GitHub Actions~~ (done, see `.github/workflows/deploy.yml`; a test build under `/test/` comes from `deploy-test.yml`)
