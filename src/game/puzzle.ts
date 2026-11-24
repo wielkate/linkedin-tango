@@ -3,9 +3,8 @@ import { toCellKey, type CellKey, type GivenCell } from "./cell-position";
 import type { EdgeHint } from "./edge-hint";
 import type { Solution } from "./solution";
 
-// One board with some cells given and some edge hints, and the solution that is the only one.
+// Board with given cells and hints
 export interface Puzzle {
-  // Shown to the player as the board number, from 1 to the number of boards.
   readonly id: number;
   readonly solution: Solution;
   readonly givenCells: GivenCell[];

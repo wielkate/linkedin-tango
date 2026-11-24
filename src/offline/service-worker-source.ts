@@ -14,7 +14,7 @@ export function createPrecachePaths(
   return ["./", ...filePathsToStore];
 }
 
-// Fills the placeholders of the service worker template. A replacement function is used so a
+// Fills the placeholders with the service worker template. A replacement function is used so a
 // "$" in a file name is never read as a special replacement pattern.
 export function createServiceWorkerSource(
   template: string,

@@ -1,6 +1,6 @@
 const ATTENTION_CLASS_NAME = "draws-attention";
 
-// Scrolls the element into view when it is off screen, then makes it pulse.
+// Scrolls the element into view when it is off-screen, then makes it pulse.
 // Players who asked their system for less motion get no scrolling animation and no pulse.
 export function drawAttentionTo(element: HTMLElement): void {
   const prefersReducedMotion = window.matchMedia(

@@ -49,10 +49,13 @@ if (areBothCellsFilled && haveSameValue) {
 When the condition is reused or needs several lines, make it a function
 (`edgeHint.isBrokenOn(board)`).
 
-## 4. Use a class only for things that hold state over time
+## 4. Classes
 
 Use a class only for things that hold state over time (game, history, stopwatch, UI widgets).
 Keep rule checks, hints and other calculations as pure functions.
+
+Put each class in a separate file named after it (`stopwatch.ts`, `board-menu.ts`,
+`clue-index.mjs`). Do not hide a class in a file that does something else.
 
 # Tests
 
@@ -70,16 +73,3 @@ Keep rule checks, hints and other calculations as pure functions.
 # Git workflow
 
 - Keep a linear history: pull with `git pull --rebase`, never create merge commits
-
-# Files
-
-## Classes live in their own files
-
-Put each class in a separate file named after it (`stopwatch.ts`, `board-menu.ts`,
-`clue-index.mjs`). Do not hide a class in a file that does something else.
-
-## JSON data files
-
-Format JSON files that hold a long array with **one element per line**, so a diff shows
-which element changed and element N is on line N + 1. `scripts/format-json.mjs` does this
-for the generated files in `src/data/`; use it (or the same layout) for any new data file.

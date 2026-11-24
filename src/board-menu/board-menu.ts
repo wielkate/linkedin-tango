@@ -4,6 +4,7 @@ import {
   findRangeContaining,
   getAllThousands,
   getHundredsOfThousand,
+  splitIntoRanges,
   type BoardRange,
 } from "./board-ranges";
 import { formatNumberWithSpaces } from "../utils/format-number";
@@ -21,9 +22,7 @@ export interface BoardMenuActions {
   onRandomBoardChosen: () => void;
 }
 
-// The list of all boards in a drawer on the left. 11 222 rows cannot be scrolled, so the
-// boards are grouped in three layers: thousands (1-1 000, ...), the hundreds inside one
-// thousand (1-100, ...) and finally the 100 board numbers of one hundred.
+// Boards are grouped in three layers: thousands --> hundreds --> 100 boards
 // A range tile fills with green in proportion to its solved boards.
 // Only the opened layer is drawn, so the menu stays fast.
 export class BoardMenu {
@@ -58,25 +57,49 @@ export class BoardMenu {
   }
 
   private createCurrentLayer(view: BoardMenuView): HTMLElement {
-    if (this.openedThousand === null) {
+    const thousand = this.openedThousand;
+    const hundred = this.openedHundred;
+
+    if (thousand === null) {
       return this.createRangeGrid(
         getAllThousands(this.boardCount),
         view,
-        (thousand) => {
-          this.openedThousand = thousand;
+        (openedThousand) => {
+          this.openedThousand = openedThousand;
         },
       );
     }
 
-    if (this.openedHundred === null) {
-      return this.createHundredsLayer(this.openedThousand, view);
+    if (hundred === null) {
+      return this.createLayer(
+        this.createBackButton("← All thousands", () => {
+          this.openedThousand = null;
+        }),
+        this.createRangeGrid(
+          getHundredsOfThousand(thousand),
+          view,
+          (openedHundred) => {
+            this.openedHundred = openedHundred;
+          },
+        ),
+      );
     }
 
-    return this.createBoardsLayer(
-      this.openedThousand,
-      this.openedHundred,
-      view,
+    return this.createLayer(
+      this.createBackButton(`← ${this.formatRange(thousand)}`, () => {
+        this.openedHundred = null;
+      }),
+      this.createBoardGroups(hundred, view),
     );
+  }
+
+  private createLayer(
+    backButton: HTMLButtonElement,
+    content: HTMLElement,
+  ): HTMLElement {
+    const layerElement = document.createElement("div");
+    layerElement.append(backButton, content);
+    return layerElement;
   }
 
   private createSummary(view: BoardMenuView): HTMLElement {
@@ -138,43 +161,6 @@ export class BoardMenu {
     numberInput.setCustomValidity("");
   }
 
-  private createHundredsLayer(
-    thousand: BoardRange,
-    view: BoardMenuView,
-  ): HTMLElement {
-    const layerElement = document.createElement("div");
-    const backButton = this.createBackButton("← All thousands", () => {
-      this.openedThousand = null;
-    });
-    const hundredsGrid = this.createRangeGrid(
-      getHundredsOfThousand(thousand),
-      view,
-      (hundred) => {
-        this.openedHundred = hundred;
-      },
-    );
-
-    layerElement.append(backButton, hundredsGrid);
-    return layerElement;
-  }
-
-  private createBoardsLayer(
-    thousand: BoardRange,
-    hundred: BoardRange,
-    view: BoardMenuView,
-  ): HTMLElement {
-    const layerElement = document.createElement("div");
-    const backButton = this.createBackButton(
-      `← ${this.formatRange(thousand)}`,
-      () => {
-        this.openedHundred = null;
-      },
-    );
-
-    layerElement.append(backButton, this.createBoardGroups(hundred, view));
-    return layerElement;
-  }
-
   // A hundred boards are shown as blocks of 5 × 5 tiles with a space between the blocks.
   private createBoardGroups(
     hundred: BoardRange,
@@ -182,36 +168,28 @@ export class BoardMenu {
   ): HTMLElement {
     const groupsElement = document.createElement("div");
     groupsElement.className = "board-groups";
-
-    for (
-      let firstBoardIdOfGroup = hundred.firstBoardId;
-      firstBoardIdOfGroup <= hundred.lastBoardId;
-      firstBoardIdOfGroup += BOARDS_PER_GROUP
-    ) {
-      const lastBoardIdOfGroup = Math.min(
-        firstBoardIdOfGroup + BOARDS_PER_GROUP - 1,
+    groupsElement.append(
+      ...splitIntoRanges(
+        hundred.firstBoardId,
         hundred.lastBoardId,
-      );
-      groupsElement.appendChild(
-        this.createBoardGroup(view, firstBoardIdOfGroup, lastBoardIdOfGroup),
-      );
-    }
-
+        BOARDS_PER_GROUP,
+      ).map((group) => this.createBoardGroup(view, group)),
+    );
     return groupsElement;
   }
 
   private createBoardGroup(
     view: BoardMenuView,
-    firstBoardId: number,
-    lastBoardId: number,
+    group: BoardRange,
   ): HTMLElement {
     const groupElement = document.createElement("div");
     groupElement.className = "board-grid";
-
-    for (let boardId = firstBoardId; boardId <= lastBoardId; boardId++) {
-      groupElement.appendChild(this.createBoardTile(view, boardId));
-    }
-
+    groupElement.append(
+      ...Array.from(
+        { length: group.lastBoardId - group.firstBoardId + 1 },
+        (_, offset) => this.createBoardTile(view, group.firstBoardId + offset),
+      ),
+    );
     return groupElement;
   }
 
@@ -222,11 +200,11 @@ export class BoardMenu {
   ): HTMLElement {
     const gridElement = document.createElement("div");
     gridElement.className = "range-grid";
-
-    for (const range of ranges) {
-      gridElement.appendChild(this.createRangeTile(range, view, onRangeOpened));
-    }
-
+    gridElement.append(
+      ...ranges.map((range) =>
+        this.createRangeTile(range, view, onRangeOpened),
+      ),
+    );
     return gridElement;
   }
 

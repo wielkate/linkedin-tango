@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { getCells, openBoard } from "./page";
 
-// Solve shows the right symbol of every cell, and Reset takes the board back to its start.
+// Solve shows full board, Reset takes the board back to its start.
 async function readSolutionSymbols(page: Page): Promise<string[]> {
   await page.locator("#solve").click();
   const solutionSymbols = await getCells(page).allTextContents();

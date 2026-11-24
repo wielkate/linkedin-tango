@@ -6,7 +6,6 @@ import {
 } from "./cell-position";
 import type { CellValue } from "./symbols";
 
-// The grid of cells the player fills in. A cell is empty (null), a cat or a dog.
 export class Board {
   private constructor(private readonly rows: CellValue[][]) {}
 

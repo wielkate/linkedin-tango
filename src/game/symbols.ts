@@ -7,7 +7,6 @@ export type CellValue = PlayerSymbol | null;
 
 export const ALL_SYMBOLS: PlayerSymbol[] = [CAT, DOG];
 
-// Clicking a cell cycles through these values: empty -> cat -> dog -> empty.
 const CLICK_CYCLE: CellValue[] = [null, CAT, DOG];
 
 export function getOppositeSymbol(symbol: PlayerSymbol): PlayerSymbol {

@@ -1,6 +1,4 @@
-// Writes every animal picture as a separate .svg file into example/pets/, so the pictures
-// can be looked at without starting the game: `npm run export:pet-svgs`.
-// Vite loads the TypeScript source, so the files always match what the game draws.
+// Writes every animal picture as a separate .svg file into example/pets/
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createServer } from "vite";

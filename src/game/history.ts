@@ -1,9 +1,5 @@
-import type { CellPosition } from "./cell-position";
+import { toCellKey, type CellPosition } from "./cell-position";
 import type { CellValue } from "./symbols";
-
-function areSamePosition(first: CellPosition, second: CellPosition): boolean {
-  return first.row === second.row && first.column === second.column;
-}
 
 export interface CellChange {
   position: CellPosition;
@@ -12,7 +8,7 @@ export interface CellChange {
 
 // Remembers every cell change so the player can take them back one by one.
 export class ChangeHistory {
-  private readonly changes: CellChange[] = [];
+  private changes: CellChange[] = [];
 
   record(change: CellChange): void {
     this.changes.push(change);
@@ -24,11 +20,9 @@ export class ChangeHistory {
 
   // Drops every change made to one cell, for a cell that can no longer be changed.
   forgetChangesAt(position: CellPosition): void {
-    const keptChanges = this.changes.filter(
-      (change) => !areSamePosition(change.position, position),
+    this.changes = this.changes.filter(
+      (change) => toCellKey(change.position) !== toCellKey(position),
     );
-    this.changes.length = 0;
-    this.changes.push(...keptChanges);
   }
 
   isEmpty(): boolean {
@@ -36,6 +30,6 @@ export class ChangeHistory {
   }
 
   clear(): void {
-    this.changes.length = 0;
+    this.changes = [];
   }
 }

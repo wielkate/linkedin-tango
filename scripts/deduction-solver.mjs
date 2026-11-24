@@ -1,28 +1,23 @@
-// Solves a puzzle the way the hint button explains it, so the generator can tell
-// which puzzles the hint can explain all the way to the end.
+// Solves a puzzle the way the hint button explains it.
 //
 // It repeats the two kinds of steps of src/hints/ (keep both in step with them):
 //   1. Simple rules: an edge hint with one cell known, a pair of identical symbols
-//      with an empty cell next to it, an empty cell between two identical symbols,
-//      and a line that already holds three of one symbol.
+//      with an empty cell next to it, sandwich, and a line that already holds three of one symbol.
 //   2. Lookahead: assume a symbol in an empty cell, let the simple rules fill in
 //      whatever they force, and if a rule breaks, the cell holds the other symbol.
 //
 // A hint that finds neither step falls back to "this one needs a longer chain of
 // reasoning", which explains nothing. The solving level tells how far a puzzle gets.
-//
-// The steps only ever add knowledge, so the order they are applied in does not change
-// the result. Solving from the given cells alone is therefore enough to know whether
-// the hint can explain a move from every position the player can reach.
 
-const BOARD_SIZE = 6;
-const CELL_COUNT = BOARD_SIZE * BOARD_SIZE;
-const SYMBOLS_PER_LINE = BOARD_SIZE / 2;
-const FORBIDDEN_STREAK_LENGTH = 3;
+import {
+  BOARD_SIZE,
+  CELL_COUNT,
+  FORBIDDEN_STREAK_LENGTH,
+  SYMBOLS_PER_LINE,
+} from "../src/game/board-constants.ts";
+import { ALL_SYMBOLS, CAT, DOG } from "../src/game/symbols.ts";
+
 const EMPTY = -1;
-const CAT = 0;
-const DOG = 1;
-const ALL_SYMBOLS = [CAT, DOG];
 
 // How far the hint can follow a puzzle from the given cells to the full solution.
 export const SOLVING_LEVELS = Object.freeze({
@@ -30,12 +25,7 @@ export const SOLVING_LEVELS = Object.freeze({
   lookahead: "lookahead",
   stuck: "stuck",
 });
-
-const SOLVING_LEVEL_ORDER = [
-  SOLVING_LEVELS.simpleRules,
-  SOLVING_LEVELS.lookahead,
-  SOLVING_LEVELS.stuck,
-];
+const LEVEL_ORDER = Object.values(SOLVING_LEVELS);
 
 const LINES = createAllLines();
 const WINDOWS = LINES.flatMap(createWindows);
@@ -59,30 +49,25 @@ function createAllLines() {
 }
 
 function createWindows(line) {
-  const streaks = [];
+  const windows = [];
 
   for (let start = 0; start + FORBIDDEN_STREAK_LENGTH <= line.length; start++) {
-    streaks.push(line.slice(start, start + FORBIDDEN_STREAK_LENGTH));
+    windows.push(line.slice(start, start + FORBIDDEN_STREAK_LENGTH));
   }
 
-  return streaks;
+  return windows;
 }
 
 function getOppositeSymbol(symbol) {
   return symbol === CAT ? DOG : CAT;
 }
 
-// Is the level reached no harder than the level the difficulty asks for?
-export function isSolvableAtLevel(solvingLevel, requiredSolvingLevel) {
+export function isSolvableAtLevel(currentLevel, requiredLevel) {
   return (
-    SOLVING_LEVEL_ORDER.indexOf(solvingLevel) <=
-    SOLVING_LEVEL_ORDER.indexOf(requiredSolvingLevel)
+    LEVEL_ORDER.indexOf(currentLevel) <= LEVEL_ORDER.indexOf(requiredLevel)
   );
 }
 
-// Solves the puzzle made of the given cells and edge hints on the solution board.
-// The board holds 0 (cat) or 1 (dog) per cell, edges are the list of cell pairs
-// that the edge hint indexes point into.
 export function findSolvingLevel(solutionBoard, givenCells, hintEdges, edges) {
   const cells = createCellsWithGivenSymbols(solutionBoard, givenCells);
   const edgeHints = createEdgeHints(solutionBoard, hintEdges, edges);
@@ -97,7 +82,7 @@ export function findSolvingLevel(solutionBoard, givenCells, hintEdges, edges) {
   return canLookaheadFinish ? SOLVING_LEVELS.lookahead : SOLVING_LEVELS.stuck;
 }
 
-// How many cells the simple rules alone leave empty. 0 means they solve the puzzle.
+// 0 means solved puzzle.
 export function countCellsLeftBySimpleRules(
   solutionBoard,
   givenCells,
@@ -123,14 +108,13 @@ function createCellsWithGivenSymbols(solutionBoard, givenCells) {
 
 function createEdgeHints(solutionBoard, hintEdges, edges) {
   return [...hintEdges].map((edge) => {
-    const [firstCell, secondCell] = edges[edge];
-    const hasSameSymbols =
-      solutionBoard[firstCell] === solutionBoard[secondCell];
-    return { firstCell, secondCell, hasSameSymbols };
+    const [a, b] = edges[edge];
+    const same = solutionBoard[a] === solutionBoard[b];
+    return { a, b, same };
   });
 }
 
-// The clues come from a real solution, so no rule can break while solving them.
+// The clues come from a real solution, so a broken rule means a bug.
 function assertNoContradiction(didReachContradiction) {
   if (didReachContradiction) {
     throw new Error(
@@ -213,135 +197,101 @@ function runSimpleRulesUntilStable(cells, edgeHints) {
 }
 
 function isAnyRuleBroken(cells, edgeHints) {
-  const hasLineWithTooManyOfOneSymbol = LINES.some((line) =>
-    hasTooManyOfOneSymbol(cells, line),
+  return (
+    LINES.some((line) => hasTooManyOfOneSymbol(cells, line)) ||
+    WINDOWS.some((window) => areFilledAndIdentical(cells, window)) ||
+    edgeHints.some((edgeHint) => isEdgeHintBroken(cells, edgeHint))
   );
-  const hasTooLongStreak = WINDOWS.some((streakCells) =>
-    areFilledAndIdentical(cells, streakCells),
-  );
-  const hasBrokenEdgeHint = edgeHints.some((edgeHint) =>
-    isEdgeHintBroken(cells, edgeHint),
-  );
-
-  return hasLineWithTooManyOfOneSymbol || hasTooLongStreak || hasBrokenEdgeHint;
 }
 
 function hasTooManyOfOneSymbol(cells, line) {
   return ALL_SYMBOLS.some(
-    (symbol) => countSymbolInLine(cells, line, symbol) > SYMBOLS_PER_LINE,
+    (symbol) => count(cells, line, symbol) > SYMBOLS_PER_LINE,
   );
 }
 
-function countSymbolInLine(cells, line, symbol) {
+function count(cells, line, symbol) {
   return line.filter((cell) => cells[cell] === symbol).length;
 }
 
-function areFilledAndIdentical(cells, streakCells) {
-  const firstSymbol = cells[streakCells[0]];
-  const isFirstCellFilled = firstSymbol !== EMPTY;
-  const haveSameSymbol = streakCells.every(
-    (cell) => cells[cell] === firstSymbol,
-  );
-  return isFirstCellFilled && haveSameSymbol;
+function areFilledAndIdentical(cells, window) {
+  const [a, b, c] = window;
+  return cells[a] !== EMPTY && cells[a] === cells[b] && cells[b] === cells[c];
 }
 
 function isEdgeHintBroken(cells, edgeHint) {
-  const firstSymbol = cells[edgeHint.firstCell];
-  const secondSymbol = cells[edgeHint.secondCell];
-  const areBothCellsFilled = firstSymbol !== EMPTY && secondSymbol !== EMPTY;
-  const haveSameSymbol = firstSymbol === secondSymbol;
-
-  return areBothCellsFilled && haveSameSymbol !== edgeHint.hasSameSymbols;
+  const { a, b, same } = edgeHint;
+  return (
+    cells[a] !== EMPTY && cells[b] !== EMPTY && (cells[a] === cells[b]) !== same
+  );
 }
 
 // Every empty cell that one simple rule settles, as { cell, symbol }.
 function findSimpleDeductions(cells, edgeHints) {
   return [
     ...edgeHints.flatMap((edgeHint) => deduceFromEdgeHint(cells, edgeHint)),
-    ...WINDOWS.flatMap((streakCells) =>
-      deduceFromNeighbouringPair(cells, streakCells),
-    ),
-    ...WINDOWS.flatMap((streakCells) => deduceFromSandwich(cells, streakCells)),
+    ...WINDOWS.flatMap((window) => deduceFromPair(cells, window)),
+    ...WINDOWS.flatMap((window) => deduceFromSandwich(cells, window)),
     ...LINES.flatMap((line) => deduceFromCompleteSymbols(cells, line)),
   ];
 }
 
-// The other cell of an edge hint is filled, so this cell follows from "=" or "×".
 function deduceFromEdgeHint(cells, edgeHint) {
-  const { firstCell, secondCell, hasSameSymbols } = edgeHint;
-  const isOnlyFirstFilled =
-    cells[firstCell] !== EMPTY && cells[secondCell] === EMPTY;
-  const isOnlySecondFilled =
-    cells[firstCell] === EMPTY && cells[secondCell] !== EMPTY;
+  const { a, b, same } = edgeHint;
+  const isOnlyFirstFilled = cells[a] !== EMPTY && cells[b] === EMPTY;
+  const isOnlySecondFilled = cells[a] === EMPTY && cells[b] !== EMPTY;
 
   if (isOnlyFirstFilled) {
-    return [
-      createEdgeHintDeduction(secondCell, cells[firstCell], hasSameSymbols),
-    ];
+    return createEdgeHintDeduction(b, cells[a], same);
   }
 
   if (isOnlySecondFilled) {
-    return [
-      createEdgeHintDeduction(firstCell, cells[secondCell], hasSameSymbols),
-    ];
+    return createEdgeHintDeduction(a, cells[b], same);
   }
 
   return [];
 }
 
-function createEdgeHintDeduction(emptyCell, partnerSymbol, hasSameSymbols) {
-  const symbol = hasSameSymbols
-    ? partnerSymbol
-    : getOppositeSymbol(partnerSymbol);
-  return { cell: emptyCell, symbol };
+function createEdgeHintDeduction(emptyCell, partnerSymbol, same) {
+  const symbol = same ? partnerSymbol : getOppositeSymbol(partnerSymbol);
+  return [{ cell: emptyCell, symbol }];
 }
 
-// Two identical symbols side by side: the cell next to the pair is the other symbol.
-function deduceFromNeighbouringPair(cells, streakCells) {
-  const [firstCell, middleCell, lastCell] = streakCells;
-  const firstSymbol = cells[firstCell];
-  const middleSymbol = cells[middleCell];
-  const lastSymbol = cells[lastCell];
+function deduceFromPair(cells, window) {
+  const [a, b, c] = window;
   const isPairAtStart =
-    firstSymbol !== EMPTY &&
-    firstSymbol === middleSymbol &&
-    lastSymbol === EMPTY;
+    cells[a] !== EMPTY && cells[a] === cells[b] && cells[c] === EMPTY;
   const isPairAtEnd =
-    lastSymbol !== EMPTY &&
-    lastSymbol === middleSymbol &&
-    firstSymbol === EMPTY;
+    cells[c] !== EMPTY && cells[c] === cells[b] && cells[a] === EMPTY;
 
   if (isPairAtStart) {
-    return [{ cell: lastCell, symbol: getOppositeSymbol(firstSymbol) }];
+    return [{ cell: c, symbol: getOppositeSymbol(cells[a]) }];
   }
 
   if (isPairAtEnd) {
-    return [{ cell: firstCell, symbol: getOppositeSymbol(lastSymbol) }];
+    return [{ cell: a, symbol: getOppositeSymbol(cells[c]) }];
   }
 
   return [];
 }
 
-// An empty cell between two identical symbols is the other symbol.
-function deduceFromSandwich(cells, streakCells) {
-  const [firstCell, middleCell, lastCell] = streakCells;
-  const areEndsIdentical =
-    cells[firstCell] !== EMPTY && cells[firstCell] === cells[lastCell];
-  const isMiddleEmpty = cells[middleCell] === EMPTY;
+function deduceFromSandwich(cells, window) {
+  const [a, b, c] = window;
+  const areEndsIdentical = cells[a] !== EMPTY && cells[a] === cells[c];
+  const isMiddleEmpty = cells[b] === EMPTY;
 
   if (areEndsIdentical && isMiddleEmpty) {
-    return [{ cell: middleCell, symbol: getOppositeSymbol(cells[firstCell]) }];
+    return [{ cell: b, symbol: getOppositeSymbol(cells[a]) }];
   }
 
   return [];
 }
 
-// A line that already holds all three of one symbol can only take the other symbol.
 function deduceFromCompleteSymbols(cells, line) {
   const emptyCells = line.filter((cell) => cells[cell] === EMPTY);
 
   return ALL_SYMBOLS.filter(
-    (symbol) => countSymbolInLine(cells, line, symbol) === SYMBOLS_PER_LINE,
+    (symbol) => count(cells, line, symbol) === SYMBOLS_PER_LINE,
   ).flatMap((completeSymbol) =>
     emptyCells.map((cell) => ({
       cell,

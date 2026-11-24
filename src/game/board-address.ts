@@ -1,12 +1,11 @@
 import { DIFFICULTIES, type Difficulty } from "./difficulty";
 
-// Which puzzle is open, written in the page address after the #, for example "#hard/123".
 export interface BoardAddress {
   difficulty: Difficulty;
   boardId: number;
 }
 
-const ADDRESS_PATTERN = /^#?([a-z]+)\/(\d+)$/;
+const ADDRESS_PATTERN = /^#?([a-z]+)\/(\d+)$/; // #hard/123.
 
 export function formatBoardAddress(address: BoardAddress): string {
   return `#${address.difficulty}/${address.boardId}`;
