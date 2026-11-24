@@ -10,7 +10,7 @@
 // The folder the worker lives in is part of the prefix, so the game at /linkedin-tango/ and a
 // test build at /linkedin-tango/test/ never delete each other's cache.
 const CACHE_PREFIX = `tango-${new URL("./", self.location).pathname}-`;
-const CACHE_VERSION = "9409d0d90864";
+const CACHE_VERSION = "701b772e2ecd";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 const PRECACHE_PATHS = JSON.parse("[\"./\",\"apple-touch-icon.png\",\"assets/index-B_RDNCxd.css\",\"assets/index-CCTeSfhS.js\",\"assets/success-ClaQpYIQ.wav\",\"favicon.svg\",\"icon-192.png\",\"icon-512.png\",\"icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\"]");
 
