@@ -13,7 +13,8 @@ function readSavedRecords(): Partial<SolveSecondsByDifficulty> {
   }
 }
 
-// The boards the player has solved, per difficulty, with the best time
+// The boards the player has solved, per difficulty, with the best time each was solved in,
+// kept in localStorage between visits.
 // localStorage can be unavailable (private window, blocked site data)
 export class SolvedBoards {
   private constructor(

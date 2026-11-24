@@ -265,11 +265,11 @@ function deduceFromPair(cells, window) {
     cells[c] !== EMPTY && cells[c] === cells[b] && cells[a] === EMPTY;
 
   if (isPairAtStart) {
-    return [{ cell: cells[c], symbol: getOppositeSymbol(cells[a]) }];
+    return [{ cell: c, symbol: getOppositeSymbol(cells[a]) }];
   }
 
   if (isPairAtEnd) {
-    return [{ cell: cells[a], symbol: getOppositeSymbol(cells[c]) }];
+    return [{ cell: a, symbol: getOppositeSymbol(cells[c]) }];
   }
 
   return [];
