@@ -1,18 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 1200" preserveAspectRatio="xMidYMin meet">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 580" preserveAspectRatio="xMidYMin meet">
   <defs>
     <clipPath id="paw-clip">
-      <path d="M 27,1200 L 27,580 L 60,224 C 32,165 32,102 58,95 C 50,35 95,12 126,38 C 148,10 198,18 197,62 C 230,62 246,115 232,175 L 232,224 L 234,580 L 234,1200 Z"/>
+      <path d="M 27,580 L 60,224 C 32,165 32,102 58,95 C 50,35 95,12 126,38 C 148,10 198,18 197,62 C 230,62 246,115 232,175 L 232,224 L 234,580 Z"/>
     </clipPath>
   </defs>
   <!-- Forearm and closed paw of a white cat with a black and an orange patch, toes at the top.
-       The arm is long and straight so the page can cut it off at the edge of the screen. -->
+       The arm is just long enough for the page to cut it off at the edge of the screen. -->
   <g clip-path="url(#paw-clip)">
-    <rect x="0" y="0" width="260" height="1200" fill="#ffffff"/>
+    <rect x="0" y="0" width="260" height="580" fill="#ffffff"/>
     <path fill="#222222" d="M 55,242 C 78,240 94,248 92,268 C 90,285 74,292 75,310 C 76,332 106,334 134,322 C 162,310 182,324 176,348 C 170,372 135,388 95,408 C 65,422 45,432 35,442 L 35,242 Z"/>
     <path fill="#d9780e" d="M 240,418 C 202,438 162,482 142,555 L 136,585 L 240,585 Z"/>
   </g>
   <g fill="none" stroke="#0a0a0a" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 27,1200 L 27,580 L 60,224 C 32,165 32,102 58,95 C 50,35 95,12 126,38 C 148,10 198,18 197,62 C 230,62 246,115 232,175 L 232,224 L 234,580 L 234,1200"/>
+    <path d="M 27,580 L 60,224 C 32,165 32,102 58,95 C 50,35 95,12 126,38 C 148,10 198,18 197,62 C 230,62 246,115 232,175 L 232,224 L 234,580"/>
     <!-- The grooves between the toes. -->
     <path d="M 58,95 C 60,104 62,110 64,114" stroke-width="6"/>
     <path d="M 126,38 C 125,47 125,54 125,60" stroke-width="6"/>
