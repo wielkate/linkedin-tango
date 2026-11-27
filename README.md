@@ -160,8 +160,11 @@ linkedin-tango/
 │   │   ├── stopwatch.ts      Stopwatch class
 │   │   ├── timer-display.ts  TimerDisplay class: shows the stopwatch time
 │   │   ├── info-dialog.ts    InfoDialog class: the "how to play" dialog
+│   │   ├── start-paw.ts      the paw that walks in and taps the ⓘ button when the page opens (skipped with reduced motion)
+│   │   ├── paw-path.ts       where the paw stops and which way its toes point
 │   │   ├── required-element.ts  finds an element of index.html or fails with a clear message
 │   │   ├── controls.css      styling of the difficulty and undo/reset buttons
+│   │   ├── start-paw.css     the paw's walk-in animation
 │   │   ├── panel.css         layout of the title, timer, side buttons and info dialog
 │   │   └── error-highlight.css  1-second CSS delay before rule violations turn red
 │   ├── offline/              offline play

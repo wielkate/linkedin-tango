@@ -1,0 +1,49 @@
+/* The paw that walks in at the start and taps the ⓘ button (see start-paw.ts).
+   It is placed where it stops; --start-paw-from-x/y say where the walk begins, measured from there,
+   and --start-paw-rotation turns the toes toward the button. It ignores the mouse and is drawn
+   above the visiting animals (z-index 1 in pets.css). */
+.start-paw {
+  --start-paw-size: 56px;
+  position: fixed;
+  z-index: 3;
+  width: var(--start-paw-size);
+  height: var(--start-paw-size);
+  background: var(--text-primary);
+  mask: url("./background-paw.svg") no-repeat center / contain;
+  pointer-events: none;
+  opacity: 0;
+  animation: start-paw-walk 2.6s ease-in-out forwards;
+}
+
+/* Two small steps toward the button, then a tap, then it fades away. */
+@keyframes start-paw-walk {
+  0% {
+    opacity: 0;
+    transform: translate(var(--start-paw-from-x), var(--start-paw-from-y))
+      rotate(var(--start-paw-rotation)) scale(1.3);
+  }
+
+  15% {
+    opacity: 0.85;
+  }
+
+  60% {
+    opacity: 0.85;
+    transform: translate(0, 0) rotate(var(--start-paw-rotation)) scale(1);
+  }
+
+  70% {
+    opacity: 0.85;
+    transform: translate(0, 0) rotate(var(--start-paw-rotation)) scale(0.8);
+  }
+
+  80% {
+    opacity: 0.85;
+    transform: translate(0, 0) rotate(var(--start-paw-rotation)) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(var(--start-paw-rotation)) scale(1);
+  }
+}
