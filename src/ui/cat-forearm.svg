@@ -1,10 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 580" preserveAspectRatio="xMidYMin meet">
+<svg aria-hidden="true" focusable="false" viewBox="0 0 260 580" preserveAspectRatio="xMidYMin meet">
   <defs>
     <clipPath id="paw-clip">
       <path d="M 27,580 L 60,224 C 32,165 32,102 58,95 C 50,35 95,12 126,38 C 148,10 198,18 197,62 C 230,62 246,115 232,175 L 232,224 L 234,580 Z"/>
     </clipPath>
   </defs>
-  <!-- Forearm and closed paw of a white cat with a black and an orange patch, toes at the top.
+  <!-- Inserted into the page as inline SVG (see start-paw.ts), so it needs no xmlns address.
+       Forearm and closed paw of a white cat with a black and an orange patch, toes at the top.
        The arm is just long enough for the page to cut it off at the edge of the screen. -->
   <g clip-path="url(#paw-clip)">
     <rect x="0" y="0" width="260" height="580" fill="#ffffff"/>

@@ -163,7 +163,7 @@ linkedin-tango/
 │   │   ├── start-paw.ts      the cat's forearm that reaches down and covers the ⓘ button once per session (skipped with reduced motion)
 │   │   ├── arm-placement.ts  where the forearm sits so that its paw covers the button
 │   │   ├── start-paw-session.ts  remembers that the forearm has played in this session
-│   │   ├── cat-forearm.svg   the drawing of the forearm
+│   │   ├── cat-forearm.svg   the drawing of the forearm, inserted into the page as inline SVG
 │   │   ├── required-element.ts  finds an element of index.html or fails with a clear message
 │   │   ├── controls.css      styling of the difficulty and undo/reset buttons
 │   │   ├── start-paw.css     the forearm's cover-and-withdraw animation

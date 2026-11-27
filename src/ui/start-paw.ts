@@ -1,4 +1,5 @@
 import { calculateArmPlacement } from "./arm-placement";
+import catForearmMarkup from "./cat-forearm.svg?raw";
 import { claimStartPawPlay } from "./start-paw-session";
 
 // Must match the proportions of cat-forearm.svg, which is 260 units wide: the solid white back of
@@ -48,6 +49,7 @@ function createForearmElement(infoButton: HTMLElement): HTMLElement {
   const forearmElement = document.createElement("div");
   forearmElement.className = "start-paw";
   forearmElement.setAttribute("aria-hidden", "true");
+  forearmElement.innerHTML = catForearmMarkup;
   forearmElement.style.width = `${ARM_WIDTH_PIXELS}px`;
   forearmElement.style.height = `${placement.boxHeightPixels}px`;
   forearmElement.style.left = `${placement.boxLeftPixels}px`;
