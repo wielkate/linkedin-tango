@@ -1,46 +1,32 @@
-/* The cat's forearm that reaches in at the start, covers the ⓘ button and opens it (see start-paw.ts).
-   JavaScript sets the size and position of the box and --start-paw-hidden-distance. The arm is drawn
-   upright, toes at the top, and turned to point left around its toes. translateY after the rotation
-   slides it along its own length. The arm ignores the mouse and is drawn above the visiting animals
-   (z-index 1 in pets.css). */
+/* The cat's forearm that reaches down at the start, covers the ⓘ button and withdraws
+   (see start-paw.ts). JavaScript sets the size and position of the box and
+   --start-paw-hidden-distance. The arm is drawn upright, toes at the top, and turned upside down
+   around its toes. translateY after the rotation slides it along its own length. The arm ignores
+   the mouse and is drawn above the visiting animals (z-index 1 in pets.css). */
 .start-paw {
   position: fixed;
   z-index: 3;
   background: url("./cat-forearm.svg") no-repeat top center / 100% auto;
-  filter: drop-shadow(-4px 4px 6px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 0 1px rgba(236, 233, 226, 0.9))
+    drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
   transform-origin: 50% 0;
-  transform: rotate(-90deg) translateY(var(--start-paw-hidden-distance));
+  transform: rotate(180deg) translateY(var(--start-paw-hidden-distance));
   pointer-events: none;
-  animation: start-paw-reach 1.6s ease-out forwards;
+  animation: start-paw-cover 2.6s ease-in-out forwards;
 }
 
-/* Added when the paw has covered the button and the dialog opens: the arm pulls back. */
-.start-paw.is-withdrawing {
-  animation: start-paw-withdraw 0.7s ease-in forwards;
-}
-
-/* The arm slides in, presses a little too far onto the button, settles and waits for a moment. */
-@keyframes start-paw-reach {
+/* The arm slides down onto the button, waits there for a moment, then pulls back up. */
+@keyframes start-paw-cover {
   0% {
-    transform: rotate(-90deg) translateY(var(--start-paw-hidden-distance));
+    transform: rotate(180deg) translateY(var(--start-paw-hidden-distance));
   }
 
-  60% {
-    transform: rotate(-90deg) translateY(-8px);
+  35%,
+  65% {
+    transform: rotate(180deg) translateY(0);
   }
 
-  75%,
   100% {
-    transform: rotate(-90deg) translateY(0);
-  }
-}
-
-@keyframes start-paw-withdraw {
-  from {
-    transform: rotate(-90deg) translateY(0);
-  }
-
-  to {
-    transform: rotate(-90deg) translateY(var(--start-paw-hidden-distance));
+    transform: rotate(180deg) translateY(var(--start-paw-hidden-distance));
   }
 }

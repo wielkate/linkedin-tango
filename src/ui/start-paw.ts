@@ -1,21 +1,21 @@
 import { calculateArmPlacement } from "./arm-placement";
+import { claimStartPawPlay } from "./start-paw-session";
 
-// Must match the proportions of cat-forearm.svg, which is 100 units wide: the solid back of the
-// paw, below the grooves between the toes, is about 125 units behind the tip of the toes.
-const ARM_WIDTH_PIXELS = 96;
-const TIP_TO_PAW_CENTER_PIXELS = 120;
-const WITHDRAWING_CLASS_NAME = "is-withdrawing";
+// Must match the proportions of cat-forearm.svg, which is 260 units wide: the solid white back of
+// the paw is about 150 units behind the tip of the toes.
+const ARM_WIDTH_PIXELS = 110;
+const TIP_TO_PAW_CENTER_PIXELS = 65;
 
-// When the page opens, a cat's forearm reaches in from the right edge, covers the ⓘ button and
-// opens it, so new players find the rules. The arm then withdraws behind the dialog.
-// It ignores the mouse, goes away at the first click or key press without opening anything, and
-// does not appear for players who asked their system for less motion.
-export function showStartPawOpening(infoButton: HTMLElement): void {
+// When a session starts, a cat's forearm reaches down from the top edge of the screen, covers the
+// ⓘ button for a moment and withdraws, so new players notice the button. It plays once per
+// session, ignores the mouse, goes away at the first click or key press, and does not appear for
+// players who asked their system for less motion.
+export function showStartPawOverInfoButton(infoButton: HTMLElement): void {
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
 
-  if (prefersReducedMotion) {
+  if (prefersReducedMotion || !claimStartPawPlay(sessionStorage)) {
     return;
   }
 
@@ -28,24 +28,9 @@ export function showStartPawOpening(infoButton: HTMLElement): void {
     document.removeEventListener("keydown", removeForearm);
   };
 
-  const openInfoAndWithdraw = () => {
-    infoButton.click();
-    forearmElement.classList.add(WITHDRAWING_CLASS_NAME);
-  };
-
   document.addEventListener("pointerdown", removeForearm);
   document.addEventListener("keydown", removeForearm);
-  forearmElement.addEventListener("animationend", () => {
-    const hasWithdrawn = forearmElement.classList.contains(
-      WITHDRAWING_CLASS_NAME,
-    );
-
-    if (hasWithdrawn) {
-      removeForearm();
-    } else {
-      openInfoAndWithdraw();
-    }
-  });
+  forearmElement.addEventListener("animationend", removeForearm);
 }
 
 function createForearmElement(infoButton: HTMLElement): HTMLElement {

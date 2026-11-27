@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { calculateArmPlacement } from "./arm-placement";
 
-function placementFor(buttonCenterX: number) {
+function placementFor(buttonCenterY: number, buttonCenterX = 300) {
   return calculateArmPlacement({
-    buttonCenter: { x: buttonCenterX, y: 40 },
+    buttonCenter: { x: buttonCenterX, y: buttonCenterY },
     viewportWidthPixels: 400,
     armWidthPixels: 100,
     tipToPawCenterPixels: 60,
@@ -11,27 +11,28 @@ function placementFor(buttonCenterX: number) {
 }
 
 describe("calculateArmPlacement", () => {
-  it("puts the toes behind the button, so the middle of the paw covers it", () => {
-    const placement = placementFor(360);
-
-    // The toes are at x = 300; the box is 100 wide with the toes at its top middle.
-    expect(placement.boxLeftPixels).toBe(250);
+  it("centres the arm on the button", () => {
+    expect(placementFor(40).boxLeftPixels).toBe(250);
   });
 
-  it("starts the arm at the height of the button", () => {
-    expect(placementFor(360).boxTopPixels).toBe(40);
+  it("keeps the arm inside the screen when the button is near the right edge", () => {
+    expect(placementFor(40, 390).boxLeftPixels).toBe(300);
   });
 
-  it("makes the arm reach past the right edge of the screen", () => {
-    const placement = placementFor(360);
-
-    // 100 from the toes to the edge, plus one arm width of spare length.
-    expect(placement.boxHeightPixels).toBe(200);
+  it("keeps the arm inside the screen when the button is near the left edge", () => {
+    expect(placementFor(40, 10).boxLeftPixels).toBe(0);
   });
 
-  it("pulls the arm back far enough to hide the toes beyond the right edge", () => {
-    const placement = placementFor(360);
+  it("puts the toes below the button, so the middle of the paw covers it", () => {
+    expect(placementFor(40).boxTopPixels).toBe(100);
+  });
 
-    expect(placement.hiddenDistancePixels).toBe(108);
+  it("makes the arm reach past the top edge of the screen", () => {
+    // 100 from the toes up to the edge, plus one arm width of spare length.
+    expect(placementFor(40).boxHeightPixels).toBe(200);
+  });
+
+  it("pulls the arm back far enough to hide the toes above the top edge", () => {
+    expect(placementFor(40).hiddenDistancePixels).toBe(108);
   });
 });

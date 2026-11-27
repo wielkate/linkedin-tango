@@ -13,8 +13,9 @@ export interface ArmPlacementInput {
 }
 
 export interface ArmPlacement {
-  // The arm is drawn upright, with the toes at the top middle of its box. The page turns it to
-  // point left, around that top middle point, so it reaches in from the right edge of the screen.
+  // The arm is drawn upright, with the toes at the top middle of its box. The page turns it
+  // upside down around that top middle point, so it hangs from the top edge of the screen with
+  // the toes pointing down at the button.
   boxLeftPixels: number;
   boxTopPixels: number;
   boxHeightPixels: number;
@@ -24,16 +25,21 @@ export interface ArmPlacement {
 
 const HIDDEN_MARGIN_PIXELS = 8;
 
-// Puts the middle of the paw on the button and the rest of the arm beyond the right edge.
+// Puts the middle of the paw on the button and the rest of the arm above the top edge.
 export function calculateArmPlacement(input: ArmPlacementInput): ArmPlacement {
   const { buttonCenter, viewportWidthPixels, armWidthPixels } = input;
-  const toesX = buttonCenter.x - input.tipToPawCenterPixels;
-  const distanceFromToesToRightEdge = viewportWidthPixels - toesX;
+  const toesY = buttonCenter.y + input.tipToPawCenterPixels;
+  const centeredLeftPixels = buttonCenter.x - armWidthPixels / 2;
+  const rightmostLeftPixels = viewportWidthPixels - armWidthPixels;
 
   return {
-    boxLeftPixels: toesX - armWidthPixels / 2,
-    boxTopPixels: buttonCenter.y,
-    boxHeightPixels: distanceFromToesToRightEdge + armWidthPixels,
-    hiddenDistancePixels: distanceFromToesToRightEdge + HIDDEN_MARGIN_PIXELS,
+    // A button near the edge of the screen must not push the arm out of view.
+    boxLeftPixels: Math.max(
+      0,
+      Math.min(centeredLeftPixels, rightmostLeftPixels),
+    ),
+    boxTopPixels: toesY,
+    boxHeightPixels: toesY + armWidthPixels,
+    hiddenDistancePixels: toesY + HIDDEN_MARGIN_PIXELS,
   };
 }
