@@ -44,6 +44,7 @@ export default defineConfig({
         "src/ui/game-page.ts",
         "src/ui/info-dialog.ts",
         "src/ui/required-element.ts",
+        "src/ui/start-paw.ts",
         "src/ui/timer-display.ts",
       ],
       thresholds: {

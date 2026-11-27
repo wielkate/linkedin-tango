@@ -49,3 +49,41 @@ test("closing the info dialog keeps a pause the player chose", async ({
   await expect(page.locator("#pause")).toHaveText("▶ Resume");
   await expect(page.locator("#board")).toHaveClass(/blurred/);
 });
+
+test("a cat's forearm covers the info button and goes away without opening it", async ({
+  page,
+}) => {
+  await expect(page.locator(".start-paw")).toBeVisible();
+
+  await expect(page.locator(".start-paw")).toHaveCount(0, { timeout: 5000 });
+  await expect(page.locator("#info-dialog")).not.toBeVisible();
+});
+
+test("a click removes the forearm at once", async ({ page }) => {
+  await expect(page.locator(".start-paw")).toBeVisible();
+
+  await page.locator("#title").click();
+
+  await expect(page.locator(".start-paw")).toHaveCount(0);
+});
+
+test("the forearm does not come back when the page is loaded again in the same session", async ({
+  page,
+}) => {
+  await expect(page.locator(".start-paw")).toBeVisible();
+
+  await page.reload();
+  await page.waitForSelector("#board .cell");
+
+  await expect(page.locator(".start-paw")).toHaveCount(0);
+});
+
+test.describe("with reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("no forearm reaches in", async ({ page }) => {
+    await openBoard(page);
+
+    await expect(page.locator(".start-paw")).toHaveCount(0);
+  });
+});
