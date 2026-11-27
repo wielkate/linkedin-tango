@@ -10,9 +10,9 @@
 // The folder the worker lives in is part of the prefix, so the game at /linkedin-tango/ and a
 // test build at /linkedin-tango/test/ never delete each other's cache.
 const CACHE_PREFIX = `tango-${new URL("./", self.location).pathname}-`;
-const CACHE_VERSION = "598a4c23e56c";
+const CACHE_VERSION = "8abc0322a9c7";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
-const PRECACHE_PATHS = JSON.parse("[\"./\",\"apple-touch-icon.png\",\"assets/index-CVmpCQ39.css\",\"assets/index-N_1qPOLu.js\",\"assets/success-ClaQpYIQ.wav\",\"favicon.svg\",\"icon-192.png\",\"icon-512.png\",\"icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\"]");
+const PRECACHE_PATHS = JSON.parse("[\"./\",\"apple-touch-icon.png\",\"assets/index-B4dEiQHN.js\",\"assets/index-BfA_TBCA.css\",\"assets/success-ClaQpYIQ.wav\",\"favicon.svg\",\"icon-192.png\",\"icon-512.png\",\"icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\"]");
 
 // The page asks for its scripts with an Origin header and the worker stores them without one.
 // A server that answers "Vary: Origin" (vite preview does) would then never match, so the
