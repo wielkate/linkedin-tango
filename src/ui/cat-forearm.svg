@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 1000" preserveAspectRatio="xMidYMin meet">
+  <defs>
+    <linearGradient id="fur" gradientUnits="userSpaceOnUse" x1="0" x2="100" y1="0" y2="0">
+      <stop offset="0" stop-color="#746d88"/>
+      <stop offset="0.45" stop-color="#554f66"/>
+      <stop offset="1" stop-color="#383344"/>
+    </linearGradient>
+  </defs>
+  <!-- Forearm and closed paw of a grey Scottish Fold, four toes at the top. The arm is long and
+       straight so the page can cut it off at the edge of the screen. -->
+  <g fill="url(#fur)">
+    <path d="M16 1000 L16 205 C16 190 9 172 12 148 C8 120 10 90 14 70 L86 70 C90 90 92 120 88 148 C86 175 84 190 84 205 L84 1000 Z"/>
+    <ellipse cx="23" cy="58" rx="11.5" ry="19" transform="rotate(-10 23 58)"/>
+    <ellipse cx="42" cy="37" rx="11.5" ry="21"/>
+    <ellipse cx="62" cy="35" rx="11.5" ry="21"/>
+    <ellipse cx="79" cy="55" rx="11.5" ry="19" transform="rotate(10 79 55)"/>
+  </g>
+  <path fill="#2f2a3a" opacity="0.4" d="M66 215 C74 200 82 185 84 160 L84 1000 L60 1000 Z"/>
+  <!-- Soft highlights on the toes. -->
+  <g fill="#9a93ab" opacity="0.45">
+    <ellipse cx="22" cy="48" rx="5.5" ry="10" transform="rotate(-10 22 48)"/>
+    <ellipse cx="41" cy="27" rx="5.5" ry="11"/>
+    <ellipse cx="61" cy="25" rx="5.5" ry="11"/>
+    <ellipse cx="80" cy="45" rx="5.5" ry="10" transform="rotate(10 80 45)"/>
+  </g>
+  <g fill="none" stroke="#2a2533" stroke-linecap="round">
+    <!-- Grooves between the toes. -->
+    <g stroke-width="2.6">
+      <path d="M32 52 C32 72 33 88 36 106"/>
+      <path d="M52 40 C52 66 52 88 52 110"/>
+      <path d="M71 50 C70 72 68 88 66 106"/>
+    </g>
+    <!-- Where the toes meet the paw, the wrist and folds of fur on the arm. -->
+    <path d="M15 128 C36 146 64 146 85 126" stroke-width="2"/>
+    <path d="M17 214 C40 236 64 236 84 212" stroke-width="2.8"/>
+    <g stroke-width="2" opacity="0.55">
+      <path d="M24 300 C34 330 30 380 40 420"/>
+      <path d="M70 330 C62 380 66 430 58 480"/>
+      <path d="M30 560 C40 600 34 650 44 700"/>
+      <path d="M12 150 L6 160 M13 175 L7 186 M88 150 L94 160 M86 176 L92 187" stroke="#4a4458" stroke-width="2.4"/>
+    </g>
+  </g>
+</svg>

@@ -10,10 +10,10 @@ import { peekIn } from "./pets/pet-peek";
 import { VisitScheduler } from "./pets/visit-scheduler";
 import { GamePage } from "./ui/game-page";
 import { getRequiredElement } from "./ui/required-element";
-import { showStartPawPointingAt } from "./ui/start-paw";
+import { showStartPawOpening } from "./ui/start-paw";
 
 new GamePage(new PuzzleLibrary(), SolvedBoards.loadFromStorage()).start();
-showStartPawPointingAt(getRequiredElement("info"));
+showStartPawOpening(getRequiredElement("info"));
 // One visitor at a time: an animal peeks in now and then.
 new VisitScheduler(Math.random, [
   {

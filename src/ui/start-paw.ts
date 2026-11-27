@@ -1,13 +1,16 @@
-import { drawAttentionTo } from "./draw-attention";
-import { calculatePawPath } from "./paw-path";
+import { calculateArmPlacement } from "./arm-placement";
 
-// Must match --start-paw-size in start-paw.css.
-const PAW_SIZE_PIXELS = 56;
+// Must match the proportions of cat-forearm.svg, which is 100 units wide: the solid back of the
+// paw, below the grooves between the toes, is about 125 units behind the tip of the toes.
+const ARM_WIDTH_PIXELS = 96;
+const TIP_TO_PAW_CENTER_PIXELS = 120;
+const WITHDRAWING_CLASS_NAME = "is-withdrawing";
 
-// When the page opens, a paw walks in and taps the ⓘ button, so new players find the rules.
-// It ignores the mouse, goes away at the first click or key press, and does not appear for
-// players who asked their system for less motion.
-export function showStartPawPointingAt(infoButton: HTMLElement): void {
+// When the page opens, a cat's forearm reaches in from the right edge, covers the ⓘ button and
+// opens it, so new players find the rules. The arm then withdraws behind the dialog.
+// It ignores the mouse, goes away at the first click or key press without opening anything, and
+// does not appear for players who asked their system for less motion.
+export function showStartPawOpening(infoButton: HTMLElement): void {
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
@@ -16,45 +19,57 @@ export function showStartPawPointingAt(infoButton: HTMLElement): void {
     return;
   }
 
-  const pawElement = createPawElement(infoButton);
-  document.body.appendChild(pawElement);
+  const forearmElement = createForearmElement(infoButton);
+  document.body.appendChild(forearmElement);
 
-  const removePaw = () => {
-    pawElement.remove();
-    document.removeEventListener("pointerdown", removePaw);
-    document.removeEventListener("keydown", removePaw);
+  const removeForearm = () => {
+    forearmElement.remove();
+    document.removeEventListener("pointerdown", removeForearm);
+    document.removeEventListener("keydown", removeForearm);
   };
 
-  document.addEventListener("pointerdown", removePaw);
-  document.addEventListener("keydown", removePaw);
-  pawElement.addEventListener("animationend", () => {
-    removePaw();
-    drawAttentionTo(infoButton);
+  const openInfoAndWithdraw = () => {
+    infoButton.click();
+    forearmElement.classList.add(WITHDRAWING_CLASS_NAME);
+  };
+
+  document.addEventListener("pointerdown", removeForearm);
+  document.addEventListener("keydown", removeForearm);
+  forearmElement.addEventListener("animationend", () => {
+    const hasWithdrawn = forearmElement.classList.contains(
+      WITHDRAWING_CLASS_NAME,
+    );
+
+    if (hasWithdrawn) {
+      removeForearm();
+    } else {
+      openInfoAndWithdraw();
+    }
   });
 }
 
-function createPawElement(infoButton: HTMLElement): HTMLElement {
+function createForearmElement(infoButton: HTMLElement): HTMLElement {
   const buttonBounds = infoButton.getBoundingClientRect();
-  const path = calculatePawPath({
-    start: { x: window.innerWidth / 2, y: window.innerHeight * 0.75 },
-    targetCenter: {
+  const placement = calculateArmPlacement({
+    buttonCenter: {
       x: buttonBounds.left + buttonBounds.width / 2,
       y: buttonBounds.top + buttonBounds.height / 2,
     },
-    targetRadiusPixels: Math.max(buttonBounds.width, buttonBounds.height) / 2,
-    pawSizePixels: PAW_SIZE_PIXELS,
+    viewportWidthPixels: document.documentElement.clientWidth,
+    armWidthPixels: ARM_WIDTH_PIXELS,
+    tipToPawCenterPixels: TIP_TO_PAW_CENTER_PIXELS,
   });
 
-  const pawElement = document.createElement("div");
-  pawElement.className = "start-paw";
-  pawElement.setAttribute("aria-hidden", "true");
-  pawElement.style.left = `${path.stopCenter.x - PAW_SIZE_PIXELS / 2}px`;
-  pawElement.style.top = `${path.stopCenter.y - PAW_SIZE_PIXELS / 2}px`;
-  pawElement.style.setProperty("--start-paw-from-x", `${path.startOffset.x}px`);
-  pawElement.style.setProperty("--start-paw-from-y", `${path.startOffset.y}px`);
-  pawElement.style.setProperty(
-    "--start-paw-rotation",
-    `${path.rotationDegrees}deg`,
+  const forearmElement = document.createElement("div");
+  forearmElement.className = "start-paw";
+  forearmElement.setAttribute("aria-hidden", "true");
+  forearmElement.style.width = `${ARM_WIDTH_PIXELS}px`;
+  forearmElement.style.height = `${placement.boxHeightPixels}px`;
+  forearmElement.style.left = `${placement.boxLeftPixels}px`;
+  forearmElement.style.top = `${placement.boxTopPixels}px`;
+  forearmElement.style.setProperty(
+    "--start-paw-hidden-distance",
+    `${placement.hiddenDistancePixels}px`,
   );
-  return pawElement;
+  return forearmElement;
 }

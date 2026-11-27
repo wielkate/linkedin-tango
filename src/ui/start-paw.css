@@ -1,49 +1,46 @@
-/* The paw that walks in at the start and taps the ⓘ button (see start-paw.ts).
-   It is placed where it stops; --start-paw-from-x/y say where the walk begins, measured from there,
-   and --start-paw-rotation turns the toes toward the button. It ignores the mouse and is drawn
-   above the visiting animals (z-index 1 in pets.css). */
+/* The cat's forearm that reaches in at the start, covers the ⓘ button and opens it (see start-paw.ts).
+   JavaScript sets the size and position of the box and --start-paw-hidden-distance. The arm is drawn
+   upright, toes at the top, and turned to point left around its toes. translateY after the rotation
+   slides it along its own length. The arm ignores the mouse and is drawn above the visiting animals
+   (z-index 1 in pets.css). */
 .start-paw {
-  --start-paw-size: 56px;
   position: fixed;
   z-index: 3;
-  width: var(--start-paw-size);
-  height: var(--start-paw-size);
-  background: var(--text-primary);
-  mask: url("./background-paw.svg") no-repeat center / contain;
+  background: url("./cat-forearm.svg") no-repeat top center / 100% auto;
+  filter: drop-shadow(-4px 4px 6px rgba(0, 0, 0, 0.55));
+  transform-origin: 50% 0;
+  transform: rotate(-90deg) translateY(var(--start-paw-hidden-distance));
   pointer-events: none;
-  opacity: 0;
-  animation: start-paw-walk 2.6s ease-in-out forwards;
+  animation: start-paw-reach 1.6s ease-out forwards;
 }
 
-/* Two small steps toward the button, then a tap, then it fades away. */
-@keyframes start-paw-walk {
-  0% {
-    opacity: 0;
-    transform: translate(var(--start-paw-from-x), var(--start-paw-from-y))
-      rotate(var(--start-paw-rotation)) scale(1.3);
-  }
+/* Added when the paw has covered the button and the dialog opens: the arm pulls back. */
+.start-paw.is-withdrawing {
+  animation: start-paw-withdraw 0.7s ease-in forwards;
+}
 
-  15% {
-    opacity: 0.85;
+/* The arm slides in, presses a little too far onto the button, settles and waits for a moment. */
+@keyframes start-paw-reach {
+  0% {
+    transform: rotate(-90deg) translateY(var(--start-paw-hidden-distance));
   }
 
   60% {
-    opacity: 0.85;
-    transform: translate(0, 0) rotate(var(--start-paw-rotation)) scale(1);
+    transform: rotate(-90deg) translateY(-8px);
   }
 
-  70% {
-    opacity: 0.85;
-    transform: translate(0, 0) rotate(var(--start-paw-rotation)) scale(0.8);
-  }
-
-  80% {
-    opacity: 0.85;
-    transform: translate(0, 0) rotate(var(--start-paw-rotation)) scale(1);
-  }
-
+  75%,
   100% {
-    opacity: 0;
-    transform: translate(0, 0) rotate(var(--start-paw-rotation)) scale(1);
+    transform: rotate(-90deg) translateY(0);
+  }
+}
+
+@keyframes start-paw-withdraw {
+  from {
+    transform: rotate(-90deg) translateY(0);
+  }
+
+  to {
+    transform: rotate(-90deg) translateY(var(--start-paw-hidden-distance));
   }
 }

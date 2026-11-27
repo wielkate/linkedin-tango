@@ -50,28 +50,34 @@ test("closing the info dialog keeps a pause the player chose", async ({
   await expect(page.locator("#board")).toHaveClass(/blurred/);
 });
 
-test("a paw walks in to the info button at the start and then goes away", async ({
+test("a cat's forearm covers the info button, opens the dialog and goes away", async ({
   page,
 }) => {
   await expect(page.locator(".start-paw")).toBeVisible();
 
+  await expect(page.locator("#info-dialog")).toBeVisible({ timeout: 5000 });
   await expect(page.locator(".start-paw")).toHaveCount(0, { timeout: 5000 });
 });
 
-test("a click removes the paw at once", async ({ page }) => {
+test("a click removes the forearm at once and opens no dialog", async ({
+  page,
+}) => {
   await expect(page.locator(".start-paw")).toBeVisible();
 
   await page.locator("#title").click();
 
   await expect(page.locator(".start-paw")).toHaveCount(0);
+  await expect(page.locator("#info-dialog")).not.toBeVisible();
 });
 
 test.describe("with reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 
-  test("no paw walks in", async ({ page }) => {
+  test("no forearm reaches in and no dialog opens", async ({ page }) => {
     await openBoard(page);
 
     await expect(page.locator(".start-paw")).toHaveCount(0);
+    await page.waitForTimeout(2500);
+    await expect(page.locator("#info-dialog")).not.toBeVisible();
   });
 });
